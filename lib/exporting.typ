@@ -66,10 +66,12 @@
 
 // Make notebook metadata
 #let _notebook-metadata(kernel, lang) = {
-  // A kernelspec must contain a display name, but it's
-  // not used to find the kernel so we can pick one ourselves
-  let kernel-spec = (name: kernel, display_name: kernel)
-  let md =  (kernelspec: kernel-spec)
+  let md = (
+    callisto: (version: toml("/typst.toml").package.version),
+    // A kernelspec must contain a display name, but it's
+    // not used to find the kernel so we can pick one ourselves
+    kernelspec: (name: kernel, display_name: kernel),
+  )
   // The language info is normally written by the kernel upon execution, but it
   // can be helpful to set it in case the notebook is read without execution
   if lang not in (auto, none) {

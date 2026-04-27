@@ -60,3 +60,10 @@
   }
   return outs
 }
+
+// Get a single stream value
+#let stream(..args) = {
+  let (cfg,) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
+  return single-value(streams(..args), kind: "item", setting: "item", cfg: cfg)
+}

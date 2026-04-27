@@ -1,7 +1,7 @@
-#import "/lib/configuration.typ"
+#import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ"
-#import "common.typ": final-result, single-cell
-#import "cell.typ": cells
+#import "common.typ": final-result
+#import "cell.typ": cells, cell
 
 // Return the lang of the cell's source
 #let _cell-lang(cell, ctx: none) = (
@@ -19,15 +19,14 @@
 
 // Extract the 'source' field from cells as raw blocks.
 #let sources(..args) = {
-  let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  if configuration.read-enabled(cfg: cfg) == false { return none }
+  let (cell-spec, cfg) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
   return cells(..args).map(_cell-source.with(cfg: cfg))
 }
 
 // Get a single cell's source
 #let source(..args) = {
-  let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  if configuration.read-enabled(cfg: cfg) == false { return none }
-  let cell = single-cell(cells(..args), args)
-  return _cell-source(cell, cfg: cfg)
+  let (cfg,) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
+  return _cell-source(cell(..args), cfg: cfg)
 }

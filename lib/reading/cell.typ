@@ -1,8 +1,8 @@
 #import "/lib/util.typ"
-#import "/lib/configuration.typ"
+#import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/cells.typ": resolve-name-path
 #import "/lib/header-pattern.typ"
-#import "common.typ": single-cell
+#import "common.typ": single-value
 #import "notebook.typ"
 
 // All possible Jupyter cell types
@@ -145,15 +145,14 @@
 // Cell selector: return an array of cells according to the cell specification.
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
-  let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  if configuration.read-enabled(cfg: cfg) == false { return none }
+  let (cell-spec, cfg) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
   return _cells-from-spec(cell-spec, cfg: cfg)
 }
 
 // Get a single cell
 #let cell(..args) = {
-  let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  if configuration.read-enabled(cfg: cfg) == false { return none }
-  let cells = _cells-from-spec(cell-spec, cfg: cfg)
-  return single-cell(cells, args)
+  let (cfg,) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
+  return single-value(cells(..args), kind: "cell", setting: "keep", cfg: cfg)
 }

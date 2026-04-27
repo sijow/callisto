@@ -1,45 +1,25 @@
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 
-// Calls the specified function with the given arguments and returns a single
-// item as specified in by the `item` setting, raising an error if the list is
-// empty or if 'item' is "unique" and the list contains more than one.
-#let single-item(func, args) = {
-  let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
-
-  let items = func(..args)
-  let item = cfg.item
-  if items.len() == 0 {
-    panic("no matching item found")
+// Returns a single value from the given list as specified by the `choice`
+// argument, raising an error if the list is empty or if 'choice' is "unique"
+// and the list contains more than one. The value-kind string is used for
+// error messages.
+#let single-value(values, kind: none, setting: none, cfg: none) = {
+  if values.len() == 0 {
+    panic("no matching " + kind + " found")
   }
-  if item == "unique" {
-    if items.len() != 1 {
-      panic("expected 1 item, found " + str(items.len()))
+  let choice = cfg.at(setting)
+  if choice == "unique" {
+    if values.len() != 1 {
+      panic("expected 1 " + kind + ", found " + str(values.len()))
     }
-    item = 0
+    return values.first()
   }
-  return items.at(item)
-}
-
-
-// Return a single cell from the given array according to the `keep` setting,
-// raising an error if no cell is found or if `keep` is "unique" and several
-// are found.
-#let single-cell(cells, args) = {
-  let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
-
-  if cfg.keep == "unique" {
-    if cells.len() != 1 {
-      panic("expected 1 cell, found " + str(cells.len()))
-    }
-    return cells.first()
+  if type(choice) != int {
+    panic("unexpected value for '" + setting +
+      "': expected \"unique\" or int, got " + type(choice))
   }
-  if type(cfg.keep) != int {
-    panic("unexpected value for 'keep': expected \"unique\" or int, got " +
-      type(cfg.keep))
-  }
-  return cells.at(cfg.keep)
+  return values.at(choice)
 }
 
 // A dictionary of cell-related data, to be used as one field in the result

@@ -1,5 +1,4 @@
-#import "reading/cell.typ": cells
-#import "reading/common.typ": single-cell
+#import "reading/cell.typ": cells, cell
 #import "util.typ": handle
 #import "configuration.typ": parse-main-args, read-enabled
 #import "ctx/ctx.typ": get-ctx
@@ -14,8 +13,8 @@
     result: "value",
   )
   if read-enabled(cfg: cfg) == false { return none }
-  for cell in cells(..args) {
-    handle(cell, mime: "cell", ctx: get-ctx(cell, cfg: cfg))
+  for c in cells(..args) {
+    handle(c, mime: "cell", ctx: get-ctx(c, cfg: cfg))
   }
 }
 
@@ -28,6 +27,6 @@
     result: "value",
   )
   if read-enabled(cfg: cfg) == false { return none }
-  let cell = single-cell(cells(..args), args)
-  handle(cell, mime: "cell", ctx: get-ctx(cell, cfg: cfg))
+  let c = cell(..args)
+  handle(c, mime: "cell", ctx: get-ctx(c, cfg: cfg))
 }

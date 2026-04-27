@@ -42,7 +42,10 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
-#let output(..args) = reading.single-item(outputs, args)
+#let output = reading.output.output.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 
 #let displays(..args)     = outputs(..args, output-type: "display")
 #let results(..args)      = outputs(..args, output-type: "result")
@@ -58,7 +61,10 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
-#let stream(..args) = reading.single-item(streams, args)
+#let stream(..args) = reading.stream.stream.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 
 #let render = rendering.render.with(
   default-handlers: handlers.default,

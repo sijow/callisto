@@ -58,7 +58,7 @@
 // Tests for 'keep' and 'item'
 #assert.eq(
   catch(() => Out("non-existing")),
-  "panicked with: \"expected 1 cell, found 0\"",
+  "panicked with: \"no matching cell found\"",
 )
 
 #assert.eq(source("scatter", name-path: "metadata.callisto.header.type", keep: 2).text.split("\n").first(), "a = 2")

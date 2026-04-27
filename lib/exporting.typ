@@ -182,9 +182,7 @@
   }
   // Get single cell, taking 'keep' into account
   let cell = reading.cell.cell(..args)
-  // Make args using this cell as spec
-  let new-args = arguments(cell, ..cfg)
-  let item = reading.single-item(reading.output.outputs, new-args)
+  let item = reading.output.output(cell, ..cfg)
   if cfg.transform == none {
     return item
   }

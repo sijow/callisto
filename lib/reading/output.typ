@@ -1,7 +1,7 @@
 #import "/lib/util.typ": ensure-array, handle
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ": get-ctx
-#import "common.typ": final-result
+#import "common.typ": final-result, single-value
 #import "cell.typ": cells
 #import "rich-object.typ"
 #import "stream.typ"
@@ -73,4 +73,11 @@
     }
   }
   return outs
+}
+
+// Extract a single output
+#let output(..args) = {
+  let (cfg,) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
+  return single-value(outputs(..args), kind: "item", setting: "item", cfg: cfg)
 }

@@ -165,7 +165,7 @@
   if configuration.export-enabled(cfg: cfg) {
     _export(..all-args)
   }
-  rendering.render(..all-args, keep: "unique")
+  rendering.Cell(..all-args)
 }
 
 // Export the given raw element and return the unique output.
@@ -180,7 +180,11 @@
   if configuration.read-enabled(cfg: cfg) == false {
     return none
   }
-  let item = reading.single-item(reading.output.outputs, args)
+  // Get single cell, taking 'keep' into account
+  let cell = reading.cell.cell(..args)
+  // Make args using this cell as spec
+  let new-args = arguments(cell, ..cfg)
+  let item = reading.single-item(reading.output.outputs, new-args)
   if cfg.transform == none {
     return item
   }

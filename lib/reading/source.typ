@@ -1,6 +1,6 @@
 #import "/lib/configuration.typ"
 #import "/lib/ctx/ctx.typ"
-#import "common.typ": final-result
+#import "common.typ": final-result, single-cell
 #import "cell.typ": cells
 
 // Return the lang of the cell's source
@@ -10,16 +10,24 @@
   code: ctx.lang,
 ).at(cell.cell_type)
 
-/// Extract the 'source' field from cells as raw blocks.
+#let _cell-source(cell, cfg: none) = {
+  let ctx = ctx.get-ctx(cell, cfg: cfg)
+  let cell-lang = _cell-lang(cell, ctx: ctx)
+  let value = raw(cell.source, lang: cell-lang, block: true)
+  return final-result((text: cell.source), value, ctx: ctx)
+}
+
+// Extract the 'source' field from cells as raw blocks.
 #let sources(..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
   if configuration.read-enabled(cfg: cfg) == false { return none }
-  let srcs = ()
-  for cell in cells(..args) {
-    let ctx = ctx.get-ctx(cell, cfg: cfg)
-    let cell-lang = _cell-lang(cell, ctx: ctx)
-    let value = raw(cell.source, lang: cell-lang, block: true)
-    srcs.push(final-result((text: cell.source), value, ctx: ctx))
-  }
-  return srcs
+  return cells(..args).map(_cell-source.with(cfg: cfg))
+}
+
+// Get a single cell's source
+#let source(..args) = {
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
+  if configuration.read-enabled(cfg: cfg) == false { return none }
+  let cell = single-cell(cells(..args), args)
+  return _cell-source(cell, cfg: cfg)
 }

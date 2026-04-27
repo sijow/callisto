@@ -24,7 +24,19 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
-#let cell(..args) = reading.single-item(cells, args)
+#let cell = reading.cell.cell.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
+
+#let sources = reading.source.sources.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
+#let source = reading.source.source.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 
 #let outputs = reading.output.outputs.with(
   default-handlers: handlers.default,
@@ -48,18 +60,14 @@
 )
 #let stream(..args) = reading.single-item(streams, args)
 
-#let sources = reading.source.sources.with(
-  default-handlers: handlers.default,
-  named-themes: themes,
-)
-#let source(..args) = reading.single-item(sources, args)
-
 #let render = rendering.render.with(
   default-handlers: handlers.default,
   named-themes: themes,
 )
-// Render a single cell. The `keep` value is enforced.
-#let Cell(..args) = render(..args, keep: "unique")
+#let Cell = rendering.Cell.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 // Render a single cell's input
 #let In(..args) = Cell(..args, cell-type: "code", input: true, output: false)
 // Render a single cell's output

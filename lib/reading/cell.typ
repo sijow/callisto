@@ -2,6 +2,7 @@
 #import "/lib/configuration.typ"
 #import "/lib/ctx/cells.typ": resolve-name-path
 #import "/lib/header-pattern.typ"
+#import "common.typ": single-cell
 #import "notebook.typ"
 
 // All possible Jupyter cell types
@@ -112,26 +113,6 @@
   panic("invalid cell specification: " + repr(spec))
 }
 
-// Filter the cell list according to the 'keep' setting
-#let _apply-keep(cells, keep) = {
-  if keep == "all" {
-    return cells
-  }
-  if keep == "unique" {
-    if cells.len() != 1 {
-      panic("expected 1 cell, found " + str(cells.len()))
-    }
-    return cells
-  }
-  if type(keep) == int {
-    return (cells.at(keep),)
-  }
-  if type(keep) == array {
-    return keep.map(i => cells.at(i))
-  }
-  panic("invalid keep value: " + repr(keep))
-}
-
 // Return the cells matching the given user spec.
 // The spec can a literal cell or array thereof in which case it is simply
 // filtered according to the cfg settings. Otherwise, cells will be read from
@@ -166,6 +147,13 @@
 #let cells(..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
   if configuration.read-enabled(cfg: cfg) == false { return none }
-  let cs = _cells-from-spec(cell-spec, cfg: cfg)
-  return _apply-keep(cs, cfg.keep)
+  return _cells-from-spec(cell-spec, cfg: cfg)
+}
+
+// Get a single cell
+#let cell(..args) = {
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
+  if configuration.read-enabled(cfg: cfg) == false { return none }
+  let cells = _cells-from-spec(cell-spec, cfg: cfg)
+  return single-cell(cells, args)
 }

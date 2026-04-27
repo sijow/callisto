@@ -140,7 +140,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
 ## Main functions
 
--  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", keep: "all", cell-header-pattern: auto, keep-cell-header: false)`
+-  `cells([spec], nb: none, count: "index", name-path: auto, cell-type: "all", cell-header-pattern: auto, keep-cell-header: false)`
 
    Retrieves cells from a notebook. Each cell is returned as a dict. This is a low-level function to be used for further processing.
 
@@ -216,13 +216,6 @@ Most functions accept a cell specification as positional argument. Below we use 
       ```typst
       // Get cells with index between 0 and 9 and discard the raw cells
       #cells(range(10), cell-type: ("markdown", "code"))
-      ```
-
-   -  `keep` can be a cell index, an array of cell indices, `"all"`, or `"unique"` to raise an error if the call doesn't match exactly one cell. This filter is applied after all the others described above. Example:
-
-      ```typst
-      // Get first and last non-raw cells with index between 0 and 9
-      #cells(range(10), cell-type: ("markdown", "code"), keep: (0, -1))
       ```
 
 -  `sources(..cell-args, result: "value", lang: auto, raw-lang: none)`
@@ -418,15 +411,13 @@ The main functions have many aliases defined for convenience. Each alias corresp
 
 ### Aliases for single values
 
-The functions `sources` and `outputs` are in plural form: they always return an array of items. For convenience there is a singular alias defined for each plural form: the functions `cell`, `source`, `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Example:
+The functions `outputs`, `displays`, `reuslts`, `stream-items`, `errors` and `streams` always return an array of items. For convenience there is a singular alias defined for each plural form: the functions  `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Examples:
 
    ```typst
-   // The first cell
-   #cell(0)
-   // The unique cell that matches "plot1"
-   #cell("plot1")
    // The unique display item in the first cell's output
    #display(0)
+   // The unique error in the whole notebook
+   #error()
    ```
 
 The singular form is useful in two ways:
@@ -437,24 +428,26 @@ The singular form is useful in two ways:
 
 The check for uniqueness can be disabled by setting the `item` argument to a value different from `"unique"`. Use for example `cell(..., item: 0)` to get the first matching cell, and `display(..., item: -1)` to get the last display of the matching cell(s).
 
-Note that `keep` is always a filter on the results of the cell specification and can be used for plural as well as singular functions, while `item` is used to select which result is returned by a singular function. Both can be used together. Example:
+The functions `cells` and `sources` also have singular aliases `cell` and `source` that return a single value, and by default ensure that only one cell matches the specification. The `keep` setting can be used to disable the check for uniqueness and control which cell is used when several match. Examples:
 
 ```typst
-// Second display of the first cell matching "plot1"
-#display("plot1", keep: 0, item: 1)
+// Get source of last cell with tag "plot"
+#source("plot", keep: -1)
+// Get unique display of this cell
+#display(cell("plot", keep: -1))
 ```
-
-However these functionalities overlap in the case of `cell`. Using both parameters rarely makes sense for this function.
 
 ### Aliases for rendering
 
 The `render` function always returns a `content` value, but it also has an alias to check that only one cell matches the specification:
 
--  `Cell` is the same as `render` with `keep` set to `"unique"`. Example:
+-  `Cell` is the same as `render` but renders a single cell. The `keep` setting can be used like for the `cell` function. Examples:
 
    ```typst
    // Render the unique cell matching "plot1"
    #Cell("plot1")
+   // Render the last cell with tag "plot"
+   #Cell("plot", keep: -1)
    ```
 
 The `Cell` function itself has aliases to render only the input or output of a code cell:

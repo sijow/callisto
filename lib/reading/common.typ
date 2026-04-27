@@ -21,6 +21,27 @@
   return items.at(item)
 }
 
+
+// Return a single cell from the given array according to the `keep` setting,
+// raising an error if no cell is found or if `keep` is "unique" and several
+// are found.
+#let single-cell(cells, args) = {
+  let (cell-spec, cfg) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
+
+  if cfg.keep == "unique" {
+    if cells.len() != 1 {
+      panic("expected 1 cell, found " + str(cells.len()))
+    }
+    return cells.first()
+  }
+  if type(cfg.keep) != int {
+    panic("unexpected value for 'keep': expected \"unique\" or int, got " +
+      type(cfg.keep))
+  }
+  return cells.at(cfg.keep)
+}
+
 // A dictionary of cell-related data, to be used as one field in the result
 // dict.
 #let _cell-output-dict(cell) = (

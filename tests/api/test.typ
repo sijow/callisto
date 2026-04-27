@@ -60,6 +60,8 @@
   catch(() => Out("non-existing")),
   "panicked with: \"expected 1 cell, found 0\"",
 )
+
+#assert.eq(source("scatter", name-path: "metadata.callisto.header.type", keep: 2).text.split("\n").first(), "a = 2")
 #{
   let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
   assert.eq(output("plot3"), "5")

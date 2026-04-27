@@ -8,7 +8,7 @@
   count: "index",
   name-path: auto,
   cell-type: "all",
-  keep: "all",
+  keep: "unique",
   // Source
   lang: auto,
   raw-lang: none,

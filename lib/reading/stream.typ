@@ -46,7 +46,7 @@
   let outs = ()
   for cell in cs {
     // item-desc.index is undefined since we gather outputs from different cells
-    let ctx = get-ctx(cell, cfg: cfg, item-desc: (type: "stream", index: none))
+    let ctx = get-ctx(cell, cell-spec: cell-spec, cfg: cfg, item-desc: (type: "stream", index: none))
     // Concatenate all stream items
     let txt = for item in cell.outputs {
       if item.output_type == "stream" {
@@ -64,6 +64,5 @@
 // Get a single stream value
 #let stream(..args) = {
   let (cfg,) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
-  return single-value(streams(..args), kind: "item", setting: "item", cfg: cfg)
+  return single-value(streams(..args), kind: "output", setting: "item", cfg: cfg)
 }

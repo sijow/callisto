@@ -11,6 +11,8 @@
 // (replacing most 'auto' values with resolved values) as well as contextual
 // data including at least the following fields:
 //
+// - cell-spec: the cell specification.
+// 
 // - cfg: a dict with all the settings supported by callisto.config, using
 //   default values for settings not set by the user (this holds the
 //   non-resolved settings values).
@@ -47,6 +49,7 @@
 // Build a ctx dict for the given cell and settings dict.
 #let get-ctx(
   cell,
+  cell-spec: none,
   cfg: none,
   item-desc: none,
 ) = {
@@ -84,12 +87,13 @@
   ctx.export = configuration.export-enabled(cfg: cfg)
 
   let latex-preamble = none
-  if ctx.gather-latex-defs {
+  if ctx.gather-latex-defs and (nb-json != none or cell != none) {
     let cells = if nb-json == none { (cell,) } else { nb-json.cells }
     latex-preamble = preamble.latex-preamble(cells)
   }
 
   return ctx + (
+    cell-spec: cell-spec,
     cfg: cfg,
     cell: cell,
     item-desc: item-desc,

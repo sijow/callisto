@@ -302,6 +302,64 @@
   handle(cell, mime: cell.cell_type + "-cell", ctx: ctx, ..args)
 }
 
+// Check if the cell spec is a raw element
+#let _is-raw-spec(spec) = type(spec) == content and spec.func() == raw
+
+// Return a string that summarizes the given cell spec
+#let _cell-spec-summary(spec) = {
+  if _is-raw-spec(spec) {
+    let txt = spec.text.trim()
+    let truncated = false
+    let lines = txt.split("\n")
+    if lines.len() > 1 {
+      txt = lines.first()
+      truncated = true
+    }
+    let clusters = txt.clusters()
+    if clusters.len() >= 50 {
+      txt = clusters.slice(0, count: 49).join()
+      truncated = true
+    }
+    if truncated {
+      txt += "…"
+    }
+    return "`" + txt + "`"
+  }
+  return repr(spec)
+}
+
+// Generic placeholder that shows the given text
+#let placeholder-generic(txt, ctx: none, ..args) = {
+  set align(start)
+  show raw.where(block: true): it => rect(
+    stroke: (dash: "dashed"),
+    width: 100%,
+    inset: 1em,
+    it.text,
+  )
+  raw(block: true, txt)
+}
+
+#let placeholder-func-and-spec(data, ctx: none, func: none, ..args) = {
+  let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
+  handle(txt, mime: "placeholder-generic", ctx: ctx, ..args)
+}
+
+// Placeholder that shows the source code for a raw cell spec
+#let placeholder-source-code-raw-spec(data, ctx: none, ..args) = {
+  let elem = ctx.cell-spec
+  handle(elem.text, mime: "placeholder-generic", ctx: ctx, ..args)
+}
+
+// Placeholder that shows the source code if available (from raw cell spec),
+// or a generic value otherwise.
+#let placeholder-source-code(data, ctx: none, func: none, ..args) = {
+  if _is-raw-spec(ctx.cell-spec) {
+    return handle(data, mime: "placeholder-source-code-raw-spec", ctx: ctx, ..args)
+  }
+  return handle(data, mime: "placeholder-func-and-spec", func: func, ctx: ctx, ..args)
+}
+
 // Default handlers
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
@@ -340,6 +398,17 @@
   "code-cell-output": code-cell-output,
   "code-cell": code-cell,
   "cell": cell, // called before the cell-type-specific handler
+  // Placeholders
+  "placeholder-generic": placeholder-generic,
+  "placeholder-func-and-spec": placeholder-func-and-spec,
+  "placeholder-source-code-raw-spec": placeholder-source-code-raw-spec,
+  "placeholder-source-code": placeholder-source-code,
+  "placeholder-cell-func": none,
+  "placeholder-source-func": handle.with(mime: "placeholder-source-code", func: "source"),
+  "placeholder-output-func": handle.with(mime: "placeholder-func-and-spec", func: "output"),
+  "placeholder-Cell-func": handle.with(mime: "placeholder-func-and-spec", func: "Cell"),
+  "placeholder-In-func": handle.with(mime: "placeholder-source-code", func: "In"),
+  "placeholder-Out-func": handle.with(mime: "placeholder-func-and-spec", func: "Out"),
   // Other handlers
   "text-ansi-generic": text-ansi-generic,
   "text-console-block": text-console-block,

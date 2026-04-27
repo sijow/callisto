@@ -74,10 +74,14 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
-// Render a single cell's input
-#let In(..args) = Cell(..args, cell-type: "code", input: true, output: false)
-// Render a single cell's output
-#let Out(..args) = Cell(..args, cell-type: "code", input: false, output: true)
+#let In = rendering.In.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
+#let Out = rendering.Out.with(
+  default-handlers: handlers.default,
+  named-themes: themes,
+)
 
 #let export = exporting.export.with(
   default-handlers: handlers.default,

@@ -10,6 +10,7 @@
 
 #let (
   cell,
+  source,
   result,
   render,
   Cell,
@@ -126,6 +127,14 @@ b = 42; b
 == Select with raw lang in cell metadata
 
 #render(c => c.metadata.callisto.export.lang == "python-x")
+
+== Select with raw lang and execute
+
+#show raw.where(lang: "python-xx"): execute
+
+```python-xx
+c = 91; c
+```
 
 #pagebreak()
 

@@ -1,6 +1,8 @@
 #import "/lib/header-pattern.typ"
 #import "/lib/rendering.typ"
 #import "/lib/reading/reading.typ"
+#import "/lib/reading/common.typ": placeholder-enabled, get-placeholder
+#import "ctx/ctx.typ": get-ctx
 #import "configuration.typ"
 
 // Make label for exported raw elements
@@ -173,16 +175,28 @@
 // callisto-export sys.input is "true") or return the unique execution output
 // otherwise.
 #let evaluate(..args) = {
-  let (cfg,) = configuration.parse-main-args(..args)
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
   if configuration.export-enabled(cfg: cfg) {
     return _export(..args)
   }
   if configuration.read-enabled(cfg: cfg) == false {
     return none
   }
+
   // Get single cell, taking 'keep' into account
-  let cell = reading.cell.cell(..args)
-  let item = reading.output.output(cell, ..cfg)
+  let c = if placeholder-enabled(cfg: cfg) {
+    reading.cell.cell(..args, placeholder: "placeholder")
+  } else {
+    reading.cell.cell(..args, placeholder: false)
+  }
+
+  let item
+  if c == "placeholder" {
+    let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+    item = get-placeholder(kind: "output", ctx: ctx)
+  } else {
+    item = reading.output.output(c, ..cfg)
+  }
   if cfg.transform == none {
     return item
   }

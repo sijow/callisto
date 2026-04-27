@@ -1,14 +1,47 @@
 #import "/lib/configuration.typ": parse-main-args, read-enabled
+#import "/lib/util.typ"
+#import "notebook.typ"
+
+// Knowing that reading is enabled, is it from an exported notebook?
+#let _from-export(cfg: none) = {
+  let nb-json = notebook.get-json(cfg: cfg)
+  return "callisto" in nb-json.metadata
+}
+
+// Return true if the configuration allows using placeholders
+#let placeholder-enabled(cfg: none) = {
+  if read-enabled(cfg: cfg) and not _from-export(cfg: cfg) {
+    // Enabled if anything but false or auto (can be true/content/function)
+    return cfg.placeholder not in (false, auto)
+  }
+  // If read disabled or from export, we use it unless explicitly disabled
+  return cfg.placeholder != false
+}
+
+// Return the placeholder value to use for the given kind (cell, source,
+// output).
+#let get-placeholder(kind: none, ctx: none) = {
+  if ctx.placeholder in (auto, true) {
+    return util.handle(none, mime: "placeholder-" + kind + "-func", ctx: ctx)
+  }
+  if type(ctx.placeholder) == function {
+    return (ctx.placeholder)(ctx.cell-spec)
+  }
+  return ctx.placeholder
+}
 
 // Returns a single value from the given list as specified by the `choice`
-// argument, raising an error if the list is empty or if 'choice' is "unique"
-// and the list contains more than one. The value-kind string is used for
-// error messages.
-#let single-value(values, kind: none, setting: none, cfg: none) = {
-  if values.len() == 0 {
+// argument, using a placeholder or raising an error if the list is empty or
+// none or if 'choice' is "unique" and the list contains more than one.
+// The `kind` string is used for error messages.
+#let single-value(values, kind: none, setting: none, ctx: none) = {
+  if values == none or values.len() == 0 {
+    if placeholder-enabled(cfg: ctx.cfg) {
+      return get-placeholder(kind: kind, ctx: ctx)
+    }
     panic("no matching " + kind + " found")
   }
-  let choice = cfg.at(setting)
+  let choice = ctx.at(setting)
   if choice == "unique" {
     if values.len() != 1 {
       panic("expected 1 " + kind + ", found " + str(values.len()))

@@ -1,22 +1,26 @@
 #import "/lib/ctx/handling.typ": all-handlers
 #import "/lib/header-pattern.typ"
+#import "/lib/configuration.typ": read-enabled
 
 // Return the notebook as JSON, without any processing
 #let get-json(cfg: none) = {
   if cfg.nb == none {
     return none
   }
-  if type(cfg.nb) not in (str, bytes, dictionary) {
-    panic("invalid notebook type: " + str(type(cfg.nb)))
-  }
   if type(cfg.nb) == bytes {
     return json(cfg.nb)
   }
-  if type(cfg.nb) == str {
-    let handlers = all-handlers(cfg: cfg)
-    return json(handlers.at("path")(cfg.nb, ctx: none))
+  if type(cfg.nb) == dictionary {
+    return cfg.nb
   }
-  return cfg.nb
+  if type(cfg.nb) != str {
+    panic("invalid notebook type: " + str(type(cfg.nb)))
+  }
+  if not read-enabled(cfg: cfg) {
+    return none
+  }
+  let handlers = all-handlers(cfg: cfg)
+  return json(handlers.at("path")(cfg.nb, ctx: none))
 }
 
 // Ensure each cell source is a single string.

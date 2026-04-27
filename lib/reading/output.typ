@@ -52,7 +52,7 @@
       if output-type not in output-types { continue }
       // Make context for processor
       let item-desc = (index: i, type: output-type)
-      let ctx = get-ctx(cell, cfg: cfg, item-desc: item-desc)
+      let ctx = get-ctx(cell, cell-spec: cell-spec, cfg: cfg, item-desc: item-desc)
 
       // The processing is split in two output-type-specific steps:
       // preprocessing and "rendering". The preprocessed data is used
@@ -77,7 +77,7 @@
 
 // Extract a single output
 #let output(..args) = {
-  let (cfg,) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
-  return single-value(outputs(..args), kind: "item", setting: "item", cfg: cfg)
+  let (cell-spec, cfg) = parse-main-args(..args)
+  let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+  return single-value(outputs(..args), kind: "output", setting: "item", ctx: ctx)
 }

@@ -1,6 +1,7 @@
 #import "/lib/util.typ"
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/cells.typ": resolve-name-path
+#import "/lib/ctx/ctx.typ": get-ctx
 #import "/lib/header-pattern.typ"
 #import "common.typ": single-value
 #import "notebook.typ"
@@ -152,7 +153,7 @@
 
 // Get a single cell
 #let cell(..args) = {
-  let (cfg,) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
-  return single-value(cells(..args), kind: "cell", setting: "keep", cfg: cfg)
+  let (cell-spec, cfg) = parse-main-args(..args)
+  let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+  return single-value(cells(..args), kind: "cell", setting: "keep", ctx: ctx)
 }

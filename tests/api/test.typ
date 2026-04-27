@@ -48,11 +48,11 @@
 
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x")),
-  "panicked with: \"no matching item found\"",
+  "panicked with: \"no matching output found\"",
 )
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true)),
-  "panicked with: \"no matching item found\"",
+  "panicked with: \"no matching output found\"",
 )
 
 // Tests for 'keep' and 'item'

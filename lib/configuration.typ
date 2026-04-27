@@ -33,6 +33,8 @@
   cell-header: none,
   kernel: none,
   transform: none,
+  // General
+  placeholder: auto,
   // Undocumented for now
   read: auto,
   export: auto,

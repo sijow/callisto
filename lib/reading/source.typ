@@ -37,7 +37,7 @@
 
   if c == "placeholder" {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-    return get-placeholder(kind: "source", ctx: ctx)
+    return get-placeholder(mime: "placeholder-source-func", ctx: ctx)
   }
 
   return _cell-source(c, cell-spec: cell-spec, cfg: cfg)

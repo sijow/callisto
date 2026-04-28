@@ -192,7 +192,7 @@
 
   if c == "placeholder" {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-    return get-placeholder(kind: "output", ctx: ctx)
+    return get-placeholder(mime: "placeholder-output", ctx: ctx)
   } else {
     return reading.output.output(c, ..cfg)
   }

@@ -20,9 +20,9 @@
 
 // Return the placeholder value to use for the given kind (cell, source,
 // output).
-#let get-placeholder(kind: none, ctx: none) = {
+#let get-placeholder(mime: none, ctx: none) = {
   if ctx.placeholder in (auto, true) {
-    return util.handle(none, mime: "placeholder-" + kind + "-func", ctx: ctx)
+    return util.handle(none, mime: mime, ctx: ctx)
   }
   if type(ctx.placeholder) == function {
     return (ctx.placeholder)(ctx.cell-spec)
@@ -34,10 +34,10 @@
 // argument, using a placeholder or raising an error if the list is empty or
 // none or if 'choice' is "unique" and the list contains more than one.
 // The `kind` string is used for error messages.
-#let single-value(values, kind: none, setting: none, ctx: none) = {
+#let single-value(values, kind: none, setting: none, placeholder-mime: none, ctx: none) = {
   if values == none or values.len() == 0 {
     if placeholder-enabled(cfg: ctx.cfg) {
-      return get-placeholder(kind: kind, ctx: ctx)
+      return get-placeholder(mime: placeholder-mime, ctx: ctx)
     }
     panic("no matching " + kind + " found")
   }

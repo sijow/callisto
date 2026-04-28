@@ -19,12 +19,13 @@
   handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.raw-lang),
 )
 
-#let _handler-code-cell-input(cell, ctx: none, ..args) = block(
+#let _handler-code-cell-input(cell, ctx: none, block-args: none, ..args) = block(
   above: 2em,
   below: if ctx.output and cell.outputs.len() > 0 { 0pt } else { 2em },
   width: 100%,
   inset: 0.5em,
   fill: luma(240),
+  ..block-args,
   {
     _in-out-num("In ", cell.execution_count)
     handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
@@ -67,6 +68,16 @@
   )
 }
 
+#let _placeholder-input-from-source(source, ctx: none, ..args) = {
+  let cell = (
+    source: source,
+    execution_count: "?",
+  )
+  let block-args = (stroke: (dash: "dashed"))
+  ctx.output = false
+  return _handler-code-cell-input(cell, ctx: ctx, block-args: block-args)
+}
+
 #let theme = plain.theme + (
   stream-stderr: _handler-stream-stderr,
   error: _handler-error,
@@ -74,4 +85,5 @@
   raw-cell: _handler-raw-cell,
   code-cell-input: _handler-code-cell-input,
   code-cell-output: _handler-code-cell-output,
+  placeholder-input-from-source: _placeholder-input-from-source,
 )

@@ -38,10 +38,10 @@
   doc
 }
 
-#let _code-cell-input(cell, ctx: none, ..args) = {
+#let _code-cell-input(cell, ctx: none, block-args: none, ..args) = {
   let has-output = ctx.output and cell.outputs.len() > 0
   set text(rgb("#005979"))
-  show raw: set block(.._raw-block-cfg, above: 1em)
+  show raw: set block(.._raw-block-cfg, ..block-args, above: 1em)
   show raw: set block(below: 1em) if not has-output
   handle(cell.source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang)
 }
@@ -61,8 +61,16 @@
   )
 }
 
+#let _placeholder-input-from-source(source, ctx: none, ..args) = {
+  let cell = (source: source)
+  let block-args = (stroke: (dash: "dashed"))
+  ctx.output = false
+  return _code-cell-input(cell, ctx: ctx, block-args: block-args)
+}
+
 #let theme = plain.theme + (
   template: _template,
   code-cell-input: _code-cell-input,
   code-cell-output: _code-cell-output,
+  placeholder-input-from-source: _placeholder-input-from-source,
 )

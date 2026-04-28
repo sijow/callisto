@@ -44,15 +44,25 @@
 #assert.eq(cell("plot3").metadata.callisto.header.type, "scatter")
 
 
+// Test placeholders
+#assert.eq(cell("no-such-cell", placeholder: [x]), [x])
+#assert.eq(source("no-such-cell", placeholder: [x]), [x])
+#assert.eq(output("no-such-cell", placeholder: [x]), [x])
+#assert.eq(cell("no-such-cell", handlers: (placeholder-cell-func: (..args) => [x]), placeholder: true), [x])
+#assert.eq(source("no-such-cell", handlers: (placeholder-source-func: (..args) => [x]), placeholder: true), [x])
+#assert.eq(output("no-such-cell", handlers: (placeholder-output: (..args) => [x]), placeholder: true), [x])
+// #assert.eq(source("no-such-cell", placeholder: true), [x])
+
+
 #assert("`aa` not defined" in error())
 
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x")),
-  "panicked with: \"no matching output found\"",
+  "panicked with: \"no matching display found\"",
 )
 #assert.eq(
   catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true)),
-  "panicked with: \"no matching output found\"",
+  "panicked with: \"no matching display found\"",
 )
 
 // Tests for 'keep' and 'item'

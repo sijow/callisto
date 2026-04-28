@@ -1,0 +1,2 @@
+export:
+    typst query --root=../.. --input callisto-export=true --one --field=value test.typ '<notebook>' > export.ipynb

@@ -350,6 +350,8 @@
 
   // We go through a raw block (replaced by a simple block in the show rule)
   // to apply raw font and to allow the user to set show-set rules on raw.
+  // The final result itself cannot be a raw element since we style the text
+  // manually with `text`, `underline`, etc.
   show raw.where(block: true, lang: "ansi"): r => block({
     renderer(r.text, ..args)
   })

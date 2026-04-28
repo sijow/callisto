@@ -39,9 +39,7 @@
   description: "Notebook of all code blocks in the document",
 )
 
-= Select exports using a label
-
-== Show rule to show + export + render
+= Using execute with a label
 
 #show <g>: execute
 

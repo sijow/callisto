@@ -64,5 +64,11 @@
 // Get a single stream value
 #let stream(..args) = {
   let (cfg,) = parse-main-args(..args)
-  return single-value(streams(..args), kind: "output", setting: "item", cfg: cfg)
+  return single-value(
+    streams(..args),
+    kind: "stream",
+    setting: "item",
+    placeholder-mime: "placeholder-output",
+    ctx: ctx,
+  )
 }

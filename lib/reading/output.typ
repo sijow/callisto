@@ -79,5 +79,19 @@
 #let output(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
   let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-  return single-value(outputs(..args), kind: "output", setting: "item", ctx: ctx)
+
+  let kind = if ctx.output-type in all-output-types {
+    // If a single output type is configured, use that (more informative)
+    ctx.output-type
+  } else {
+    "output"
+  }
+
+  return single-value(
+    outputs(..args),
+    kind: kind,
+    setting: "item",
+    placeholder-mime: "placeholder-output",
+    ctx: ctx,
+  )
 }

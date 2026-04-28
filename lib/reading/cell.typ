@@ -155,5 +155,11 @@
 #let cell(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
   let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-  return single-value(cells(..args), kind: "cell", setting: "keep", ctx: ctx)
+  return single-value(
+    cells(..args),
+    kind: "cell",
+    setting: "keep",
+    placeholder-mime: "placeholder-cell-func",
+    ctx: ctx,
+  )
 }

@@ -6,7 +6,9 @@
 #import "reading/rich-object.typ"
 #import "reading/stream.typ"
 #import "reading/error.typ"
-#import "reading/output.typ": outputs
+#import "reading/notebook.typ"
+#import "reading/output.typ": outputs, all-output-types
+#import "header-pattern.typ"
 #import "ansi.typ"
 #import "latex.typ"
 
@@ -32,6 +34,9 @@
 //
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
+//
+// - The "placeholder-function" and "placeholder-cell-source" handlers (used
+//   by some default placeholder handlers) take a 'func' argument.
 //
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
@@ -328,36 +333,121 @@
   return repr(spec)
 }
 
-// Generic placeholder that shows the given text
-#let placeholder-generic(txt, ctx: none, ..args) = {
-  set align(start)
-  show raw.where(block: true): it => rect(
-    stroke: (dash: "dashed"),
-    width: 100%,
-    inset: 1em,
-    it.text,
-  )
-  raw(block: true, txt)
-}
-
-#let placeholder-func-and-spec(data, ctx: none, func: none, ..args) = {
-  let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
-  handle(txt, mime: "placeholder-generic", ctx: ctx, ..args)
-}
-
-// Placeholder that shows the source code for a raw cell spec
-#let placeholder-source-code-raw-spec(data, ctx: none, ..args) = {
-  let elem = ctx.cell-spec
-  handle(elem.text, mime: "placeholder-generic", ctx: ctx, ..args)
-}
-
-// Placeholder that shows the source code if available (from raw cell spec),
-// or a generic value otherwise.
-#let placeholder-source-code(data, ctx: none, func: none, ..args) = {
+// Return true if the placeholder is likely for block content
+#let _is-placeholder-likely-block(ctx: none) = {
   if _is-raw-spec(ctx.cell-spec) {
-    return handle(data, mime: "placeholder-source-code-raw-spec", ctx: ctx, ..args)
+    return ctx.cell-spec.block
   }
-  return handle(data, mime: "placeholder-func-and-spec", func: func, ctx: ctx, ..args)
+  return true
+}
+
+// Return placeholder for rendered code cell input using the raw spec
+#let _placeholder-input-from-raw-spec(ctx: none, ..args) = {
+  let source = ctx.cell-spec.text
+  if not ctx.keep-cell-header {
+    // Remove cell header
+    let pattern = ctx.cell-header-pattern
+    source = header-pattern.parse-text(source, pattern: pattern).code
+  }
+  return handle(
+    source,
+    mime: "placeholder-input-from-source",
+    ctx: ctx,
+    ..args,
+  )
+}
+
+// Handler that shows the given block in generic placeholder style
+#let placeholder-generic-block(data, ctx: none, ..args) = block(
+  stroke: (dash: "dashed"),
+  inset: 1em,
+  data,
+)
+
+// Handler that shows the given inline content in generic placeholder style
+#let placeholder-generic-inline(data, ctx: none, ..args) = box(
+  stroke: (dash: "dashed"),
+  inset: (x: 0.5em),
+  outset: (y: 0.5em),
+  data,
+)
+
+// Placeholder that renders the data in a generic placeholder style.
+// This implementation tries to guess if the content should be rendered
+// inline or as block.
+#let placeholder-generic(data, ctx: none, ..args) = {
+  if _is-placeholder-likely-block(ctx: ctx) {
+    handle(data, mime: "placeholder-generic-block", ctx: ctx, ..args)
+  } else {
+    handle(data, mime: "placeholder-generic-inline", ctx: ctx, ..args)
+  }
+}
+
+// Placeholder that shows `func(spec)` where func is given as argument and
+// spec is a summary of a the cell specification.
+#let placeholder-function-call(func, ctx: none, ..args) = {
+  let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
+  handle(raw(block: true, txt), mime: "placeholder-generic", ctx: ctx, ..args)
+}
+
+// Placeholder for code cell input rendering using source (from raw spec)
+#let placeholder-input-from-source(source, ctx: none, ..args) = {
+  // Make new raw element with canonical lang (the lang on the raw-spec
+  // element might be a "fake" value like "python-x" for selection in a show
+  // rule, and in any case reusing in the output the value used for show rule
+  // the selector would lead to infinite recursion).
+  // For code cell input rendering we render as block even if the raw spec
+  // was inline (e.g. from #execute(`...`)).
+  let new-elem = raw(
+    block: true,
+    lang: ctx.lang,
+    source,
+  )
+  return handle(new-elem, mime: "placeholder-generic-block", ctx: ctx, ..args)
+}
+
+// Placeholder for an output item
+#let placeholder-output(data, ctx: none, ..args) = {
+  let func = if ctx.output-type in all-output-types {
+    ctx.output-type
+  } else {
+    "output"
+  }
+  handle(func, mime: "placeholder-function-call", ctx: ctx, ..args)
+}
+
+// Placeholder for rendered code cell input
+#let placeholder-code-cell-input(data, ctx: none, ..args) = {
+  if _is-raw-spec(ctx.cell-spec) {
+    // Source is available!
+    return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
+  }
+  return handle("In", mime: "placeholder-function-call", ctx: ctx, ..args)
+}
+
+// Placeholder for rendered code cell output
+#let placeholder-code-cell-output(data, ctx: none, ..args) = {
+  handle("Out", mime: "placeholder-function-call", ctx: ctx, ..args)
+}
+
+// Placeholder for a rendered code cell.
+// This implementation shows the cell source if available from raw spec, or
+// a representation of the function call otherwise.
+#let placeholder-code-cell(data, ctx: none, ..args) = {
+  if _is-raw-spec(ctx.cell-spec) {
+    // Source is available!
+    return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
+  }
+  return handle("Cell", mime: "placeholder-function-call", ctx: ctx, ..args)
+}
+
+// Placeholder for a rendered cell.
+#let placeholder-cell(data, ctx: none, ..args) = {
+  if _is-raw-spec(ctx.cell-spec) {
+    // Raw spec implies that this is a code cell
+    return handle(data, mime: "placeholder-code-cell", ctx: ctx, ..args)
+  }
+  return handle("Cell", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
 // Default handlers
@@ -399,16 +489,18 @@
   "code-cell": code-cell,
   "cell": cell, // called before the cell-type-specific handler
   // Placeholders
+  "placeholder-generic-inline": placeholder-generic-inline,
+  "placeholder-generic-block": placeholder-generic-block,
   "placeholder-generic": placeholder-generic,
-  "placeholder-func-and-spec": placeholder-func-and-spec,
-  "placeholder-source-code-raw-spec": placeholder-source-code-raw-spec,
-  "placeholder-source-code": placeholder-source-code,
+  "placeholder-function-call": placeholder-function-call,
+  "placeholder-input-from-source": placeholder-input-from-source,
+  "placeholder-output": placeholder-output,
+  "placeholder-code-cell-input": placeholder-code-cell-input,
+  "placeholder-code-cell-output": placeholder-code-cell-output,
+  "placeholder-code-cell": placeholder-code-cell,
+  "placeholder-cell": placeholder-cell,
   "placeholder-cell-func": none,
-  "placeholder-source-func": handle.with(mime: "placeholder-source-code", func: "source"),
-  "placeholder-output-func": handle.with(mime: "placeholder-func-and-spec", func: "output"),
-  "placeholder-Cell-func": handle.with(mime: "placeholder-func-and-spec", func: "Cell"),
-  "placeholder-In-func": handle.with(mime: "placeholder-source-code", func: "In"),
-  "placeholder-Out-func": handle.with(mime: "placeholder-func-and-spec", func: "Out"),
+  "placeholder-source-func": none,
   // Other handlers
   "text-ansi-generic": text-ansi-generic,
   "text-console-block": text-console-block,

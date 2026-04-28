@@ -66,7 +66,7 @@
   (execution-count: cell.execution_count)
 }
 
-// Final result for an output item.
+// Final result for an output item (or source), with transform applied if any.
 // Depending on ctx.result, this returns either 'value', or the
 // 'preprocessed' dict with 'output_type' renamed to 'type' and with additional
 // fields:
@@ -75,6 +75,9 @@
 #let final-result(preprocessed, value, ctx: none) = {
   if ctx.result not in ("value", "dict") {
     panic("invalid result specification: " + repr(ctx.result))
+  }
+  if ctx.transform != none {
+    value = (ctx.transform)(value)
   }
   if ctx.result == "value" {
     return value

@@ -190,15 +190,10 @@
     reading.cell.cell(..args, placeholder: false)
   }
 
-  let item
   if c == "placeholder" {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-    item = get-placeholder(kind: "output", ctx: ctx)
+    return get-placeholder(kind: "output", ctx: ctx)
   } else {
-    item = reading.output.output(c, ..cfg)
+    return reading.output.output(c, ..cfg)
   }
-  if cfg.transform == none {
-    return item
-  }
-  return (cfg.transform)(item)
 }

@@ -36,8 +36,6 @@
   // General
   placeholder: auto,
   // Undocumented for now
-  read: auto,
-  export: auto,
   default-handlers: (:), // to be filled in callisto.typ
   named-themes: (:), // to be filled in callisto.typ
 )
@@ -66,7 +64,7 @@
 
 // Return true if export was enabled on the command-line
 // (--input callisto-export=true), false otherwise.
-#let _cli-export() = {
+#let exporting() = {
   let export = sys.inputs.at("callisto-export", default: "false")
   if export == "true" {
     return true
@@ -81,18 +79,5 @@
 // that is if the user set read=false or if read=auto and export was
 // enabled on the command-line (--input callisto-export=true).
 #let read-enabled(cfg: none) = {
-  if cfg.read != auto {
-    return cfg.read
-  }
-  return _cli-export() == false
-}
-
-// Return true if export is enabled in this configuration,
-// that is if the user set export=true or if export=auto and export was
-// enabled on the command-line (--input callisto-export=true).
-#let export-enabled(cfg: none) = {
-  if cfg.export != auto {
-    return cfg.export
-  }
-  return _cli-export()
+  return exporting() == false
 }

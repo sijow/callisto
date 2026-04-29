@@ -9,7 +9,6 @@
 #let _export-label(name) = label("__callisto-export:" + name)
 
 // Return the export metadata for the given raw element.
-// Note that the 'export' setting makes no difference for this function.
 #let export(..args) = {
   // The cell-spec is a raw element in this case
   let (cell-spec: elem, cfg) = configuration.parse-main-args(..args)
@@ -101,9 +100,7 @@
 // Return the metadata required for exporting a Jupyter notebook containing
 // as code cells all the raw blocks exported with the configured export-name.
 //
-// This function requires context, and returns the exported notebook even
-// if the export setting is false (so it can be used for example to embed the
-// exported notebook as PDF attachment during normal compilation).
+// This function requires context.
 // 
 // The exported notebook can be obtained from the command line using a command
 // such as
@@ -146,50 +143,25 @@
 // `typst query` can find the exported notebook.
 #let stage-notebook(..args) = {
   let (cfg,) = configuration.parse-main-args(..args)
-  if not configuration.export-enabled(cfg: cfg) {
-    return none
-  }
   return context {
     let md = metadata(make-notebook(..args))
     return [#md#label(cfg.export-name)]
   }
 }
 
-// Copy export binding for when it's shadowed by a function parameter
-#let _export = export
+// Export the given raw element and render it
+#let execute(..args) = export(..args) + rendering.Cell(..args)
 
-// Export the given raw element and render it.
-// This function defines a non-standard default value for export:
-// the export is always done unless explicitly disabled with export=false.
-#let execute(..args, export: true) = {
-  let all-args = arguments(..args, export: export)
-  let (cfg,) = configuration.parse-main-args(..all-args)
-  if configuration.export-enabled(cfg: cfg) {
-    _export(..all-args)
-  }
-  rendering.Cell(..all-args)
-}
-
-// Export the given raw element and return the unique output.
-// Return the export metadata if export is true (or auto and the
-// callisto-export sys.input is "true") or return the unique execution output
-// otherwise.
+// Export the given raw element and return the unique output
 #let evaluate(..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  if configuration.export-enabled(cfg: cfg) {
-    return _export(..args)
-  }
-  if configuration.read-enabled(cfg: cfg) == false {
-    return none
-  }
-
+  export(..args)
   // Get single cell, taking 'keep' into account
   let c = if placeholder-enabled(cfg: cfg) {
     reading.cell.cell(..args, placeholder: "placeholder")
   } else {
     reading.cell.cell(..args, placeholder: false)
   }
-
   if c == "placeholder" {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
     return get-placeholder(mime: "placeholder-output", ctx: ctx)

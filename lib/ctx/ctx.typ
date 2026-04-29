@@ -83,9 +83,6 @@
 
   ctx.ansi = (process: auto) + ctx.ansi
 
-  ctx.read = configuration.read-enabled(cfg: cfg)
-  ctx.export = configuration.export-enabled(cfg: cfg)
-
   let latex-preamble = none
   if ctx.gather-latex-defs and (nb-json != none or cell != none) {
     let cells = if nb-json == none { (cell,) } else { nb-json.cells }

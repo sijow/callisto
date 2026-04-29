@@ -387,7 +387,8 @@
 // spec is a summary of a the cell specification.
 #let placeholder-function-call(func, ctx: none, ..args) = {
   let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
-  handle(raw(block: true, txt), mime: "placeholder-generic", ctx: ctx, ..args)
+  let elem = raw(txt, block: _is-placeholder-likely-block(ctx: ctx))
+  handle(elem, mime: "placeholder-generic", ctx: ctx, ..args)
 }
 
 // Placeholder for code cell input rendering using source (from raw spec)

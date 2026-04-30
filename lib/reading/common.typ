@@ -39,12 +39,13 @@
     if placeholder-enabled(cfg: ctx.cfg) {
       return get-placeholder(mime: placeholder-mime, ctx: ctx)
     }
-    panic("no matching " + kind + " found")
+    panic("no matching " + kind + " found. Cell spec was " + repr(ctx.cell-spec))
   }
   let choice = ctx.at(setting)
   if choice == "unique" {
     if values.len() != 1 {
-      panic("expected 1 " + kind + ", found " + str(values.len()))
+      panic("expected 1 " + kind + ", found " + str(values.len()) +
+        ". Cell spec was " + repr(ctx.cell-spec))
     }
     return values.first()
   }

@@ -288,7 +288,7 @@
 // Handler for code cell output
 #let code-cell-output(cell, ctx: none, ..args) = {
   // Get outputs with user config, but override 'result' to get just the values
-  outputs(cell, ..ctx.cfg, result: "value").join()
+  outputs(cell, ..ctx.cfg, result: "value").map(x => [#x]).join()
 }
 
 // Handler for code cell

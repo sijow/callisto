@@ -149,23 +149,74 @@
   }
 }
 
+// Return export metadata and cell rendering/output for the given cell
+#let _exec-cell(
+  cell,
+  value-func: none,
+  placeholder-mime: none,
+  cell-spec: none,
+  cfg: none,
+) = {
+  let export-md = export(cell-spec, ..cfg)
+  if cell == none {
+    if placeholder-enabled(cfg: cfg) {
+      let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+      let value = get-placeholder(mime: placeholder-mime, ctx: ctx)
+      return export-md + [#value]
+    }
+    panic("cell not found")
+  }
+
+  let value = value-func(cell, ..cfg)
+  return export-md + [#value]
+}
+
+// Return export metadata and cell rendering/output (depending on value-func),
+// looking for the single cell that corresponds to the raw cell spec.
+#let _exec(value-func: none, placeholder-mime: none, ..args) = {
+  let (cell-spec, cfg) = configuration.parse-main-args(..args)
+
+  let exec-cell-configured = _exec-cell.with(
+    value-func: value-func, 
+    placeholder-mime: placeholder-mime,
+    cell-spec: cell-spec,
+    cfg: cfg,
+  )
+
+  // Using cells() rather than cell() to disambiguate manually in case of
+  // several cells matching the cell spec
+  let cs = reading.cell.cells(..args)
+  if cs == none or cs.len() == 0 {
+    return exec-cell-configured(none)
+  }
+
+  if cs.len() > 1 {
+    // Disambiguate based on sequence of exports in document
+    return context {
+      // Find how many exports before this one have the exact same cell source
+      // (including the cell header, which is normalized by export()).
+      // If there are already n exports for this cell source, they have indices
+      // 0...n-1 and we are index n.
+      let export-md = export(..args)
+      let sel = selector(_export-label(cfg.export-name)).before(here())
+      let matches = query(sel).filter(x => x.value.text == export-md.value.text)
+      let n = matches.len()
+      let cell = cs.at(n, default: none)
+      exec-cell-configured(cell)
+    }
+  }
+
+  return exec-cell-configured(cs.first())
+}
+
 // Export the given raw element and render it
-#let execute(..args) = export(..args) + rendering.Cell(..args)
+#let execute = _exec.with(
+  value-func: rendering.Cell,
+  placeholder-mime: "placeholder-cell",
+)
 
 // Export the given raw element and return the unique output
-#let evaluate(..args) = {
-  let (cell-spec, cfg) = configuration.parse-main-args(..args)
-  export(..args)
-  // Get single cell, taking 'keep' into account
-  let c = if placeholder-enabled(cfg: cfg) {
-    reading.cell.cell(..args, placeholder: "placeholder")
-  } else {
-    reading.cell.cell(..args, placeholder: false)
-  }
-  if c == "placeholder" {
-    let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-    return get-placeholder(mime: "placeholder-output", ctx: ctx)
-  } else {
-    return reading.output.output(c, ..cfg)
-  }
-}
+#let evaluate = _exec.with(
+  value-func: reading.output.output,
+  placeholder-mime: "placeholder-output",
+)

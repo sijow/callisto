@@ -5,12 +5,11 @@
 #import "ctx/ctx.typ": get-ctx
 
 // Render the specified cells according to the settings (see common.typ).
-// By default this function does apply the theme.
-#let render(..args, apply-theme: true) = {
+#let render(..args) = {
   // Make sure the handlers are called with a context with result: "value"
   let (cell-spec, cfg) = parse-main-args(
     ..args,
-    apply-theme: apply-theme,
+    apply-theme: true,
     result: "value",
   )
   if read-enabled(cfg: cfg) == false { return none }
@@ -20,11 +19,11 @@
 }
 
 // Helper for rendering from a single cell
-#let _render-cell(..args, apply-theme: true, placeholder-mime: none) = {
+#let _render-cell(..args, placeholder-mime: none) = {
   // Make sure the handlers are called with a context with result: "value"
   let (cell-spec, cfg) = parse-main-args(
     ..args,
-    apply-theme: apply-theme,
+    apply-theme: true,
     result: "value",
   )
 

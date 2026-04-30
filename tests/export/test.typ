@@ -39,18 +39,22 @@
   description: "Notebook of all code blocks in the document",
 )
 
-= Using execute with a label
+= Using `#show: <label>: execute`
 
 #show <g>: execute
 
 ```python
-#| label: x
-x = 1 + 2
-x
+x = 1 + 2; x
 ```<g>
 
 ```python
-"a" + "b"
+x += 1; x
+```<g>
+
+Same code again, different result:
+
+```python
+x += 1; x
 ```<g>
 
 == Control what part to show from the cell header
@@ -58,6 +62,7 @@ x
 #show <with-header>: execute
 
 ```python
+#| label: x
 #| output: false
 2 + 3
 ```<with-header>
@@ -69,8 +74,7 @@ x
 
 == Get cell by name
 
-Cell `x`:
-#Cell("x")
+Cell `x` result: #result("x")
 
 == Select by Typst label
 #render(<g>)
@@ -147,18 +151,14 @@ The square of 3 is #evaluate(`3*3`, keep: 0).
 
 A table with $3^2$ cells:
 
-#{
-  let n = evaluate(`3*3`, keep: 1)
-  if type(n) == str {
-    set align(center)
-    table(
-      columns: int(n),
-      ..range(int(n)).map(str),
-    )
-  } else {
-    n
-  }
+#let my-table(n) = {
+  set align(center)
+  table(
+    columns: int(n),
+    ..range(int(n)).map(str),
+  )
 }
+#evaluate(`3*3`, transform: my-table)
 
 == Using `transform`
 

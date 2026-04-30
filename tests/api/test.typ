@@ -56,20 +56,17 @@
 
 #assert("`aa` not defined" in error())
 
-#assert.eq(
-  catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x")),
-  "panicked with: \"no matching display found\"",
+#assert(
+  "no matching display found" in
+    catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x"))
 )
-#assert.eq(
-  catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true)),
-  "panicked with: \"no matching display found\"",
+#assert(
+  "no matching display found" in
+    catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true))
 )
 
 // Tests for 'keep' and 'item'
-#assert.eq(
-  catch(() => Out("non-existing")),
-  "panicked with: \"no matching cell found\"",
-)
+#assert("no matching cell found" in catch(() => Out("non-existing")))
 
 #assert.eq(source("scatter", name-path: "metadata.callisto.header.type", keep: 2).text.split("\n").first(), "a = 2")
 #{

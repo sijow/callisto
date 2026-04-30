@@ -1,7 +1,7 @@
 #import "/lib/util.typ": ensure-array, handle
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ": get-ctx
-#import "common.typ": final-result, single-value
+#import "common.typ": final-result, single-output
 #import "cell.typ": cells
 #import "rich-object.typ"
 #import "stream.typ"
@@ -79,19 +79,5 @@
 #let output(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
   let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-
-  let kind = if ctx.output-type in all-output-types {
-    // If a single output type is configured, use that (more informative)
-    ctx.output-type
-  } else {
-    "output"
-  }
-
-  return single-value(
-    outputs(..args),
-    kind: kind,
-    setting: "item",
-    placeholder-mime: "placeholder-output",
-    ctx: ctx,
-  )
+  single-output(outputs(..args), ctx: ctx)
 }

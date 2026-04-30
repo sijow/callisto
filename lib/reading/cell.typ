@@ -3,7 +3,7 @@
 #import "/lib/ctx/cells.typ": resolve-name-path
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "/lib/header-pattern.typ"
-#import "common.typ": single-value
+#import "common.typ": single-output, placeholder-enabled, get-placeholder
 #import "notebook.typ"
 
 // All possible Jupyter cell types
@@ -154,12 +154,18 @@
 // Get a single cell
 #let cell(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-  return single-value(
-    cells(..args),
-    kind: "cell",
-    setting: "keep",
-    placeholder-mime: "placeholder-cell-func",
-    ctx: ctx,
-  )
+
+  let cs = cells(..args)
+  if cs == none or cs.len() == 0 {
+    if placeholder-enabled(cfg: cfg) {
+      let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+      return get-placeholder(mime: "placeholder-cell-func", ctx: ctx)
+    }
+    panic("no match found for cell " + repr(cell-spec))
+  }
+  if cs.len() != 1 {
+    panic("expected 1 cell, found " + str(cs.len()) +
+      ". Cell spec was " + repr(cell-spec))
+  }
+  return cs.first()
 }

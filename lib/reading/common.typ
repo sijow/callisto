@@ -30,30 +30,30 @@
   return ctx.placeholder
 }
 
-// Returns a single value from the given list as specified by the `choice`
-// argument, using a placeholder or raising an error if the list is empty or
-// none or if 'choice' is "unique" and the list contains more than one.
-// The `kind` string is used for error messages.
-#let single-value(values, kind: none, setting: none, placeholder-mime: none, ctx: none) = {
+// Returns a single value from the given list as specified by the 'item'
+// setting (in args), using a placeholder or raising an error if the list is
+// empty or none or if 'item' is "unique" and the list contains more than one.
+#let single-output(values, ctx: none) = {
+  let (cell-spec, cfg) = ctx
+
   if values == none or values.len() == 0 {
-    if placeholder-enabled(cfg: ctx.cfg) {
-      return get-placeholder(mime: placeholder-mime, ctx: ctx)
+    if placeholder-enabled(cfg: cfg) {
+      return get-placeholder(mime: "placeholder-output", ctx: ctx)
     }
-    panic("no matching " + kind + " found. Cell spec was " + repr(ctx.cell-spec))
+    panic("no matching item found. Cell spec was " + repr(cell-spec))
   }
-  let choice = ctx.at(setting)
-  if choice == "unique" {
+  if cfg.item == "unique" {
     if values.len() != 1 {
-      panic("expected 1 " + kind + ", found " + str(values.len()) +
-        ". Cell spec was " + repr(ctx.cell-spec))
+      panic("expected 1 item, found " + str(values.len()) +
+        ". Cell spec was " + repr(cell-spec))
     }
     return values.first()
   }
-  if type(choice) != int {
-    panic("unexpected value for '" + setting +
-      "': expected \"unique\" or int, got " + type(choice))
+  if type(cfg.item) != int {
+    panic("unexpected value for 'item'': expected \"unique\" or int, got " +
+      type(cfg.item))
   }
-  return values.at(choice)
+  return values.at(cfg.item)
 }
 
 // A dictionary of cell-related data, to be used as one field in the result

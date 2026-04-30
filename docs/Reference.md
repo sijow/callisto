@@ -428,26 +428,24 @@ The singular form is useful in two ways:
 
 The check for uniqueness can be disabled by setting the `item` argument to a value different from `"unique"`. Use for example `cell(..., item: 0)` to get the first matching cell, and `display(..., item: -1)` to get the last display of the matching cell(s).
 
-The functions `cells` and `sources` also have singular aliases `cell` and `source` that return a single value, and by default ensure that only one cell matches the specification. The `keep` setting can be used to disable the check for uniqueness and control which cell is used when several match. Examples:
+The functions `cells` and `sources` also have singular aliases `cell` and `source` that return a single value and ensure that only one cell matches the specification. Examples:
 
 ```typst
-// Get source of last cell with tag "plot"
-#source("plot", keep: -1)
-// Get unique display of this cell
-#display(cell("plot", keep: -1))
+// Get unique cell that matches "plot"
+#cell("plot")
+// Get source of this cell
+#source("plot")
 ```
 
 ### Aliases for rendering
 
 The `render` function always returns a `content` value, but it also has an alias to check that only one cell matches the specification:
 
--  `Cell` is the same as `render` but renders a single cell. The `keep` setting can be used like for the `cell` function. Examples:
+-  `Cell` is the same as `render` but renders a single cell. Example:
 
    ```typst
    // Render the unique cell matching "plot1"
    #Cell("plot1")
-   // Render the last cell with tag "plot"
-   #Cell("plot", keep: -1)
    ```
 
 The `Cell` function itself has aliases to render only the input or output of a code cell:

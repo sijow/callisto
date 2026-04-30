@@ -57,18 +57,16 @@
 #assert("`aa` not defined" in error())
 
 #assert(
-  "no matching display found" in
+  "no matching item found" in
     catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x"))
 )
 #assert(
-  "no matching display found" in
+  "no matching item found" in
     catch(() => display("plots", name-path: "metadata.callisto.header.name", format: "x", ignore-wrong-format: true))
 )
 
-// Tests for 'keep' and 'item'
-#assert("no matching cell found" in catch(() => Out("non-existing")))
-
-#assert.eq(source("scatter", name-path: "metadata.callisto.header.type", keep: 2).text.split("\n").first(), "a = 2")
+// Tests for 'item'
+#assert("no match found for cell" in catch(() => Out("non-existing")))
 #{
   let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
   assert.eq(output("plot3"), "5")

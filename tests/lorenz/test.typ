@@ -2,6 +2,5 @@
 
 #callisto.render(
   nb: json("Lorenz.ipynb"),
-  // keep: range(5),
 )
  

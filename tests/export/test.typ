@@ -144,8 +144,7 @@ c = 91; c
 
 == With `evaluate`
 
-// Using keep to disambiguate between several evaluations of `3*3`
-The square of 3 is #evaluate(`3*3`, keep: 0).
+The square of 3 is #evaluate(`3*3`).
 
 == Transforming the evaluation result
 

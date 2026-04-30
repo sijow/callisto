@@ -29,7 +29,6 @@
 #let source(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
 
-  // Get single cell, taking 'keep' into account
   let c = if placeholder-enabled(cfg: cfg) {
     cell(..args, placeholder: "placeholder")
   } else {
@@ -40,6 +39,6 @@
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
     return get-placeholder(mime: "placeholder-source-func", ctx: ctx)
   }
-
+  
   return _cell-source(c, cell-spec: cell-spec, cfg: cfg)
 }

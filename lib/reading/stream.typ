@@ -1,7 +1,7 @@
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/util.typ": handle, ensure-array
 #import "/lib/ctx/ctx.typ": get-ctx
-#import "common.typ": final-result
+#import "common.typ": final-result, single-output
 #import "cell.typ": cells
 
 #let all-stream-names = ("stdout", "stderr")
@@ -63,12 +63,7 @@
 
 // Get a single stream value
 #let stream(..args) = {
-  let (cfg,) = parse-main-args(..args)
-  return single-value(
-    streams(..args),
-    kind: "stream",
-    setting: "item",
-    placeholder-mime: "placeholder-output",
-    ctx: ctx,
-  )
+  let (cell-spec, cfg) = parse-main-args(..args)
+  let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
+  single-output(streams(..args), ctx: ctx)
 }

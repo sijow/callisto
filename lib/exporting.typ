@@ -149,74 +149,44 @@
   }
 }
 
-// Return export metadata and cell rendering/output for the given cell
-#let _exec-cell(
-  cell,
-  value-func: none,
-  placeholder-mime: none,
-  cell-spec: none,
-  cfg: none,
-) = {
-  let export-md = export(cell-spec, ..cfg)
-  if cell == none {
-    if placeholder-enabled(cfg: cfg) {
-      let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-      let value = get-placeholder(mime: placeholder-mime, ctx: ctx)
-      return export-md + [#value]
-    }
-    panic("cell not found")
-  }
-
-  let value = value-func(cell, ..cfg)
-  return export-md + [#value]
-}
-
 // Return export metadata and cell rendering/output (depending on value-func),
 // looking for the single cell that corresponds to the raw cell spec.
-#let _exec(value-func: none, placeholder-mime: none, ..args) = {
+#let _exec(value-func: none, ..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
-
-  let exec-cell-configured = _exec-cell.with(
-    value-func: value-func, 
-    placeholder-mime: placeholder-mime,
-    cell-spec: cell-spec,
-    cfg: cfg,
-  )
+  let export-md = export(cell-spec, ..cfg)
+  
+  // Below we convert the value to content, so it can be joined with the
+  // export metadata even if the value was something like an integer.
 
   // Using cells() rather than cell() to disambiguate manually in case of
   // several cells matching the cell spec
   let cs = reading.cell.cells(..args)
-  if cs == none or cs.len() == 0 {
-    return exec-cell-configured(none)
-  }
-
-  if cs.len() > 1 {
+  if cs != none and cs.len() > 1 {
     // Disambiguate based on sequence of exports in document
     return context {
-      // Find how many exports before this one have the exact same cell source
-      // (including the cell header, which is normalized by export()).
+      // Find how many exports before this one have the exact same cell source,
+      // including the cell header as normalized by export(). The comparison
+      // done here must match exactly the comparison done for raw specs in
+      // cell.typ:_cell-indices.
       // If there are already n exports for this cell source, they have indices
       // 0...n-1 and we are index n.
-      let export-md = export(..args)
+      let exported-text = export(..args).value.text
       let sel = selector(_export-label(cfg.export-name)).before(here())
-      let matches = query(sel).filter(x => x.value.text == export-md.value.text)
+      let matches = query(sel).filter(x => x.value.text == exported-text)
       let n = matches.len()
       let cell = cs.at(n, default: none)
-      exec-cell-configured(cell)
+      // Use this cell as cell spec
+      export-md + [#value-func(cell, ..cfg)]
     }
   }
 
-  return exec-cell-configured(cs.first())
+  // Zero or one match -> we just call the function, which will use a
+  // placeholder if appropriate
+  return export-md + [#value-func(cell-spec, ..cfg)]
 }
 
 // Export the given raw element and render it
-#let execute = _exec.with(
-  value-func: rendering.Cell,
-  placeholder-mime: "placeholder-cell",
-)
+#let execute = _exec.with(value-func: rendering.Cell)
 
 // Export the given raw element and return the unique output
-#let evaluate = _exec.with(
-  value-func: reading.output.output,
-  placeholder-mime: "placeholder-output",
-)
+#let evaluate = _exec.with(value-func: reading.output.output)

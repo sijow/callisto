@@ -288,7 +288,7 @@
 // Handler for code cell output
 #let code-cell-output(cell, ctx: none, ..args) = {
   // Get outputs with user config, but override 'result' to get just the values
-  outputs(cell, ..ctx.cfg, result: "value").map(x => [#x]).join()
+  outputs(cell, ..ctx.cfg, result: "value").join()
 }
 
 // Handler for code cell
@@ -417,7 +417,7 @@
   handle(func, mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for rendered code cell input
+// Placeholder for rendered code cell input (e.g. for In() calls)
 #let placeholder-code-cell-input(data, ctx: none, ..args) = {
   if _is-raw-spec(ctx.cell-spec) {
     // Source is available!
@@ -426,12 +426,12 @@
   return handle("In", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for rendered code cell output
+// Placeholder for rendered code cell output (e.g. for Out() calls)
 #let placeholder-code-cell-output(data, ctx: none, ..args) = {
   handle("Out", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for a rendered code cell.
+// Placeholder for a rendered code cell (e.g. Cell() call).
 // This implementation shows the cell source if available from raw spec, or
 // a representation of the function call otherwise.
 #let placeholder-code-cell(data, ctx: none, ..args) = {

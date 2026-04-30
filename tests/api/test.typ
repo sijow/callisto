@@ -104,6 +104,7 @@
   cells,
   cell,
   streams,
+  stream,
   stream-items,
   stream-item,
   output,
@@ -117,8 +118,15 @@
 
 #assert.eq(streams(result: "dict").map(x => x.cell.index), (3, 4, 6))
 #assert.eq(
-  streams((4, 5)),
-  ("Error 1\nMessage 1\nError 2\nMessage 2\n",),
+  stream((4, 5)),
+  "Error 1\nMessage 1\nError 2\nMessage 2\n",
+)
+#assert.eq(
+  streams((3, 4)),
+  (
+    "Message 1\nMessage 2\nError 1\nError 2\n",
+    "Error 1\nMessage 1\nError 2\nMessage 2\n",
+  ),
 )
 #assert.eq(
   stream-items(4, result: "dict").map(x => x.name),

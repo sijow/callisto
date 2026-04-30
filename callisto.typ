@@ -61,7 +61,7 @@
   default-handlers: handlers.default,
   named-themes: themes,
 )
-#let stream(..args) = reading.stream.stream.with(
+#let stream = reading.stream.stream.with(
   default-handlers: handlers.default,
   named-themes: themes,
 )

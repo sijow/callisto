@@ -310,27 +310,43 @@
 // Check if the cell spec is a raw element
 #let _is-raw-spec(spec) = type(spec) == content and spec.func() == raw
 
+// Truncate given string to one line and ad most the given length,
+// with an ellipsis at the end to indicate truncation if applicable.
+#let _short-string(txt, max-length) = {
+  let truncated = false
+
+  // Keep only first line
+  let lines = txt.split("\n")
+  if lines.len() > 1 {
+    txt = lines.first()
+    truncated = true
+  }
+
+  // Cut line if too long
+  let clusters = txt.clusters()
+  if clusters.len() >= max-length {
+    // Reserve 1 character for ellipsis
+    txt = clusters.slice(0, count: max-length - 1).join()
+    truncated = true
+  }
+
+  // Add ellipsis if truncated
+  if truncated {
+    txt += "…"
+  }
+
+  return txt
+}
+
 // Return a string that summarizes the given cell spec
 #let _cell-spec-summary(spec) = {
   if _is-raw-spec(spec) {
-    let txt = spec.text.trim()
-    let truncated = false
-    let lines = txt.split("\n")
-    if lines.len() > 1 {
-      txt = lines.first()
-      truncated = true
-    }
-    let clusters = txt.clusters()
-    if clusters.len() >= 50 {
-      txt = clusters.slice(0, count: 49).join()
-      truncated = true
-    }
-    if truncated {
-      txt += "…"
-    }
-    return "`" + txt + "`"
+    return "`" + _short-string(spec.text.trim(), 48) + "`"
   }
-  return repr(spec)
+  if type(spec) == dictionary {
+    return "`" + _short-string(spec.source, 48) + "`"
+  }
+  return _short-string(repr(spec), 50)
 }
 
 // Return true if the placeholder is likely for block content

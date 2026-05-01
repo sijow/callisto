@@ -167,14 +167,15 @@
     "panicked with: \"unknown handler \\\"custom\\\""
 ))
 
-// check that custom handlers work if registered
+// check custom handlers
 #let out = output(
   6,
   item: 2,
-  default-handlers: callisto.handlers.default + ("custom": none),
   handlers: (
-    "custom": (..args) => square(stroke: red),
     "image/png": callisto.handle.with(mime: "custom"),
+  ),
+  new-handlers: (
+    custom: (..args) => square(stroke: red),
   ),
 )
 #assert.eq(out.func(), square)

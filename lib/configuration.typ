@@ -18,6 +18,7 @@
   stream: "all",
   result: "value",
   handlers: auto,
+  new-handlers: (:),
   item: "unique",
   // Rendering
   input: auto,

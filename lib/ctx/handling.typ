@@ -26,22 +26,30 @@
     + repr(value))
 }
 
-// Given the default handler dict and user handler dict, return a dict of
-// resolved user handlers, where each value is a handler function or none.
-// Each user handler can be given as none or auto or a function or an array of
-// values representing functions to compose, where the auto value represent the
-// default handler.
-#let _resolve-user-handlers(default, user) = {
-  if user == auto { return (:) }
+// Given the dicts for default, user and user new (non standard) handlers,
+// return a dict of resolved user handlers, where each value is a handler
+// function or none. Each user handler can be given as none or auto or a
+// function or an array of values representing functions to compose, where
+// the auto value represent the default handler.
+#let _resolve-user-handlers(default, user, user-new) = {
+  if user == auto {
+    user = (:)
+  }
   if type(user) != dictionary {
-    panic("handlers must be auto or a dictionary mapping formats to functions")
+    panic("handlers must be auto or a dictionary")
+  }
+  if type(user-new) != dictionary {
+    panic("new-handlers must be a dictionary")
   }
   for (k, v) in user.pairs() {
     if k not in default {
       panic("unknown handler " + repr(k) +
-        " (custom handlers must be registered with default-handlers)")
+        " (custom handlers must be registered with new-handlers")
     }
     ((k): _resolve-one-handler(default.at(k), k, v))
+  }
+  for (k, v) in user-new.pairs() {
+    ((k): _resolve-one-handler(default.at(k, default: none), k, v))
   }
 }
 
@@ -49,9 +57,14 @@
 #let all-handlers(cfg: none) = {
   let handlers = cfg.default-handlers
   if cfg.apply-theme {
-    let (template, ..theme-handlers) = theming.resolve(cfg.theme, cfg.named-themes)
+    let (template, ..theme-handlers) = theming.resolve(
+      cfg.theme, cfg.named-themes)
     handlers += theme-handlers
   }
-  let user-handlers = _resolve-user-handlers(handlers, cfg.handlers)
+  let user-handlers = _resolve-user-handlers(
+    handlers,
+    cfg.handlers,
+    cfg.new-handlers,
+  )
   return handlers + user-handlers
 }

@@ -356,14 +356,14 @@ We can also define our own theme. A theme is really a dictionary of handlers tha
 
 Note that theme handlers are only used during rendering. So with the "notebook" theme for example, errors are shown with a backtrace in a red block when we call `render` or `Cell` or `Out`, which are all rendering functions, but the `output` or `error` functions will still return the short error string (unless the `apply-theme` parameter is explicitly set to `true`).
 
-The standard theme dictionaries are available in `callisto.themes`. We can make a theme by extending one of these dictionaries. For example, let's say we want each cell rendered in a frame. In the [handler reference](Reference.md#Handlers) we see there is a `cell` handler called for each cell. The "neat" theme dict, available as `callisto.themes.neat`, has no `cell` field so Callisto will use the default function `callisto.handlers.cell`. Let's extend the "neat" theme with a `cell` handler that adds a frame: 
+The standard theme dictionaries are available in `callisto.themes`. We can make a theme by extending one of these dictionaries. For example, let's say we want each cell rendered in a frame. In the [handler reference](Reference.md#Handlers) we see there is a `cell` handler called for each cell. The "neat" theme dict, available as `callisto.themes.neat`, has no `cell` field so Callisto will use the default function, available as the `cell` field of the `callisto.default-handlers` dictionary. Let's extend the "neat" theme with a `cell` handler that adds a frame: 
 
 ```typst
 #render(
   theme: callisto.themes.neat + (
     cell: (c, ..args) => rect(
       width: 100%,
-      callisto.handlers.cell(c, ..args), // render cell inside the frame
+      callisto.default-handlers.at("cell")(c, ..args), // render cell itself
     ),
   ),
 )

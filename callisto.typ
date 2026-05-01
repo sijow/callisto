@@ -13,7 +13,7 @@
 #import "lib/reading/reading.typ"
 #import "lib/theming.typ"
 #import "lib/rendering.typ"
-#import "lib/handlers.typ"
+#import "lib/handlers.typ": default as default-handlers
 #import "lib/ansi.typ"
 #import "lib/exporting.typ"
 #import "lib/header-pattern.typ"
@@ -21,29 +21,29 @@
 #import util: handle
 
 #let cells = reading.cell.cells.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let cell = reading.cell.cell.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 
 #let sources = reading.source.sources.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let source = reading.source.source.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 
 #let outputs = reading.output.outputs.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let output = reading.output.output.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 
@@ -58,49 +58,49 @@
 #let stream-item(..args) = output(..args, output-type: "stream")
 
 #let streams = reading.stream.streams.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let stream = reading.stream.stream.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 
 #let render = rendering.render.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let Cell = rendering.Cell.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let In = rendering.In.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let Out = rendering.Out.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 
 #let export = exporting.export.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let make-notebook = exporting.make-notebook.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let stage-notebook = exporting.stage-notebook.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let execute = exporting.execute.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 #let evaluate = exporting.evaluate.with(
-  default-handlers: handlers.default,
+  default-handlers: default-handlers,
   named-themes: themes,
 )
 

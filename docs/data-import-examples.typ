@@ -8,12 +8,6 @@
 #let (output, outputs) = callisto.config(
   // Set notebook
   nb: json("data-import-examples.ipynb"),
-
-  // Add support for JSON outputs (should be included by default in
-  // next version):
-
-  // Add handler for JSON outputs
-  new-handlers: ("application/json": (data, ..args) => data),
   // Prefer JSON output when available
   format: ("application/json", auto),
 )
@@ -45,7 +39,7 @@ The Callisto `output` function expects a single output, and will raise an error 
 
 = JSON outputs
 
-Python cells can use `IPython.display.JSON` to produce an output of type JSON. With the config at the start of this file, Callisto will import such outputs as Typst dictionaries:
+Python cells can use `IPython.display.JSON` to produce an output of type JSON. With the setting `format: ("application/json", auto)` used here, Callisto will import such outputs as Typst dictionaries:
 
 Single output: #output("json-result")
 

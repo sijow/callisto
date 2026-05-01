@@ -8,6 +8,7 @@
   "text/markdown",
   "text/latex",
   "text/plain",
+  "application/json",
 )
 
 // Return a normalized list of desired formats:

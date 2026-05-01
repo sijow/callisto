@@ -174,6 +174,9 @@
 // Handler for simple text
 #let text-plain(data, ctx: none, ..args) = data
 
+// Handler for JSON data
+#let application-json(data, ctx: none, ..args) = data
+
 // Handler for LaTeX equations
 #let math-generic(data, ctx: none, ..args) = mitex.mitex(data, ..args)
 
@@ -470,17 +473,18 @@
 // Default handlers
 #let default = (
   // Handlers for specific formats of rich items (outputs and cell attachments)
-  "image/svg+xml": image-svg-xml,
-  "image/png"    : handle.with(mime: "image-base64"),
-  "image/jpeg"   : handle.with(mime: "image-base64"),
-  "image/gif"    : handle.with(mime: "image-base64"),
-  "text/markdown": text-markdown,
-  "text/latex"   : text-latex,
-  "text/plain"   : text-plain,
+  "image/svg+xml"   : image-svg-xml,
+  "image/png"       : handle.with(mime: "image-base64"),
+  "image/jpeg"      : handle.with(mime: "image-base64"),
+  "image/gif"       : handle.with(mime: "image-base64"),
+  "text/markdown"   : text-markdown,
+  "text/latex"      : text-latex,
+  "text/plain"      : text-plain,
+  "application/json": application-json,
   // Generic image handlers
-  "image-generic": image-generic, // base handler used by others
-  "image-base64" : image-base64,  // base64 encoded image
-  "image-text"   : image-text,    // text encoded image
+  "image-generic" : image-generic, // base handler used by others
+  "image-base64"  : image-base64,  // base64 encoded image
+  "image-text"    : image-text,    // text encoded image
   "image-markdown": image-markdown, // image in Markdown
   // Handlers for output items
   "rich-output-generic": rich-output-generic,

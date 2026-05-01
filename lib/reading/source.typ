@@ -1,7 +1,7 @@
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/ctx.typ": get-ctx
 #import "/lib/util.typ"
-#import "common.typ": final-result, placeholder-enabled, get-placeholder
+#import "common.typ": placeholder-enabled, get-placeholder
 #import "cell.typ": cells, cell
 
 // Return the lang of the cell's source
@@ -14,8 +14,7 @@
 #let _cell-source(cell, cell-spec: none, cfg: none) = {
   let ctx = get-ctx(cell, cell-spec: cell-spec, cfg: cfg)
   let cell-lang = _cell-lang(cell, ctx: ctx)
-  let value = raw(cell.source, lang: cell-lang, block: true)
-  return final-result((text: cell.source), value, ctx: ctx)
+  return raw(cell.source, lang: cell-lang, block: true)
 }
 
 // Extract the 'source' field from cells as raw blocks.

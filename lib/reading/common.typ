@@ -67,7 +67,7 @@
   (execution-count: cell.execution_count)
 }
 
-// Final result for an output item (or source), with transform applied if any.
+// Final result for an output item, with transform applied if any.
 // Depending on ctx.result, this returns either 'value', or the
 // 'preprocessed' dict with 'output_type' renamed to 'type' and with additional
 // fields:

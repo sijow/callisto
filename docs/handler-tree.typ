@@ -51,10 +51,6 @@
   node(<stream-merged>),
   edge(<stream-merged>, <stream-generic>),
 
-  node(<text-ansi-generic>),
-  edge(<text-console-block>, <text-ansi-generic>),
-
-
   node(<markdown-generic>),
   edge(<markdown-cell>, <markdown-generic>),
 

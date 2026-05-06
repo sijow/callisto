@@ -340,7 +340,7 @@ Most functions accept a cell specification as positional argument. Below we use 
 
    - `theme`: the theme used for rendering content. This can be the name of a standard theme as string, or a theme dictionary (see [Themes](#Themes) for more information). Note that by default the theme has no effect for `outputs` (see `apply-theme` above).
 
-- `render(..cell-args, input: true, output: true, h1-level: 1, gather-latex-defs: true, ansi: (:), theme: "notebook")`
+- `render(..cell-args, input: true, output: true, h1-level: 1, gather-latex-defs: true, console-text: none, theme: "notebook")`
 
    Renders selected cells in the Typst document. The `cell-args` are the same as for the `cells` function.
 
@@ -383,9 +383,29 @@ Most functions accept a cell specification as positional argument. Below we use 
 
       Jupyter allows defining a LaTeX command in an equation and using it in another equation (contrary to actual LaTeX, where a definition in some equation is local to that equation). This can cause difficulties during rendering in Callisto: the default LaTeX renderer (mitex) doesn't allow a command local to one equation to be used in another, and it can even happen that the user renders a single cell that uses a command that was defined in another. To address these issues, by default Callisto will gather all command definitions in a single preamble string, and when a math equation from a Markdown cell is rendered, any command definition found in the equation is removed (to avoid duplicate definitions) and the full preamble is inserted at the beginning. This whole processing can be disabled by setting `gather-latex-defs: false`.
 
-   - `ansi`: how to process text that might contain ANSI escape sequences. More precisely, this setting affects every value that is processed through the `text-console-block` handler, which by default means the values of every stream, error and `text/plain` outputs. The default behavior is to look for escape sequences in the string. If none is found, the string is left untouched. If any is found, the string is processed into styled text. This processing also applies the `ansi.highlight-template` which tunes the text and highlight edges to have background colors and box-drawing characters connect nicely from one line to the next.
+   -  `console-text`: how to process text that might be meant for a terminal. More precisely, this setting affects every value that is processed through the `text-console-block` handler. By default this is all stream, error and `text/plain` outputs.
 
-   - `theme`: the theme used for rendering content. This can be the name of a standard theme as string, or a theme dictionary (see [Themes](#Themes) for more information).
+      Text shown in a terminal might require special handling to render correctly, in particular
+
+      - converting ANSI escape sequences to text styles (colors, underline, etc.),
+      - adjusting the paragraph leading and text edges to avoid gaps between rows of text when there is a background color or when the rows contain box-drawing characters.
+
+      The `console-text` value can be
+
+      -  a dictionary that can contain
+
+         - A `render` field: `true` or `false` to enable/disable the processing of textual outputs, `auto` to enable processing only when the output text contains ANSI escape sequences, `"strip"` to replace rendering with a simple stripping of all escape sequences.
+
+         - A `template` field: template function, or `auto` for the default template, or `none`. The template function is applied on the rendered text.
+
+         - Additional fields supported by `ansi.render` including `palette` (an array of 16 standard ANSI colors), `fg` and `bg` (foreground and background colors) and `bold-is-bright` (whether bold text in a standard normal color should be rendered in the corresponding bright color).
+
+      -  `true`, `false`, `auto` or `"strip"`: equivalent to a dictionary with just a `render` field set to this value.
+
+      The default value is `auto`.
+
+
+   -  `theme`: the theme used for rendering content. This can be the name of a standard theme as string, or a theme dictionary (see [Themes](#Themes) for more information).
 
 ## Alias functions
 

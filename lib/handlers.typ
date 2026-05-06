@@ -146,29 +146,26 @@
 }
 
 // Handler for text to render as console output, in particular text that can
-// include ANSI escape sequences for colors, etc.
+// include ANSI escape sequences for colors, etc. and box-drawing characters.
 #let text-console-block(data, ctx: none, ..args) = {
-  let process = ctx.ansi.process
+  let (render, ..render-args) = ctx.console-text
 
-  if process == auto {
-    process = data.contains(ansi.escape-regex)
+  if render == auto {
+    render = data.contains(ansi.escape-regex)
   }
 
-  if process in (false, "strip") {
-    if process == "strip" {
+  if render in (false, "strip") {
+    if render == "strip" {
       data = ansi.strip(data)
     }
     return raw(block: true, lang: "txt", data)
   }
 
-  if process != true {
-    panic("invalid ansi.process value: " + repr(process))
-  }
-
-  let renderer = handle.with(mime: "text-ansi-generic", ctx: ctx)
-
-  // Pass args here (could be used e.g. to change the template)
-  ansi.console-block(data, renderer: renderer, ..args)
+  // Do render
+  
+  // Give precedence to render-args: it's a user value that might be used to
+  // override arguments preconfigured by the theme
+  ansi.console-block(data, ..args, ..render-args)
 }
 
 // Handler for simple text
@@ -523,7 +520,6 @@
   "placeholder-cell-func": none,
   "placeholder-source-func": none,
   // Other handlers
-  "text-ansi-generic": text-ansi-generic,
   "text-console-block": text-console-block,
   "source-code-generic": source-code-generic,
   "attachment": attachment,

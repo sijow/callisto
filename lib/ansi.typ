@@ -330,22 +330,30 @@
   it
 }
 
-// Render the string as a console block, processing ANSI escape sequences.
-// The extra arguments are passed to the renderer.
-// Note that bg (if given in extra args) is not applied to the block itself:
-// that could be redundant, and it's easier for the user to do that themselves
-// than to undo it when undesired.
-#let console-block(
-  string,
-  renderer: render,
-  template: highlight-template,
-  ..args,
-) = {
+// Same as highlight-template but also setting the paragraph leading (not done
+// directly in highlight-template to allow using that one inline, without
+// breaking the paragraph).
+#let highlight-block-template(it) = {
   // The console block must have no leading, to allow box-drawing characters
   // to connect
   set par(leading: 0pt)
-
+  
   // Apply template after leading, in case it wants to change it
+  show: highlight-template
+
+  it
+}
+
+// Render the string as a console block, processing ANSI escape sequences.
+// The extra arguments are passed to the render function.
+// Note that bg (if given in extra args) is not applied to the block itself:
+// that could be redundant, and it's easier for the user to do that themselves
+// than to undo it when undesired.
+#let console-block(string, template: highlight-block-template, ..args) = {
+  // Use do-nothing template if none
+  if template == none {
+    template = it => it
+  }
   show: template
 
   // We go through a raw block (replaced by a simple block in the show rule)
@@ -353,7 +361,7 @@
   // The final result itself cannot be a raw element since we style the text
   // manually with `text`, `underline`, etc.
   show raw.where(block: true, lang: "ansi"): r => block({
-    renderer(r.text, ..args)
+    render(r.text, ..args)
   })
 
   raw(block: true, lang: "ansi", string)

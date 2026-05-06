@@ -25,7 +25,7 @@
   output: auto,
   h1-level: 1,
   gather-latex-defs: true,
-  ansi: (:),
+  console-text: auto,
   apply-theme: false, // default for all but render functions
   theme: "notebook",
   // Export

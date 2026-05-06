@@ -82,7 +82,7 @@ callisto.ansi.console-block(
 
 #let (render,) = callisto.config(
   nb: json("ansi-table.ipynb"),
-  ansi: (bg: white),
+  console-text: (bg: white),
 )
 #render()
 
@@ -102,14 +102,14 @@ callisto.ansi.console-block(
 #let (Out,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   theme: "plain",
-  ansi: (palette: gruvbox, bg: gruvbox.first(), fg: orange),
+  console-text: (palette: gruvbox, bg: gruvbox.first(), fg: orange),
 )
 #Out(0)
 
 #let (Out,) = callisto.config(
   nb: json("ansi-table.ipynb"),
   theme: "plain",
-  ansi: (process: "strip"),
+  console-text: "strip",
 )
 #Out(0)
 

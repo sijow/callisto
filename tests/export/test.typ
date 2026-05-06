@@ -255,7 +255,7 @@ Code can be generated dynamically for execution:
   export-name: "julia",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
   theme: "neat",
-  ansi: (bg: luma(30%)),
+  console-text: (bg: luma(30%)),
 )
 
 #stage-julia()

@@ -46,6 +46,26 @@
   return nb-json.metadata.language_info.name
 }
 
+// Return the normalized console-text dictionary, containing at least a
+// 'render' field.
+#let _resolve-console-text(value) = {
+  let render-values = (true, false, "strip", auto)
+  if value in render-values {
+    return (render: value)
+  }
+  if type(value) != dictionary {
+    panic("invalid console-text: should be true/false/\"strip\"/auto" +
+      " or a dictionary")
+  }
+  if "render" not in value {
+    value.render = auto
+  }
+  if value.render not in render-values {
+    panic("invalid console-text.render: should be true/false/\"strip\"/auto")
+  }
+  return value
+}
+
 // Build a ctx dict for the given cell and settings dict.
 #let get-ctx(
   cell,
@@ -81,7 +101,7 @@
     ctx.output = cells.resolve-output(cell, cfg: cfg)
   }
 
-  ctx.ansi = (process: auto) + ctx.ansi
+  ctx.console-text = _resolve-console-text(ctx.console-text)
 
   let latex-preamble = none
   if ctx.gather-latex-defs and (nb-json != none or cell != none) {

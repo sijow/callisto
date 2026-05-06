@@ -352,7 +352,7 @@ There is also the "plain" theme which renders elements without any styling.
 
 We can appy the theme globally in the `config` call with `callisto.config(nb: json("example.ipynb"), theme: "neat")`. This would affect all `render` calls.
 
-We can also define our own theme. A theme is really a dictionary of handlers that are used in place of the default handlers when doing rendering. For example the "notebook" theme redefines the `error` handler a bit like in the previous section, but using the function `callisto.ansi.console-block` to render ANSI escape codes correctly (converting the codes to styles such as color and underline) and showing the whole thing in a red block.
+We can also define our own theme. A theme is really a dictionary of handlers that are used in place of the default handlers when doing rendering. For example the "notebook" theme redefines the `error` handler a bit like in the previous section, but calling the `text-console-block` sub-handler to render ANSI escape codes correctly (converting the codes to styles such as color and underline) and showing the whole thing in a red block.
 
 Note that theme handlers are only used during rendering. So with the "notebook" theme for example, errors are shown with a backtrace in a red block when we call `render` or `Cell` or `Out`, which are all rendering functions, but the `output` or `error` functions will still return the short error string (unless the `apply-theme` parameter is explicitly set to `true`).
 

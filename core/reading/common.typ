@@ -1,5 +1,5 @@
-#import "/lib/configuration.typ": parse-main-args, read-enabled
-#import "/lib/util.typ"
+#import "/core/configuration.typ": parse-main-args, read-enabled
+#import "/core/util.typ"
 #import "notebook.typ"
 
 // Knowing that reading is enabled, is it from an exported notebook?

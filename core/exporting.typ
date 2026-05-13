@@ -1,7 +1,7 @@
-#import "/lib/header-pattern.typ"
-#import "/lib/rendering.typ"
-#import "/lib/reading/reading.typ"
-#import "/lib/reading/common.typ": placeholder-enabled, get-placeholder
+#import "/core/header-pattern.typ"
+#import "/core/rendering.typ"
+#import "/core/reading/reading.typ"
+#import "/core/reading/common.typ": placeholder-enabled, get-placeholder
 #import "ctx/ctx.typ": get-ctx
 #import "configuration.typ"
 

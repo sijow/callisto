@@ -1,6 +1,6 @@
 #import "/callisto.typ"
-#import "/lib/handlers.typ"
-#import "/lib/header-pattern.typ"
+#import "/core/handlers.typ"
+#import "/core/header-pattern.typ"
 
 // With julia.ipynb
 #let (

@@ -1,4 +1,4 @@
-#import "/lib/latex.typ"
+#import "/core/latex.typ"
 
 #let src = ```
   \newcommand{\ab}{CD}

@@ -1,5 +1,5 @@
-#import "/lib/configuration.typ": parse-main-args, read-enabled
-#import "/lib/ctx/ctx.typ": get-ctx
+#import "/core/configuration.typ": parse-main-args, read-enabled
+#import "/core/ctx/ctx.typ": get-ctx
 #import "cell.typ": cell
 
 // Return the lang of the cell's source

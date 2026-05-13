@@ -1,6 +1,6 @@
-#import "/lib/ctx/handling.typ": all-handlers
-#import "/lib/header-pattern.typ"
-#import "/lib/configuration.typ": read-enabled
+#import "/core/ctx/handling.typ": all-handlers
+#import "/core/header-pattern.typ"
+#import "/core/configuration.typ": read-enabled
 
 // Return the notebook as JSON, without any processing
 #let get-json(cfg: none) = {

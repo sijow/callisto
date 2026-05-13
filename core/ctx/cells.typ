@@ -1,5 +1,5 @@
-#import "/lib/util.typ"
-#import "/lib/reading/common.typ": get-header-bool
+#import "/core/util.typ"
+#import "/core/reading/common.typ": get-header-bool
 
 // Default places to look in cell dict for cell "name"
 #let default-names = ("metadata.callisto.header.label", "id", "metadata.tags")

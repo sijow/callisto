@@ -1,7 +1,7 @@
-#import "/lib/util.typ"
-#import "/lib/configuration.typ": parse-main-args, read-enabled
-#import "/lib/ctx/cells.typ": resolve-name-path
-#import "/lib/header-pattern.typ"
+#import "/core/util.typ"
+#import "/core/configuration.typ": parse-main-args, read-enabled
+#import "/core/ctx/cells.typ": resolve-name-path
+#import "/core/header-pattern.typ"
 #import "notebook.typ"
 
 // All possible Jupyter cell types

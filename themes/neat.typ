@@ -1,6 +1,6 @@
 #import "plain.typ"
-#import "/lib/util.typ": handle
-#import "/lib/reading/output.typ": outputs
+#import "/core/util.typ": handle
+#import "/core/reading/output.typ": outputs
 
 #let _fill = rgb(233, 236, 239)
 #let _inset = 8pt

@@ -1,7 +1,7 @@
 #import "@preview/cmarker:0.1.8"
 
-#import "/lib/latex.typ"
-#import "/lib/reading/notebook.typ"
+#import "/core/latex.typ"
+#import "/core/reading/notebook.typ"
 
 // Wrap the math item arguments in a labelled metadata
 #let _math-metadata(..args) = [#metadata(args)<__callisto-math-item>]

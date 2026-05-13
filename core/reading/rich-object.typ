@@ -1,4 +1,4 @@
-#import "/lib/util.typ": handle
+#import "/core/util.typ": handle
 
 // Functions to handle rich objects. A rich object is an object that can be
 // available in multiple formats. It is given as a dict with fields

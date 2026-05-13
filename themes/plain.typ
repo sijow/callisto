@@ -1,4 +1,4 @@
-#import "/lib/util.typ": handle
+#import "/core/util.typ": handle
 
 #let theme = (
   // Render text outputs as raw blocks

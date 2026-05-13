@@ -1,5 +1,5 @@
-#import "/lib/util.typ": handle
-#import "/lib/reading/output.typ": outputs
+#import "/core/util.typ": handle
+#import "/core/reading/output.typ": outputs
 #import "plain.typ"
 
 // Make a string for a cell execution count, showing a space if missing

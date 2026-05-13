@@ -8,15 +8,15 @@
 // to users or theme developers.
 
 #import "themes/themes.typ": themes
-#import "lib/configuration.typ"
-#import "lib/util.typ"
-#import "lib/reading/reading.typ"
-#import "lib/theming.typ"
-#import "lib/rendering.typ"
-#import "lib/handlers.typ": default as default-handlers
-#import "lib/ansi.typ"
-#import "lib/exporting.typ"
-#import "lib/header-pattern.typ"
+#import "core/configuration.typ"
+#import "core/util.typ"
+#import "core/reading/reading.typ"
+#import "core/theming.typ"
+#import "core/rendering.typ"
+#import "core/handlers.typ": default as default-handlers
+#import "core/ansi.typ"
+#import "core/exporting.typ"
+#import "core/header-pattern.typ"
 
 #import util: handle
 

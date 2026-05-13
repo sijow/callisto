@@ -1,6 +1,6 @@
-#import "/lib/util.typ": ensure-array, handle
-#import "/lib/configuration.typ": parse-main-args, read-enabled
-#import "/lib/ctx/ctx.typ": get-ctx
+#import "/core/util.typ": ensure-array, handle
+#import "/core/configuration.typ": parse-main-args, read-enabled
+#import "/core/ctx/ctx.typ": get-ctx
 #import "common.typ": final-result, single-output
 #import "cell.typ": cells
 #import "rich-object.typ"

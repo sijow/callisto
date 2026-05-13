@@ -1,4 +1,4 @@
-#import "/lib/theming.typ"
+#import "/core/theming.typ"
 
 // A handler function that composes the functions specified in the given list.
 // If a list value is 'none' instead of a function, the next function is called

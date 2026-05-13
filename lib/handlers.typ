@@ -32,9 +32,6 @@
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 //
-// - The "placeholder-function" and "placeholder-cell-source" handlers (used
-//   by some default placeholder handlers) take a 'func' argument.
-//
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
 // see an error when an unknown argument is passed.
@@ -514,8 +511,6 @@
   "placeholder-code-cell-output": placeholder-code-cell-output,
   "placeholder-code-cell": placeholder-code-cell,
   "placeholder-cell": placeholder-cell,
-  "placeholder-cell-func": none,
-  "placeholder-source-func": none,
   // Other handlers
   "text-console-block": text-console-block,
   "source-code-generic": source-code-generic,

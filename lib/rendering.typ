@@ -27,17 +27,19 @@
     result: "value",
   )
 
-  let c = if placeholder-enabled(cfg: cfg) {
-    cell(..args, placeholder: "placeholder")
-  } else {
-    cell(..args, placeholder: false)
-  }
+  let cs = cells(..args)
 
-  if c == "placeholder" {
+  if cs.len() == 0 and placeholder-enabled(cfg: cfg) {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
     return get-placeholder(mime: placeholder-mime, ctx: ctx)
   }
   
+  if cs.len() != 1 {
+    panic("expected 1 cell, found " + str(cs.len()) +
+      ". Cell spec was " + repr(cell-spec))
+  }
+
+  let c = cs.first()
   handle(c, mime: "cell", ctx: get-ctx(c, cell-spec: cell-spec, cfg: cfg))
 }
 

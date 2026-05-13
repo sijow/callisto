@@ -1,9 +1,7 @@
 #import "/lib/util.typ"
 #import "/lib/configuration.typ": parse-main-args, read-enabled
 #import "/lib/ctx/cells.typ": resolve-name-path
-#import "/lib/ctx/ctx.typ": get-ctx
 #import "/lib/header-pattern.typ"
-#import "common.typ": single-output, placeholder-enabled, get-placeholder
 #import "notebook.typ"
 
 // All possible Jupyter cell types
@@ -154,15 +152,9 @@
 // Get a single cell
 #let cell(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
+  if read-enabled(cfg: cfg) == false { return none }
 
   let cs = cells(..args)
-  if cs == none or cs.len() == 0 {
-    if placeholder-enabled(cfg: cfg) {
-      let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-      return get-placeholder(mime: "placeholder-cell-func", ctx: ctx)
-    }
-    panic("no match found for cell " + repr(cell-spec))
-  }
   if cs.len() != 1 {
     panic("expected 1 cell, found " + str(cs.len()) +
       ". Cell spec was " + repr(cell-spec))

@@ -44,15 +44,12 @@
 #assert.eq(cell("plot3").metadata.callisto.header.type, "scatter")
 
 
-// Test placeholders
-#assert.eq(cell("no-such-cell", placeholder: [x]), [x])
-#assert.eq(source("no-such-cell", placeholder: [x]), [x])
+// Test placeholders and other missing values
 #assert.eq(output("no-such-cell", placeholder: [x]), [x])
-#assert.eq(cell("no-such-cell", handlers: (placeholder-cell-func: (..args) => [x]), placeholder: true), [x])
-#assert.eq(source("no-such-cell", handlers: (placeholder-source-func: (..args) => [x]), placeholder: true), [x])
 #assert.eq(output("no-such-cell", handlers: (placeholder-output: (..args) => [x]), placeholder: true), [x])
-// #assert.eq(source("no-such-cell", placeholder: true), [x])
-
+#assert("expected 1 cell" in catch(() => cell("no-such-cell")))
+#assert("expected 1 cell" in catch(() => source("no-such-cell")))
+#assert("expected 1 cell" in catch(() => Out("no-such-cell")))
 
 #assert("`aa` not defined" in error())
 
@@ -66,7 +63,6 @@
 )
 
 // Tests for 'item'
-#assert("no match found for cell" in catch(() => Out("non-existing")))
 #{
   let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
   assert.eq(output("plot3"), "5")

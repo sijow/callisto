@@ -231,7 +231,7 @@ Now let's try something more complicated: we want to get the last display or res
 
 ```typst
 #let last-output = output.with(
-  output-type: ("display_data", "execute_result"),
+  output-type: ("display", "result"),
   item: -1,
 )
 ```

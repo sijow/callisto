@@ -10,7 +10,7 @@
 //   as keys, and MIME-specific metadata dicts as values.
 // - output_type: the output type (this field is absent for attachments).
 // 
-// This is how display_data/execute_result values and Markdown cell
+// This is how display_data/execute_result outputs and Markdown cell
 // attachments are stored in the notebook.
 
 // Preprocess a "rich" object, which can be available in multiple formats,

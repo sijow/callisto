@@ -146,7 +146,12 @@ c = 91; c
 
 The square of 3 is #evaluate(`3*3`).
 
-== Transforming the evaluation result
+=== Using `transform`
+
+Multiplied by ten: #evaluate(
+  `3*3`,
+  transform: x => int(x) * 10,
+).
 
 A table with $3^2$ cells:
 
@@ -158,14 +163,6 @@ A table with $3^2$ cells:
   )
 }
 #evaluate(`3*3`, transform: my-table)
-
-== Using `transform`
-
-#evaluate(
-  `3*3`,
-  cell-header: (label: "transform"), // to disambiguate
-  transform: x => int(x) * 10,
-)
 
 == Exported by label
 

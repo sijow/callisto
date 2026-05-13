@@ -40,7 +40,7 @@
 // of the same cell.
 #let streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
+  if read-enabled(cfg: cfg) == false { return () }
   let names = _stream-names(cfg.stream)
   let cs = cells(..args, cell-type: "code")
   let outs = ()

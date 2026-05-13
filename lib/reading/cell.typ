@@ -147,7 +147,7 @@
 // The function accepts one optional position argument, plus any config
 #let cells(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
+  if read-enabled(cfg: cfg) == false { return () }
   return _cells-from-spec(cell-spec, cfg: cfg)
 }
 

@@ -42,7 +42,7 @@
 // Can return several outputs per cell. The return value is always an array.
 #let outputs(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
+  if read-enabled(cfg: cfg) == false { return () }
   let output-types = _output-types(cfg.output-type)
   let outs = ()
   for cell in cells(..args, cell-type: "code") {

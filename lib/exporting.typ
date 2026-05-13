@@ -158,10 +158,9 @@
   // Below we convert the value to content, so it can be joined with the
   // export metadata even if the value was something like an integer.
 
-  // Using cells() rather than cell() to disambiguate manually in case of
-  // several cells matching the cell spec
+  // Disambiguate manually in case of several cells matching the cell spec
   let cs = reading.cell.cells(..args)
-  if cs != none and cs.len() > 1 {
+  if cs.len() > 1 {
     // Disambiguate based on sequence of exports in document
     return context {
       // Find how many exports before this one have the exact same cell source,
@@ -174,9 +173,10 @@
       let sel = selector(_export-label(cfg.export-name)).before(here())
       let matches = query(sel).filter(x => x.value.text == exported-text)
       let n = matches.len()
-      let cell = cs.at(n, default: none)
-      // Use this cell as cell spec
-      export-md + [#value-func(cell, ..cfg)]
+      // Use the nth cell as cell spec, or an empty array (which matches no
+      // cell) if there is no nth cell.
+      let new-spec = cs.at(n, default: ())
+      export-md + [#value-func(new-spec, ..cfg)]
     }
   }
 

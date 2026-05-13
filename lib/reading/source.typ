@@ -20,7 +20,7 @@
 // Extract the 'source' field from cells as raw blocks.
 #let sources(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
-  if read-enabled(cfg: cfg) == false { return none }
+  if read-enabled(cfg: cfg) == false { return () }
   return cells(..args).map(_cell-source.with(cell-spec: cell-spec, cfg: cfg))
 }
 

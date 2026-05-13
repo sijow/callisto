@@ -4,9 +4,6 @@
 
 #import "util.typ": handle
 #import "reading/rich-object.typ"
-#import "reading/stream.typ"
-#import "reading/error.typ"
-#import "reading/notebook.typ"
 #import "reading/output.typ": outputs, all-output-types
 #import "header-pattern.typ"
 #import "ansi.typ"

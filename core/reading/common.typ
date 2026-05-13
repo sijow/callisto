@@ -70,10 +70,12 @@
 
 // Final result for an output item, with transform applied if any.
 // Depending on ctx.result, this returns either 'value', or the
-// 'preprocessed' dict with 'output_type' renamed to 'type' and with additional
-// fields:
+// 'preprocessed' dict with additional fields:
 // - value: the rendered item
 // - cell (dict): the cell index, id, metadata and type.
+// 
+// Note: for rich items, the ctx passed here is not the format-specific ctx
+// but the generic output item ctx.
 #let final-result(preprocessed, value, ctx: none) = {
   if ctx.result not in ("value", "dict") {
     panic("invalid result specification: " + repr(ctx.result))
@@ -84,9 +86,8 @@
   if ctx.result == "value" {
     return value
   }
-  // Remove "output_type" field if present (will be replaced by type field from
-  // ctx.item-desc)
-  _ = preprocessed.remove("output_type", default: none)
+  // Add item-desc fields: index, type and for rich items: metadata, format.
+  // Also add cell and value.
   return preprocessed + ctx.item-desc + (
     cell: _cell-output-dict(ctx.cell),
     value: value,

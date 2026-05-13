@@ -1,4 +1,8 @@
 #import "/core/util.typ": handle
 
-// Nothing to do for error
-#let preprocess(item, ctx: none) = item
+// Preprocess error item
+#let preprocess(item, ctx: none) = (
+  name: item.ename,
+  message: item.evalue,
+  traceback: item.traceback,
+)

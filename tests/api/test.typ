@@ -147,6 +147,7 @@
   result: "dict",
   handlers: ("image/png": (ctx: none, ..args) => ctx.item-desc),
 )
+#assert.eq(out.metadata.a, "x")
 #assert.eq(out.index, 2)
 #assert.eq(out.type, "display")
 #assert.eq(out.format, "image/png")

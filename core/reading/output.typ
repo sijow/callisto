@@ -51,8 +51,12 @@
       let output-type = output-types-from-json.at(item.output_type)
       if output-type not in output-types { continue }
       // Make context for processor
-      let item-desc = (index: i, type: output-type)
-      let ctx = get-ctx(cell, cell-spec: cell-spec, cfg: cfg, item-desc: item-desc)
+      let ctx = get-ctx(
+        cell,
+        cell-spec: cell-spec,
+        cfg: cfg,
+        item-desc: (index: i, type: output-type),
+      )
 
       // The processing is split in two output-type-specific steps:
       // preprocessing and "rendering". The preprocessed data is used

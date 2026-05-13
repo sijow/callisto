@@ -29,11 +29,14 @@
   return item.text
 }
 
-// Generic preprocessing that doesn't require context
+// Preprocess stream item
 #let preprocess(item, ctx: none) = {
   item.text = _stream-text(item, ctx: ctx)
   if item.text == none { return none }
-  return item
+  return (
+    name: item.name,
+    text: item.text,
+  )
 }
 
 // Same as streams function, but merges all streams (that match 'stream')

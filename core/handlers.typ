@@ -228,7 +228,7 @@
 }
 
 // Handler for error output items
-#let error(item, ctx: none, ..args) = item.evalue
+#let error(item, ctx: none, ..args) = item.message
 
 // Handler for rich output items (display and result)
 #let rich-output-generic(data, ctx: none, ..args) = {

@@ -3,5 +3,6 @@ lorenz: (screenshot "lorenz-extract.typ")
 screenshot filename:
     typst c --root=.. {{filename}} {{file_stem(filename)}}.png
 
-handler-tree:
-    typst c --root=.. handler-tree.typ handler-tree.png
+handler-trees:
+    typst c --root=.. handler-tree.typ handler-tree.svg
+    typst c --root=.. handler-tree-placeholders.typ handler-tree-placeholders.svg

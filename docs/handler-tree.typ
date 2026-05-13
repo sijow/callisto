@@ -1,7 +1,7 @@
 #import "@preview/autograph:0.1.0": diagram, node, edge
 #set page(width: auto, height: auto)
 #diagram(
-  // bezier: true,
+  bezier: true,
   node(<cell>),
   node(<markdown-cell>),
   node(<code-cell>),
@@ -107,5 +107,4 @@
   edge(<rich-output-generic>, label("text/markdown")),
   edge(<rich-output-generic>, label("text/latex")),
   edge(<rich-output-generic>, label("text/plain")),
-
 )

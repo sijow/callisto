@@ -558,7 +558,7 @@ The following handlers ("MIME types") are defined by default:
 
 The following diagram shows which handlers can call which other handlers in the default configuration:
 
-![](handler-tree.png)
+![](handler-tree.svg)
 
 Handlers with names ending in `-generic` are close to the bottom of the chain: they correspond to fairly concrete value types that need to be processed by several higher-level handlers.
 

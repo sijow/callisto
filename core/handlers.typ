@@ -368,37 +368,31 @@
 }
 
 // Handler that shows the given block in generic placeholder style
-#let placeholder-generic-block(data, ctx: none, ..args) = block(
+#let placeholder-block-generic(data, ctx: none, ..args) = block(
   stroke: (dash: "dashed"),
   inset: 1em,
   data,
 )
 
 // Handler that shows the given inline content in generic placeholder style
-#let placeholder-generic-inline(data, ctx: none, ..args) = box(
+#let placeholder-inline-generic(data, ctx: none, ..args) = box(
   stroke: (dash: "dashed"),
   inset: (x: 0.5em),
   outset: (y: 0.5em),
   data,
 )
 
-// Placeholder that renders the data in a generic placeholder style.
-// This implementation tries to guess if the content should be rendered
-// inline or as block.
-#let placeholder-generic(data, ctx: none, ..args) = {
-  if _is-placeholder-likely-block(ctx: ctx) {
-    handle(data, mime: "placeholder-generic-block", ctx: ctx, ..args)
-  } else {
-    handle(data, mime: "placeholder-generic-inline", ctx: ctx, ..args)
-  }
-}
-
 // Placeholder that shows `func(spec)` where func is given as argument and
 // spec is a summary of a the cell specification.
 #let placeholder-function-call(func, ctx: none, ..args) = {
   let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
-  let elem = raw(txt, block: _is-placeholder-likely-block(ctx: ctx))
-  handle(elem, mime: "placeholder-generic", ctx: ctx, ..args)
+  let block = _is-placeholder-likely-block(ctx: ctx)
+  let elem = raw(txt, block: block)
+  if block {
+    handle(elem, mime: "placeholder-block-generic", ctx: ctx, ..args)
+  } else {
+    handle(elem, mime: "placeholder-inline-generic", ctx: ctx, ..args)
+  }
 }
 
 // Placeholder for code cell input rendering using source (from raw spec)
@@ -409,12 +403,8 @@
   // the selector would lead to infinite recursion).
   // For code cell input rendering we render as block even if the raw spec
   // was inline (e.g. from #execute(`...`)).
-  let new-elem = raw(
-    block: true,
-    lang: ctx.lang,
-    source,
-  )
-  return handle(new-elem, mime: "placeholder-generic-block", ctx: ctx, ..args)
+  let raw-elem = handle(source, mime: "source-code-generic", ctx: ctx, lang: ctx.lang, ..args)
+  return handle(raw-elem, mime: "placeholder-block-generic", ctx: ctx, ..args)
 }
 
 // Placeholder for an output item
@@ -441,22 +431,11 @@
   handle("Out", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for a rendered code cell (e.g. Cell() call).
-// This implementation shows the cell source if available from raw spec, or
-// a representation of the function call otherwise.
-#let placeholder-code-cell(data, ctx: none, ..args) = {
-  if _is-raw-spec(ctx.cell-spec) {
-    // Source is available!
-    return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
-  }
-  return handle("Cell", mime: "placeholder-function-call", ctx: ctx, ..args)
-}
-
 // Placeholder for a rendered cell.
 #let placeholder-cell(data, ctx: none, ..args) = {
   if _is-raw-spec(ctx.cell-spec) {
-    // Raw spec implies that this is a code cell
-    return handle(data, mime: "placeholder-code-cell", ctx: ctx, ..args)
+    // Raw spec implies that this is a code cell, and we have the source
+    return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
   }
   return handle("Cell", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
@@ -501,15 +480,13 @@
   "code-cell": code-cell,
   "cell": cell, // called before the cell-type-specific handler
   // Placeholders
-  "placeholder-generic-inline": placeholder-generic-inline,
-  "placeholder-generic-block": placeholder-generic-block,
-  "placeholder-generic": placeholder-generic,
+  "placeholder-inline-generic": placeholder-inline-generic,
+  "placeholder-block-generic": placeholder-block-generic,
   "placeholder-function-call": placeholder-function-call,
   "placeholder-input-from-source": placeholder-input-from-source,
   "placeholder-output": placeholder-output,
   "placeholder-code-cell-input": placeholder-code-cell-input,
   "placeholder-code-cell-output": placeholder-code-cell-output,
-  "placeholder-code-cell": placeholder-code-cell,
   "placeholder-cell": placeholder-cell,
   // Other handlers
   "text-console-block": text-console-block,

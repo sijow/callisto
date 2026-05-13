@@ -5,7 +5,7 @@
 The primary functionality is exposed through the following main functions:
 
 * The rendering functions: `render` and its single-cell aliases `Cell`, `In`, `Out`.
-* The extraction functions: `cells`, `sources`, `outputs`, `results`, `displays`, `stream-items`, `streams`, `errors` and the singular variants `cell`, `source`, `output`, `result`, `display`, `stream-item`, `stream`, `error`.
+* The extraction functions: `cells`, `sources`, `outputs`, `results`, `displays`, `stream`, `full-streams`, `errors` and the singular variants `cell`, `source`, `output`, `result`, `display`, `stream`, `full-stream`, `error`.
 * The export-related functions: `export`, `make-notebook`, `stage-notebook`, `execute`, `evaluate`.
 
 Callisto additionally exports
@@ -413,25 +413,25 @@ The main functions have many aliases defined for convenience. Each alias corresp
 
 ### Aliases for output type
 
--  The `outputs` function has aliases `displays`, `results`, `stream-items` and `errors` to select only a particular output type. Example:
+-  The `outputs` function has aliases `displays`, `results`, `streams` and `errors` to select only a particular output type. Example:
 
    ```typst
    // Get the results of the first 10 cells
    #results(range(10))
    // Get all stream items from cell "A" and merge them in one text value
-   #stream-items("A").join()
+   #streams("A").join()
    ```
 
--  The `outputs` function has a `streams` alias similar to `stream-items`, but `streams` merges all selected streams that belong to the same cell, and always returns an item (possibly with an empty string as value) for each selected code cell. Example:
+-  The `outputs` function has a `full-streams` alias similar to `streams`, but `full-streams` merges all selected streams that belong to the same cell, and always returns an item (possibly with an empty string as value) for each selected code cell. Example:
 
    ```typst
    // Get the stdout messages as one text value for each of cells 1, 3 and 5:
-   #streams((1, 3, 5), stream: "stdout")
+   #full-streams((1, 3, 5), stream: "stdout")
    ```
 
 ### Aliases for single values
 
-The functions `outputs`, `displays`, `reuslts`, `stream-items`, `errors` and `streams` always return an array of items. For convenience there is a singular alias defined for each plural form: the functions  `output`, `display`, `result`, `stream-item`, `error` and `stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Examples:
+The functions `outputs`, `displays`, `reuslts`, `streams`, `errors` and `full-streams` always return an array of items. For convenience there is a singular alias defined for each plural form: the functions  `output`, `display`, `result`, `stream`, `error` and `full-stream` are the same as the plural form, except that they take an additional `item` keyword (defaulting to `"unique"`) and return always a single value. Examples:
 
    ```typst
    // The unique display item in the first cell's output

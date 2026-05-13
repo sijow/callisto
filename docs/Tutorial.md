@@ -236,7 +236,7 @@ Now let's try something more complicated: we want to get the last display or res
 )
 ```
 
-Here we filter on the output type: we don't want stream items (messages written to `stdout` or `stderr`) or errors.
+Here we filter on the output type: we don't want streams (messages written to `stdout` or `stderr`) or errors.
 
 Let's try it on the `plot2` cell:
 

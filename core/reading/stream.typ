@@ -36,9 +36,9 @@
   return item
 }
 
-// Same as stream-items function, but merges all streams (matching 'stream')
+// Same as streams function, but merges all streams (that match 'stream')
 // of the same cell.
-#let streams(..args) = {
+#let full-streams(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
   if read-enabled(cfg: cfg) == false { return () }
   let names = _stream-names(cfg.stream)
@@ -61,9 +61,9 @@
   return outs
 }
 
-// Get a single stream value
-#let stream(..args) = {
+// Get a single full-stream value
+#let full-stream(..args) = {
   let (cell-spec, cfg) = parse-main-args(..args)
   let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-  single-output(streams(..args), ctx: ctx)
+  single-output(full-streams(..args), ctx: ctx)
 }

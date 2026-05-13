@@ -102,10 +102,10 @@
 #let (
   cells,
   cell,
+  full-streams,
+  full-stream,
   streams,
   stream,
-  stream-items,
-  stream-item,
   output,
   outputs,
 ) = callisto.config(nb: json("/tests/python/python.ipynb"))
@@ -115,23 +115,23 @@
 
 #assert.eq(cell("19cdb152-021b-4811-83de-3610ec97fc5b").index, 3)
 
-#assert.eq(streams(result: "dict").map(x => x.cell.index), (3, 4, 6))
+#assert.eq(full-streams(result: "dict").map(x => x.cell.index), (3, 4, 6))
 #assert.eq(
-  stream((4, 5)),
+  full-stream((4, 5)),
   "Error 1\nMessage 1\nError 2\nMessage 2\n",
 )
 #assert.eq(
-  streams((3, 4)),
+  full-streams((3, 4)),
   (
     "Message 1\nMessage 2\nError 1\nError 2\n",
     "Error 1\nMessage 1\nError 2\nMessage 2\n",
   ),
 )
 #assert.eq(
-  stream-items(4, result: "dict").map(x => x.name),
+  streams(4, result: "dict").map(x => x.name),
   ("stderr", "stdout", "stderr", "stdout"),
 )
-#assert.eq(stream-item(4, stream: "stderr", item: -1), "Error 2\n")
+#assert.eq(stream(4, stream: "stderr", item: -1), "Error 2\n")
 
 // Dict result fields
 #let out = output(6, item: 2, result: "dict")

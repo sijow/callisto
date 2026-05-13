@@ -47,21 +47,21 @@
   named-themes: themes,
 )
 
-#let displays(..args)     = outputs(..args, output-type: "display")
-#let results(..args)      = outputs(..args, output-type: "result")
-#let errors(..args)       = outputs(..args, output-type: "error")
-#let stream-items(..args) = outputs(..args, output-type: "stream")
+#let displays(..args) = outputs(..args, output-type: "display")
+#let results(..args)  = outputs(..args, output-type: "result")
+#let errors(..args)   = outputs(..args, output-type: "error")
+#let streams(..args)  = outputs(..args, output-type: "stream")
 
-#let display(..args)     = output(..args, output-type: "display")
-#let result(..args)      = output(..args, output-type: "result")
-#let error(..args)       = output(..args, output-type: "error")
-#let stream-item(..args) = output(..args, output-type: "stream")
+#let display(..args) = output(..args, output-type: "display")
+#let result(..args)  = output(..args, output-type: "result")
+#let error(..args)   = output(..args, output-type: "error")
+#let stream(..args)  = output(..args, output-type: "stream")
 
-#let streams = reading.stream.streams.with(
+#let full-streams = reading.stream.full-streams.with(
   default-handlers: default-handlers,
   named-themes: themes,
 )
-#let stream = reading.stream.stream.with(
+#let full-stream = reading.stream.full-stream.with(
   default-handlers: default-handlers,
   named-themes: themes,
 )
@@ -124,12 +124,12 @@
     display:          display         .with(..args),
     results:          results         .with(..args),
     result:           result          .with(..args),
-    stream-items:     stream-items    .with(..args),
-    stream-item:      stream-item     .with(..args),
-    errors:           errors          .with(..args),
-    error:            error           .with(..args),
     streams:          streams         .with(..args),
     stream:           stream          .with(..args),
+    errors:           errors          .with(..args),
+    error:            error           .with(..args),
+    full-streams:     full-streams    .with(..args),
+    full-stream:      full-stream     .with(..args),
     sources:          sources         .with(..args),
     source:           source          .with(..args),
     render:           render          .with(..args),

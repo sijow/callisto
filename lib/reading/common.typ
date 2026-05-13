@@ -33,6 +33,7 @@
 // Returns a single value from the given list as specified by the 'item'
 // setting (in args), using a placeholder or raising an error if the list is
 // empty or none or if 'item' is "unique" and the list contains more than one.
+// The cell field of ctx may be 'none'.
 #let single-output(values, ctx: none) = {
   let (cell-spec, cfg) = ctx
 

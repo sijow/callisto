@@ -67,6 +67,7 @@
 }
 
 // Build a ctx dict for the given cell and settings dict.
+// The cell value can be none e.g. when building a ctx for placeholders.
 #let get-ctx(
   cell,
   cell-spec: none,

@@ -51,6 +51,9 @@
 #assert("expected 1 cell" in catch(() => source("no-such-cell")))
 #assert("expected 1 cell" in catch(() => Out("no-such-cell")))
 
+// Invalid index doesn't panic
+#assert.eq(cells(range(20)).len(), 9)
+
 #assert("`aa` not defined" in error())
 
 #assert(

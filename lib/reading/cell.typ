@@ -97,8 +97,14 @@
   }
   if type(spec) == int {
     if cfg.count == "index" {
-      let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)
-      return if type-ok { (spec,) } else { () }
+      // Check if index is valid
+      if spec >= 0 and spec < all-cells.len() {
+        // Check if type is valid
+        let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)
+        if type-ok { return (spec,) }
+      }
+      // Invalid index or bad type -> no match
+      return ()
     }
     if cfg.count == "execution" {
       // Different cells can have the same execution_count, e.g. when

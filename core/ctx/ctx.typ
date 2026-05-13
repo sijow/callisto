@@ -78,8 +78,7 @@
   let nb-json = notebook.get-json(cfg: cfg)
   let ctx = cfg
 
-  ctx.cell-header-pattern = header-pattern.resolve(
-    cfg.cell-header-pattern)
+  ctx.cell-header-pattern = header-pattern.resolve(cfg.cell-header-pattern)
   
   if ctx.lang == auto {
     ctx.lang = _nb-lang(nb-json)

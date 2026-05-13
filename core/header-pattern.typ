@@ -27,7 +27,15 @@
 // header line).
 #let _regex(pat) = {
   if type(pat) == dictionary {
-    return pat.regex
+    let regx = pat.at("regex", default: none)
+    if regx == none {
+      // Regex that matches nothing
+      return regex("[^\s\S]")
+    }
+    if type(regx) != regex {
+      panic("cell header pattern regex must be a regex value or none")
+    }
+    return regx
   }
   // pat is a string
   return _header-regex-from-string(pat) 
@@ -38,7 +46,12 @@
 // without trailing newline).
 #let _writer(pat) = {
   if type(pat) == dictionary {
-    return pat.writer
+    let writer = pat.at("writer", default: none)
+    if type(writer) not in (function, type(none)) {
+      panic("cell header pattern writer must be a function or none")
+    }
+    // Can be none
+    return writer
   }
   // pat is a string
   return (key, value) => pat
@@ -48,18 +61,20 @@
 
 #let resolve(pat) = {
   // Validate pattern
-  let type-ok = type(pat) in (type(auto), str, dictionary)
-  let keys-ok = type(pat) != dictionary or pat.keys().sorted() == (
-    "regex",
-    "writer",
-  )
+  let type-ok = type(pat) in (type(auto), type(none), str, dictionary)
+  let keys-ok = type(pat) != dictionary or pat.keys().all(
+    k => k in ("regex", "writer"))
   if not (type-ok and keys-ok) {
     panic("cell header pattern must be a string, a dict with fields 'regex' " +
-      "and 'writer', or auto")
+      "and/or 'writer', or auto or none")
   }
 
   if pat == auto {
     pat = _default-pattern
+  }
+
+  if pat == none {
+    pat = (regex: none, writer: none)
   }
 
   return (
@@ -79,6 +94,9 @@
   // Build header
   let header = none
   let header-writer = resolve(pattern).writer
+  if header-writer == none {
+    panic("cell header pattern writer not specified")
+  }
   for (k, v) in header-dict {
     if type(v) != str {
       panic("cell header has key " + k + " of type " + type(v) +

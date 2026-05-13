@@ -22,18 +22,18 @@
 #assert.eq(cells((0, cell(0)), cell-type: "code").len(), 0)
 
 // Test cell-header-pattern
-#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$"), writer: none) // doesn't allow space between `#` and `|`
+#let strict-header-pattern = (regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$")) // doesn't allow space between `#` and `|`
 #let cell-spec = arguments("pattern-test", name-path: "metadata.callisto.header.name")
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
-#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"), writer: none)
+#let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
 #let cpp-cell-spec = arguments("calc", nb: json("/tests/api/cpp.ipynb"))
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
 // Test header parsing in absence of regex
 #let src = "#| label: x\na = 2"
-#assert.eq(header-pattern.parse-text(src, pattern: (regex: none, writer: none)), (header: (:), code: src))
+#assert.eq(header-pattern.parse-text(src, pattern: none), (header: (:), code: src))
 
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")

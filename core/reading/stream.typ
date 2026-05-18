@@ -57,7 +57,7 @@
       }
     }
     if txt == none { continue }
-    let preprocessed = (output_type: "stream", name: cfg.stream, text: txt)
+    let preprocessed = (name: cfg.stream, text: txt)
     let value = handle(preprocessed, mime: "stream", ctx: ctx)
     outs.push(final-result(preprocessed, value, ctx: ctx))
   }

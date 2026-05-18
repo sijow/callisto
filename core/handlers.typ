@@ -369,14 +369,14 @@
 
 // Handler that shows the given block in generic placeholder style
 #let placeholder-block-generic(data, ctx: none, ..args) = block(
-  stroke: (dash: "dashed"),
+  stroke: (dash: "dashed", paint: black, thickness: 1pt),
   inset: 1em,
   data,
 )
 
 // Handler that shows the given inline content in generic placeholder style
 #let placeholder-inline-generic(data, ctx: none, ..args) = box(
-  stroke: (dash: "dashed"),
+  stroke: (dash: "dashed", paint: black, thickness: 1pt),
   inset: (x: 0.5em),
   outset: (y: 0.5em),
   data,
@@ -387,12 +387,8 @@
 #let placeholder-function-call(func, ctx: none, ..args) = {
   let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
   let block = _is-placeholder-likely-block(ctx: ctx)
-  let elem = raw(txt, block: block)
-  if block {
-    handle(elem, mime: "placeholder-block-generic", ctx: ctx, ..args)
-  } else {
-    handle(elem, mime: "placeholder-inline-generic", ctx: ctx, ..args)
-  }
+  let elem = raw(txt, block: false)
+  handle(elem, mime: "placeholder-inline-generic", ctx: ctx, ..args)
 }
 
 // Placeholder for code cell input rendering using source (from raw spec)

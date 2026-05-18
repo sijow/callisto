@@ -11,6 +11,7 @@
 #let (
   cell,
   source,
+  sources,
   result,
   render,
   Cell,
@@ -38,6 +39,17 @@
   relationship: "supplement",
   description: "Notebook of all code blocks in the document",
 )
+
+// Check that the exported notebook is up to date with this document
+#context {
+  let external = sources()
+  let internal = sources(nb: make-notebook())
+  if external.len() != internal.len() or array.zip(external, internal).any(
+    ((a, b)) => a.text != b.text
+  ) {
+    rect(width: 100%, inset: 1em, stroke: red)[Exported notebook outdated]
+  }
+}
 
 = Using `#show: <label>: execute`
 

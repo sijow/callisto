@@ -46,7 +46,7 @@
 // Render a single cell
 #let Cell(..args) = _render-cell(
   ..args,
-  placeholder-mime: "placeholder-cell",
+  placeholder-mime: "placeholder-Cell",
 )
 // Render a single code cell's input
 #let In(..args) = _render-cell(
@@ -54,7 +54,7 @@
   cell-type: "code",
   input: true,
   output: false,
-  placeholder-mime: "placeholder-code-cell-input",
+  placeholder-mime: "placeholder-In",
 )
 // Render a single code cell's output
 #let Out(..args) = _render-cell(
@@ -62,5 +62,5 @@
   cell-type: "code",
   input: false,
   output: true,
-  placeholder-mime: "placeholder-code-cell-output",
+  placeholder-mime: "placeholder-Out",
 )

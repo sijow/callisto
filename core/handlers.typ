@@ -410,6 +410,7 @@
 // Placeholder for an output item
 #let placeholder-output(data, ctx: none, ..args) = {
   let func = if ctx.output-type in all-output-types {
+    // Use the function name for this specific output type
     ctx.output-type
   } else {
     "output"
@@ -417,8 +418,8 @@
   handle(func, mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for rendered code cell input (e.g. for In() calls)
-#let placeholder-code-cell-input(data, ctx: none, ..args) = {
+// Placeholder for In() calls
+#let placeholder-In(data, ctx: none, ..args) = {
   if _is-raw-spec(ctx.cell-spec) {
     // Source is available!
     return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
@@ -426,13 +427,13 @@
   return handle("In", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for rendered code cell output (e.g. for Out() calls)
-#let placeholder-code-cell-output(data, ctx: none, ..args) = {
+// Placeholder for Out() calls
+#let placeholder-Out(data, ctx: none, ..args) = {
   handle("Out", mime: "placeholder-function-call", ctx: ctx, ..args)
 }
 
-// Placeholder for a rendered cell.
-#let placeholder-cell(data, ctx: none, ..args) = {
+// Placeholder Cell() calls
+#let placeholder-Cell(data, ctx: none, ..args) = {
   if _is-raw-spec(ctx.cell-spec) {
     // Raw spec implies that this is a code cell, and we have the source
     return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
@@ -485,9 +486,9 @@
   "placeholder-function-call": placeholder-function-call,
   "placeholder-input-from-source": placeholder-input-from-source,
   "placeholder-output": placeholder-output,
-  "placeholder-code-cell-input": placeholder-code-cell-input,
-  "placeholder-code-cell-output": placeholder-code-cell-output,
-  "placeholder-cell": placeholder-cell,
+  "placeholder-In": placeholder-In,
+  "placeholder-Out": placeholder-Out,
+  "placeholder-Cell": placeholder-Cell,
   // Other handlers
   "text-console-block": text-console-block,
   "source-code-generic": source-code-generic,

@@ -1,3 +1,5 @@
+all: lorenz handler-trees
+    
 lorenz: (screenshot "lorenz-extract.typ")
 
 screenshot filename:

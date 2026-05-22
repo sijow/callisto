@@ -1,6 +1,6 @@
 #import "/core/configuration.typ": parse-main-args, read-enabled
 #import "/core/ctx/ctx.typ": get-ctx
-#import "cell.typ": cell
+#import "cell.typ": cells, cell
 
 // Return the lang of the cell's source
 #let _cell-lang(cell, ctx: none) = (

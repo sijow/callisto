@@ -6,14 +6,47 @@
 #let (
   cells,
   cell,
+  errors,
   error,
   results,
   result,
+  displays,
   display,
+  sources,
   source,
+  streams,
+  stream,
+  full-streams,
+  full-stream,
+  outputs,
   output,
+  render,
+  Cell,
+  In,
   Out,
 ) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
+
+// Check that all functions work without error
+#assert.ne(cells(0), none)
+#assert.ne(cell(0), none)
+#assert.ne(errors(0), none)
+#assert.ne(error(item: 0), none)
+#assert.ne(results(0), none)
+#assert.ne(result(item: 0), none)
+#assert.ne(displays(0), none)
+#assert.ne(display(item: 0), none)
+#assert.ne(sources(0), none)
+#assert.ne(source(0), none)
+#assert.ne(streams(0), none)
+#assert.ne(stream(item: 0), none)
+#assert.ne(full-streams(0), none)
+#assert.ne(full-stream(item: 0), none)
+#assert.ne(outputs(0), none)
+#assert.ne(output(item: 0), none)
+#assert.ne(render(0), none)
+#assert.ne(Cell(0), none)
+#assert.ne(In(2), none)
+#assert.ne(Out(2), none)
 
 // Check for cell deduplication
 #assert.eq(cells((..range(2), 0)).len(), 2)

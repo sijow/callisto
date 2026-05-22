@@ -8,14 +8,13 @@
 = Test strings
 
 #[
+  #show raw.where(lang: "ansi"): set highlight(top-edge: 0.9em)
   #show raw.where(lang: "ansi"): it => callisto.ansi.render(
     it.text,
     conceal: (it, ..args) => text(rgb(0, 0, 0, 50), it),
     bold-is-bright: true,
     bg: white,
   )
-
-  #show: callisto.ansi.highlight-template
 
   // Big mix
   #lorem(12)

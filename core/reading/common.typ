@@ -18,8 +18,7 @@
   return cfg.placeholder != false
 }
 
-// Return the placeholder value to use for the given kind (cell, source,
-// output).
+// Return the placeholder value to use for "mime" type
 #let get-placeholder(mime: none, ctx: none) = {
   if ctx.placeholder in (auto, true) {
     return util.handle(none, mime: mime, ctx: ctx)

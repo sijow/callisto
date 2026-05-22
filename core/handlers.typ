@@ -32,6 +32,10 @@
 // - The "attachment" handler gets 'metadata', 'type' and
 //   'subhandler-args' arguments.
 //
+// - The "placeholder-function-call" handler accepts a 'block' argument
+//   (defaulting to auto) to specify if the placeholder should be inline or
+//   block.
+//
 // When defining a handler, the user can choose to add an '..args' sink if
 // they don't care about extra arguments, or omit this sink if they prefer to
 // see an error when an unknown argument is passed.
@@ -384,11 +388,17 @@
 
 // Placeholder that shows `func(spec)` where func is given as argument and
 // spec is a summary of a the cell specification.
-#let placeholder-function-call(func, ctx: none, ..args) = {
+#let placeholder-function-call(func, block: auto, ctx: none, ..args) = {
+  if block == auto {
+    block = _is-placeholder-likely-block(ctx: ctx)
+  }
   let txt = func + "(" + _cell-spec-summary(ctx.cell-spec) + ")"
-  let block = _is-placeholder-likely-block(ctx: ctx)
-  let elem = raw(txt, block: false)
-  handle(elem, mime: "placeholder-inline-generic", ctx: ctx, ..args)
+  let elem = raw(txt, block: block)
+  if block {
+    handle(elem, mime: "placeholder-block-generic", ctx: ctx, ..args)
+  } else {
+    handle(elem, mime: "placeholder-inline-generic", ctx: ctx, ..args)
+  }
 }
 
 // Placeholder for code cell input rendering using source (from raw spec)
@@ -420,12 +430,12 @@
     // Source is available!
     return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
   }
-  return handle("In", mime: "placeholder-function-call", ctx: ctx, ..args)
+  return handle("In", mime: "placeholder-function-call", block: true, ctx: ctx, ..args)
 }
 
 // Placeholder for Out() calls
 #let placeholder-Out(data, ctx: none, ..args) = {
-  handle("Out", mime: "placeholder-function-call", ctx: ctx, ..args)
+  handle("Out", mime: "placeholder-function-call", block: true, ctx: ctx, ..args)
 }
 
 // Placeholder Cell() calls
@@ -434,7 +444,7 @@
     // Raw spec implies that this is a code cell, and we have the source
     return _placeholder-input-from-raw-spec(ctx: ctx, ..args)
   }
-  return handle("Cell", mime: "placeholder-function-call", ctx: ctx, ..args)
+  return handle("Cell", mime: "placeholder-function-call", block: true, ctx: ctx, ..args)
 }
 
 // Default handlers

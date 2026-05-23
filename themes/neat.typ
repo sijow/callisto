@@ -5,7 +5,7 @@
 #let _fill = rgb(233, 236, 239)
 #let _inset = 8pt
 #let _radius = 5pt
-#let _extent = 3pt
+#let _extent = 0pt // was 3pt but causes overlaps in case of syntax highlighting
 
 #let _raw-block-cfg = (
   width: 100%,

@@ -97,9 +97,9 @@
   }
   if type(spec) == int {
     if cfg.count == "index" {
-      // Check if index is valid
-      if spec >= 0 and spec < all-cells.len() {
-        // Check if type is valid
+      // Check if index is valid, allowing negative values to count from end
+      if spec >= -all-cells.len() and spec < all-cells.len() {
+        // Check if type is selected
         let type-ok = all-cells.at(spec).cell_type in _cell-types(cfg.cell-type)
         if type-ok { return (spec,) }
       }

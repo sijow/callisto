@@ -86,6 +86,8 @@
 
 // Invalid index doesn't panic
 #assert.eq(cells(range(20)).len(), 9)
+// Negative index works
+#assert.ne(cell(-1), none)
 
 #assert("`aa` not defined" in error())
 

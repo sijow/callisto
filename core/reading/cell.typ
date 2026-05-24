@@ -134,7 +134,11 @@
     // to convert header lines to metadata)
     return _filter-type(util.ensure-array(spec), cfg.cell-type)
   }
-  let all-cells = notebook.preprocess(cfg: cfg).cells
+  let nb-json = notebook.get-json(cfg: cfg)
+  if nb-json == none {
+    return ()
+  }
+  let all-cells = notebook.preprocess(nb-json, cfg: cfg).cells
   let cells-of-type = _filter-type(all-cells, cfg.cell-type)
   if spec == none {
     // No spec means select all cells

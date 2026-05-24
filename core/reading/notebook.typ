@@ -79,9 +79,7 @@
 }
 
 // Preprocess notebook dict
-#let preprocess(cfg: none) = {
-  if cfg.nb == none { return none }
-  let nb-json = get-json(cfg: cfg)
+#let preprocess(nb-json, cfg: none) = {
   nb-json.cells = nb-json.cells.enumerate().map(
     ((i, c)) => preprocess-cell(c, index: i, cfg: cfg)
   )

@@ -12,6 +12,7 @@
   lang: auto,
   raw-lang: none,
   // Outputs
+  item: "unique",
   output-type: "all",
   format: auto,
   ignore-wrong-format: false,
@@ -19,7 +20,6 @@
   result: "value",
   handlers: auto,
   new-handlers: (:),
-  item: "unique",
   // Rendering
   input: auto,
   output: auto,

@@ -244,6 +244,6 @@ $$
 
 
 // Check cell header functionality
-#let (Cell,) = callisto.config(nb: json("/tests/cell-header/cell-header.ipynb"), theme: "plain")
+#let (Cell,) = callisto.config(nb: json("cell-header.ipynb"), theme: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")

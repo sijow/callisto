@@ -136,7 +136,7 @@
 }
 
 // Handler for LaTeX markup
-#let text-latex(data, ctx: none, ..args) = block(mitex.mitext(data, ..args))
+#let text-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
 
 // Handler for rendering text that includes ANSI escape sequences.
 #let text-ansi-generic(data, ctx: none, ..args) = {

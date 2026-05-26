@@ -79,5 +79,5 @@
 // that is if the user set read=false or if read=auto and export was
 // enabled on the command-line (--input callisto-export=true).
 #let read-enabled(cfg: none) = {
-  return exporting() == false
+  return cfg.nb != none and exporting() == false
 }

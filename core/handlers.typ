@@ -5,6 +5,7 @@
 #import "util.typ": handle
 #import "reading/rich-object.typ"
 #import "reading/output.typ": outputs, all-output-types
+#import "reading/cell.typ": cells
 #import "header-pattern.typ"
 #import "ansi.typ"
 #import "latex.typ"
@@ -351,6 +352,12 @@
 #let _is-placeholder-likely-block(ctx: none) = {
   if _is-raw-spec(ctx.cell-spec) {
     return ctx.cell-spec.block
+  }
+  // See if only one cell matches the cell-spec: if yes and that cell was
+  // exported, use the block metadata
+  let cs = cells(ctx.cell-spec, ..ctx.cfg)
+  if cs.len() == 1 and "export" in cs.first().metadata.callisto {
+    return cs.first().metadata.callisto.export.block
   }
   return true
 }

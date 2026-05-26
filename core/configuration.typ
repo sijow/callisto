@@ -75,9 +75,8 @@
   panic("unsupported value for callisto-export input: " + export)
 }
 
-// Return false if notebook functions should be disabled in this configuration,
-// that is if the user set read=false or if read=auto and export was
-// enabled on the command-line (--input callisto-export=true).
+// Return true if reading from the notebook is enabled, that is if a notebook
+// is specified and the compilation is not an export run
 #let read-enabled(cfg: none) = {
   return cfg.nb != none and exporting() == false
 }

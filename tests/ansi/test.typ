@@ -124,9 +124,10 @@ callisto.ansi.console-block(
 
 = Test cell from issue \#6
 
-#{
-  let cfg = callisto.configuration.settings
-  let c = json("test-cell.json")
-  let processed-c = callisto.reading.notebook.preprocess-cell(c, index: 0, cfg: cfg)
-  callisto.render(processed-c, lang: "python")
-}
+#let nb = (
+  cells: (json("test-cell.json"),),
+  metadata: (:),
+  nbformat: 4,
+  nbformat_minor: 5,
+)
+#callisto.render(nb: nb, lang: "python")

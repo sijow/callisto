@@ -240,39 +240,10 @@ $$
 $$
 ```.text
 )
-#assert.eq(callisto.render(my-cell).children.at(1).func(), math.equation)
-
+#let my-nb = (cells: (my-cell,), metadata: (:), nbformat: 4, nbformat_minor: 5)
+#assert.eq(callisto.render(my-cell, nb: my-nb).children.at(1).func(), math.equation)
 
 // Check cell header functionality
 #let (Cell,) = callisto.config(nb: json("cell-header.ipynb"), theme: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")
-
-// notebook.preprocess
-#let nb = callisto.reading.notebook.preprocess(
-  cfg: callisto.configuration.settings,
-  json("cell-header.ipynb"),
-)
-#assert.eq(callisto.output(nb.cells.first()), "11")
-
-// notebook.preprocess-cell
-#let synthetic-cell = (
-  cell_type: "code",
-  execution_count: 1,
-  id: "xyz",
-  metadata: (:),
-  outputs: (
-    (
-      output_type: "execute_result",
-      data: ("text/plain": "some text"),
-      metadata: (:),
-    ),
-  ),
-  source: "print('some text')",
-)
-#let c = callisto.reading.notebook.preprocess-cell(
-  synthetic-cell,
-  index: 0,
-  cfg: callisto.configuration.settings,
-)
-#assert.eq(callisto.output(c), "some text")

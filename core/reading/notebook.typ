@@ -56,7 +56,7 @@
 // metadata, using cell-header-pattern to recognize and parse cell header lines.
 // Also ensures that the cell has a metadata.callisto dictionary.
 // The positional parameters are the cell index and original cell dict.
-#let preprocess-cell(cell, index: none, cfg: none) = {
+#let _preprocess-cell(cell, index: none, cfg: none) = {
   if type(index) != int {
     panic("cell index must be an integer")
   }
@@ -78,10 +78,11 @@
   return cell
 }
 
-// Preprocess notebook dict
+// Preprocess notebook dict, so it can be used as 'nb' setting in Callisto
+// functions
 #let preprocess(nb-json, cfg: none) = {
   nb-json.cells = nb-json.cells.enumerate().map(
-    ((i, c)) => preprocess-cell(c, index: i, cfg: cfg)
+    ((i, c)) => _preprocess-cell(c, index: i, cfg: cfg)
   )
   return nb-json
 }

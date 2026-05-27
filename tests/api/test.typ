@@ -64,9 +64,13 @@
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
-// Test header parsing in absence of regex
 #let src = "#| label: x\na = 2"
+// header-pattern.parse-text
+#assert.eq(header-pattern.parse-text(src, pattern: auto), (header: (label: "x"), code: "a = 2"))
+// In absence of regex
 #assert.eq(header-pattern.parse-text(src, pattern: none), (header: (:), code: src))
+// make-text
+#assert.eq(header-pattern.make-text((label: "x"), pattern: auto), "# | label: x\n")
 
 // Test keep-cell-header
 #assert.eq(source("plot3").text.split("\n").first(), "a = 2")
@@ -247,3 +251,20 @@ $$
 #let (Cell,) = callisto.config(nb: json("cell-header.ipynb"), theme: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")
+
+// Custom header parsing
+#let caption-handler(it, ctx: none) = {
+  let header = ctx.cell.metadata.callisto.header
+  if "caption" in header {
+    figure(kind: image, caption: header.caption, it)
+  } else {
+    it
+  }
+}
+#let (render,) = callisto.config(
+  nb: json("cell-header.ipynb"),
+  theme: "neat",
+  handlers: (code-cell-output: (auto, caption-handler)),
+)
+#assert.eq(render("caption-test").caption.body, [My Caption])
+

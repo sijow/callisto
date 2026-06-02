@@ -5,7 +5,7 @@
 #let ver = toml("../typst.toml").package.version
 
 #title[
-  Callisto API reference
+  Callisto Reference Manual
 
   #set text(0.6em)
   Version #ver
@@ -211,7 +211,7 @@ Examples:
 
 = Export and execution
 
-Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst (for example with `jupyter-nbconvert`). This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
+Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
 When using a notebook export as input, it is generally necessary to
 
@@ -221,7 +221,7 @@ When using a notebook export as input, it is generally necessary to
 Example:
 
 ```typ
-#let (...) = callisto.config(
+#let (render, execute, stage-notebook) = callisto.config(
   nb: "export.ipynb",
   kernel: "python3",
   handlers: (path: (x, ..args) => read(x, encoding: none)),
@@ -418,7 +418,7 @@ This section presents a typical workflow for executing code blocks of a Typst do
 
 Note that this is just an example. How code blocks are selected for export, and read back from the exported notebook to show the result, is largely up to the user. There are many ways to use #func[export], #func[execute] and #func[evaluate], either directly or through show rules. 
 
-+ Configure Callisto:
++ In the document, configure Callisto:
 
   - Choose a name for the notebook that will be created during export. This is also the notebook that Callisto will read from to show the code blocks and results.
 
@@ -428,8 +428,8 @@ Note that this is just an example. How code blocks are selected for export, and 
 
   Example:
 
-  ```typc
-  #import "@local/callisto:0.3.0"
+  ```typ
+  #import "@preview/callisto:0.3.0"
 
   #let (execute, stage-notebook) = callisto.config(
     nb: "export.ipynb",
@@ -438,35 +438,125 @@ Note that this is just an example. How code blocks are selected for export, and 
   )
   ```
 
-// === First export
++ In the document, process some code blocks through the #func[execute] function:
 
-// At the time of writing, Typst doesn't allow checking if a file exists (see [#link("https://github.com/typst/typst/pull/7556")[this issue]). We can only read a file, and get a compiler error if the file is not found. To work around this limitation we must 
+  ``````typ
+  // Workaround for https://github.com/typst/typst/issues/1331
+  #show raw: set text(11pt * 0.8)
 
-// + In the Typst document, configure Callisto with - a Jupyter kernel,
-//   - a 
+  // Execute all code blocks that have "py-x" lang
+  #show raw.where(lang: "py-x"): execute
 
-``````
-#show raw: set text(8.8pt)
+  // Make notebook from exported (executed) code blocks
+  #stage-notebook()
 
+  Some computation with Python:
+  ```py-x
+  2 + 3
+  ```
+
+  Another computation:
+  ```py-x
+  2 + 4
+  ```
+  ``````  
+
+  Note: until you do the first export, Typst will complain that it doesn't find the notebook file. To avoid seeing errors, you can comment-out the ```txt nb: ... ``` line in the `config` call until you're ready to export the notebook.
+
+
++ Export the notebook to a file:
+
+  ```bash
+  typst query --input callisto-export=true --one --field=value \
+    document.typ '<notebook>' > export.ipynb
+  ```
+
+  This will create (or overwrite) the file `export.ipynb`. Make sure you use the same filename as was specified in the ```txt nb: ...``` line of the `config` call.
+
++ Execute the notebook:
+
+  ```bash
+  jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+  ```
+
+That's it: the next time you compile `document.typ`, Callisto will read the execution results from `export.ipynb` and include them in the compiled document.
+
+In this example, we just exported some code blocks using #func[execute]. Here's a more complete example that also uses #func[export] and #func[evaluate]:
+
+``````typ
+#import "@preview/callisto:0.3.0"
+
+#let (execute, export, evaluate, stage-notebook) = callisto.config(
+  nb: "export.ipynb",
+  kernel: "python3",
+  handlers: (path: (x, ..args) => read(x, encoding: none)),
+)
+
+// Workaround for https://github.com/typst/typst/issues/1331
+#show raw: set text(11pt * 0.8)
+
+// Execute all code blocks that have "py-x" lang
 #show raw.where(lang: "py-x"): execute
 
+// Make notebook from exported (executed) code blocks
 #stage-notebook()
 
+// Export some code as cell but without rendering the cell
+#export(`a = 2`)
+
+Some computation with Python:
 ```py-x
-2 + 2
+a + 3
 ```
 
-Voila.
+We can do this computation inline: #evaluate(`a + 3`).
+``````
 
+Here we included some "setup code" using #func[export], to create a notebook cell that will be executed along with the other cells, but not rendered in the document.
 
-```py-x
-2 + 3
+=== Automatic export/execution with a Makefile or justfile
+
+The calls to `typst query` and `jupyter-nbconvert` can be automated using a simple Makefile:
+
+```Makefile
+TYPST-VALUE := typst query --input callisto-export=true --one --field=value
+
+default: export execute
+
+export:
+	$(TYPST-VALUE) document.typ '<notebook>' > export.ipynb
+
+execute:
+	jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+
+watch:
+	watchexec -w . -f '**/*.typ' make export execute
+
+.PHONY: default export execute watch
 ```
-``````  
 
-o have code blocks in a Typst document executing by a Jupyter for writing Typst documents that contain code blocks t
+Running the `make` command will then export and execute the notebook. This also defines a `watch` target: assuming you have `watchexec` installed, you can:
 
-There are various possible workflows 
+- run ```txt make watch``` in a terminal to monitor the current directory for changes to the `.typ` files: whenever one of these files changes it will run ```txt make export execute``` for us,
+
+- run ```txt typst watch document.typ``` in another terminal (or use the preview feature in your editor) to see the execution results automatically included in the Typst output.
+
+And here's an equivalent `justfile` to use with `just` instead of `make`:
+
+```just
+default: export execute
+
+TYPST-VALUE := "typst query --input callisto-export=true --one --field=value"
+
+export:
+	{{TYPST-VALUE}} document.typ '<notebook>' > export.ipynb
+
+execute:
+	jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+
+watch:
+	watchexec -w . -f '**/*.typ' make export execute
+```
 
 = Cell specification <cell-specification>
 
@@ -623,7 +713,7 @@ Full example:
 #render()
 ```
 
-Here `output` and `render` are configured to use `notebook.ipynb` as notebook, keep only display and result outputs (ignoring errors and streams), and in case of multiple outputs to keep only the first one. Additionally the "neat" theme is selected, and the corresponding template applied to the document.
+Here `output` and `render` are configured to use `notebook.ipynb` as notebook, keep only display and result outputs (ignoring errors and streams), and in case of multiple outputs to keep only the first one (item 0). Additionally the "neat" theme is selected, and the corresponding template applied to the document.
 
 == Settings <settings>
 

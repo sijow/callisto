@@ -122,6 +122,8 @@
   let code-block = selector.or(
     raw.where(block: true, lang: "typ"),
     raw.where(block: true, lang: "bash"),
+    raw.where(block: true, lang: "Makefile"),
+    raw.where(block: true, lang: "just"),
   )
   show code-block: set block(
     fill: code-fill,

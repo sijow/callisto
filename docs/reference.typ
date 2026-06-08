@@ -209,7 +209,7 @@ Examples:
 #full-stream("plot")
 ```
 
-= Export and execution
+= Export and execution <section:export-and-execution>
 
 Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
@@ -338,6 +338,8 @@ stage-notebook(..args) yields content-pill
 
 For the arguments, see #link(<configuration>)[Configuration].
 
+The #setting[kernel] setting must be set, either directly on `stage-notebook`, or on the #func[export]/#func[execute]/#func[evaluate] function that exported the first raw element.
+
 Example:
 
 ``````typ
@@ -371,6 +373,8 @@ make-notebook(..args) yields dictionary-pill
 For the arguments, see #link(<configuration>)[Configuration].
 
 This function is used by `stage-notebook` to prepare the notebook dictionary, but it can be useful for other purposes as shown in the examples below.
+
+The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the #func[export]/#func[execute]/#func[evaluate] function that exported the first raw element.
 
 #example[Notebook as PDF attachment]
 Here Callisto is not used to render notebooks but to add a notebook as attachment to the compiled PDF. The notebook contains a cell for every Python code block found in the document.
@@ -422,7 +426,7 @@ Note that this is just an example. How code blocks are selected for export, and 
 
   - Choose a name for the notebook that will be created during export. This is also the notebook that Callisto will read from to show the code blocks and results.
 
-  - Configure the export/execute functions with the #setting[kernel] setting, using the name of the kernel you want to use. In a standard Jupyter installation a kernel name is given by the directory holding the kernel description. For example the standard Python kernel is described in a file `.../jupyter/kernels/python3/kernel.json`, so its name is `python3`.
+  - Configure the export/execute functions with the #setting[kernel] setting, using the name of the kernel you want to use.
 
   - Set the `path` handler.
 
@@ -1160,10 +1164,145 @@ The result of the second computation is #output("calc2").
 
 #setting-doc[`kernel`] #pills.str #pills.none
 
+The name of the Jupyter kernel to use when exporting a notebook (default: `none`).
+
+To see the list of kernels available in your Jupyter installation, use the command `jupyter kernelspec list` which prints a list like the following:
+
+```txt
+$ jupyter kernelspec list
+Available kernels:
+  ir            /home/user/.local/share/jupyter/kernels/ir
+  julia-1.11    /home/user/.local/share/jupyter/kernels/julia-1.11
+  python3       /usr/share/jupyter/kernels/python3
+```
+
+We see that on this system there is an R kernel (`"ir"`), a Julia kernel (`"julia-1.11"`) and a Python kernel (`"python3"`).
+
+Note: In a standard Jupyter installation the kernel name is given by the directory holding the kernel description. For example the Python kernel is described in the file `/usr/share/jupyter/kernels/python3/kernel.json` so its name is `python3`.
+
+Example:
+
+``````typ
+#let (execute, stage-notebook) = callisto.config(
+  nb: "export.ipynb",
+  kernel: "python3",
+  handlers: (path: (x, ..args) => read(x, encoding: none)),
+)
+
+#stage-notebook()
+
+#show raw.where(lang: "py-x"): execute
+
+```py-x
+2+2
+```
+``````
+
+And a minimal example without rendering (the notebook is prepared for export but not read back):
+
+```typ
+#import "@preview/callisto:0.3.0"
+
+#callisto.export(`2+2`)
+#callisto.export(`2+3`)
+#callisto.stage-notebook(kernel: "python3")
+```
+
+In both cases, the exported notebook can be obtained from the command-line using the command
+
+```txt
+$ typst query --input callisto-export=true --one --field=value \
+    document.typ '<notebook>' > notebook.ipynb
+```
+
 #setting-doc[`transform`] #pills.function #pills.none
 
-#setting-doc[`placeholder`] #pills.auto #pills.bool #pills.function #pills.none #pills.content #pills.any
+If defined, this function is called on every output item. The function must accept the item value as positional parameter and return the transformed value.
 
+Example:
+
+```typ
+// Put a rect around every output
+#output("plot1", transform: rect)
+```
+
+This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst query`) functions such as #link(<section:singular-extract>)[output] and #func[evaluate] return a placeholder instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst query` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
+
+For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here's a complete example:
+
+``````typ
+#import "@preview/callisto:0.3.0"
+
+#let (output, execute, stage-notebook) = callisto.config(
+  nb: "notebook.ipynb",
+  kernel: "python3",
+  handlers: (path: (x, ..args) => read(x, encoding: none)),
+)
+#show raw.where(lang: "py-x"): execute
+
+#stage-notebook()
+
+// Transform "array([1., 2., 3.])" into math.vec("1", "2", "3")
+#let py-vec = output.with(
+  transform: s => math.vec(..s.slice(7, -2)
+                              .split(", ")
+                              .map(x => str(float(x)))),
+)
+
+We solve the linear system with NumPy:
+
+```py-x
+#| label: linear-system
+import numpy as np
+A = np.array([[1, 1, 1], [0, 1, 1], [0, 0, 1]])
+b = np.array([6, 5, 3])
+np.linalg.solve(A, b) 
+```
+
+The solution is:
+$ arrow(x) = #py-vec("linear-system") $
+``````
+
+#setting-doc[`placeholder`] #pills.auto #pills.bool #pills.function #pills.any
+
+The value to use in place of a missing value.
+
+Placeholders are used by functions that extract a single output and functions that render a single cell. For example `output` and `result` should always return a single output. If none is found, we know that one is missing, so a placeholder is used if this feature is enabled. On the other hand, `outputs` and `results` can very well return an empty array if the target cells have no such outputs; this doesn't mean that a value is missing, so no placeholder is used. Similarly, `Cell` uses placeholders since it is supposed to find exactly one cell, while `render` doesn't since any number of matches is valid.
+
+Placeholders are particularly useful when using #link(<section:export-and-execution>)[export and execution]: it is annoying to get an error in the editor every time a code block is added/edited and the corresponding execution result not yet available. With placeholders, Callisto can render the source of the code block as "work in progress" instead of raising an error.
+
+Supported values:
+
+#pad(left: 1em)[
+  / `false`: No placeholder is used and the missing value will cause a panic.
+
+  / `true`: A placeholder will be used in place of the missing value. The placeholder is obtained by calling the corresponding handler:
+
+    - `placeholder-output` for `output`, its variants such as `result`, and `evaluate`,
+    - `placeholder-Cell` for `Cell` and `execute`,
+    - `placeholder-In` for `In`,
+    - `placeholder-Out` for `Out`.
+
+  / `auto`: The default. Resolves to `false` when reading from a regular notebook, and `true` when reading from a notebook that was created by export.
+
+  / A function: The function is called with the #link(<cell-specification>)[cell specification] of the missing value and must return the placeholder to use.
+
+    Note: for code blocks passed to `execute` and `evaluate`, the cell specification is the code block (raw element) itself, while for calls such as `#output("my-cell")`, the specification is `"my-cell"`.
+
+  / Any other value: Other values such as a string, number, content or `none` are be used directly as placeholder.
+]
+
+Examples:
+
+```typ
+// Show placeholder text if execution result no available
+#evaluate(`1+1`, placeholder: [(computation)])
+
+// Show source in red if execution result no available
+#evaluate(`1+1`, placeholder: text.with(red))
+```
+
+Note: placeholders are used during regular compilation (`typst compile ...`). During export (`typst query`), functions such as `output` and `Cell` are "disabled" and always return `none`.
 
 = Modules and utility functions
 

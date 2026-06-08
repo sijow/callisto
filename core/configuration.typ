@@ -56,6 +56,13 @@
       panic("unexpected keyword argument '" + k + "'")
     }
   }
+  if (
+    "nb" not in user-cfg and
+    type(cell-spec) == str and
+    cell-spec.ends-with(".ipynb")
+  ) {
+    panic("Did you forget the 'nb:' keyword while specifying a notebook?")
+  }
   return (
     cell-spec: cell-spec,
     cfg: settings + user-cfg,

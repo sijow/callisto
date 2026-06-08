@@ -18,7 +18,7 @@
   ignore-wrong-format: false,
   stream: "all",
   result: "value",
-  handlers: auto,
+  handlers: (:),
   new-handlers: (:),
   // Rendering
   input: auto,

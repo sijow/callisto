@@ -32,9 +32,6 @@
 // function or an array of values representing functions to compose, where
 // the auto value represent the default handler.
 #let _resolve-user-handlers(default, user, user-new) = {
-  if user == auto {
-    user = (:)
-  }
   if type(user) != dictionary {
     panic("handlers must be auto or a dictionary")
   }

@@ -15,15 +15,7 @@
 
 = Introduction
 
-The main functionality of Callisto is exposed through reading/rendering and export/execution functions. All these functions accept the same parameters, and can be preconfigured together using a single `config` call. For example, the following configures the `render` and `outputs` functions to read from the file `notebook.ipynb`:
-
-```typ
-#let (render, outputs) = callisto.config(nb: json("notebook.ipynb"))
-```
-
-These parameters are called _settings_. Making sense of them requires some familiarity with the reading/rendering and export/execution functions so they are documented first, before the #link(<configuration>)[Configuration] section that lists all the available settings.
-
-These functions also accept a _cell specification_ as positional argument, such as a cell index, or a cell label or tag or an array of such values. Examples:
+The main functionality of Callisto is exposed through reading/rendering and export/execution functions. These functions accept a _cell specification_ as positional argument, such as a cell index, or a cell label or tag or an array of such values. Examples:
 
 ```typ
 // Get all outputs of all code cells
@@ -35,6 +27,122 @@ These functions also accept a _cell specification_ as positional argument, such 
 ```
 
 See #link(<cell-specification>)[Cell specification] for all the ways that cells can be specified.
+
+
+These functions also accept keyword arguments called _settings_. All functions accepts the same settings and can be preconfigured together using a single #func[config] call. For example, the following configures the `render` and `outputs` functions to read from the file `notebook.ipynb`:
+
+```typ
+#let (render, outputs) = callisto.config(nb: json("notebook.ipynb"))
+```
+
+== Settings overview
+
+Making full sense of all the settings requires some familiarity with the reading/rendering and export/execution functions, so the details are presented after the main functions, in the #link(<configuration>)[Configuration] section. Here is however a brief overview of each available setting:
+
+// #let setting-short(name, pills, desc) = [
+//   #set par(first-line-indent: 1em, hanging-indent: 1em)
+//   #block(breakable: false)[/ #raw(name.text): #pills #parbreak() #desc]
+// ]
+#let setting-short(name, pills, desc) = [/ #raw(name.text): #desc]
+
+#pad(left: 0em)[
+  #setting-short[nb][#pills.str #pills.bytes #pills.dictionary #pills.none][
+    The notebook to read from. Default: `none`.
+  ]
+  #setting-short[cell-header-pattern][
+    #pills.str #pills.dictionary #pills.auto #pills.none
+  ][
+    The pattern of header lines in code cells. Default:
+    `"#| %key: %value"`.
+  ]
+  #setting-short[keep-cell-header][#pills.bool][
+    Whether header lines in code cell source should be kept/rendered.
+    Default: `false`.
+  ]
+  #setting-short[count][#pills.str][
+    Whether to count cells by index or by execution count.
+    Default: `"index"`.
+  ]
+  #setting-short[name-path][#pills.str #pills.array #pills.auto][
+    Where to look for cell names/labels in cell metadata.
+    Default: `auto` which resolves to `("metadata.callisto.header.label", "id", "metadata.tags")`.
+  ]
+  #setting-short[cell-type][#pills.str #pills.array][
+    The type(s) of cells to process. Default: `"all"`.
+  ]
+  #setting-short[lang][#pills.str #pills.auto #pills.none][
+    The language of code cells. Default: `auto` to use notebook metadata.
+  ]
+  #setting-short[raw-lang][#pills.str #pills.none][
+    The language of raw cells. Default: `none`.
+  ]
+  #setting-short[item][#pills.int #pills.str][
+    The output item to use. Default: `"unique"`, which raises an error if several
+    are found.
+  ]
+  #setting-short[output-type][#pills.str #pills.array][
+    The types of output to keep. Default: `"all"`.
+  ]
+  #setting-short[format][#pills.str #pills.array #pills.auto][
+    The output format(s) to use, in order of preference.
+    Default: `auto` for the default list.
+  ]
+  #setting-short[ignore-wrong-format][#pills.bool][
+    Whether to ignore outputs without suitable format, rather than raise an error. Default: `false`.
+  ]
+  #setting-short[stream][#pills.str][
+    The text stream(s) to include in cell outputs. Default: `"all"`.
+  ]
+  #setting-short[result][#pills.str][
+    Whether each output should be returned as a simple value or a dict with
+    metadata. Default: `"value"`.
+  ]
+  #setting-short[handlers][#pills.dictionary][
+    Handlers to override the processing of certain types of values. Default: `(:)`.
+  ]
+  #setting-short[new-handlers][#pills.dictionary][
+    User-defined handlers. Default: `(:)`.
+  ]
+  #setting-short[input][#pills.bool #pills.auto][
+    Whether to render the input of code cells. Default: `true`.
+  ]
+  #setting-short[output][#pills.bool #pills.auto][
+    Whether to render the output of code cells. Default: `true`.
+  ]
+  #setting-short[h1-level][#pills.int][
+    The level to use for notebook top-level headings. Default: 1.
+  ]
+  #setting-short[gather-latex-defs][#pills.bool][
+    Whether LaTeX command definitions should be gathered from the whole notebook and made available to every formula. Default: `true`.
+  ]
+  #setting-short[console-text][#pills.bool #pills.auto #pills.str #pills.dictionary][
+    How to process text outputs that might contain ANSI escape sequences.
+    Default: `auto` to process values that contain such sequences.
+  ]
+  #setting-short[apply-theme][#pills.bool][
+    Whether to apply theme handlers even outside of rendering. Default: `false`.
+  ]
+  #setting-short[theme][#pills.str #pills.dictionary][
+    Theme for rendering the notebook cells. Default: `"notebook"`.
+  ]
+  #setting-short[export-name][#pills.str][
+    Identifier to use for this notebook export.
+    Default: `"notebook"`.
+  ]
+  #setting-short[cell-header][#pills.dictionary #pills.none][
+    Keys and values to add to the header of exported cells.
+    Default: `none`.
+  ]
+  #setting-short[kernel][#pills.str #pills.none][
+    Name of Jupyter kernel to use in exported notebook. Default: `none`.
+  ]
+  #setting-short[transform][#pills.function #pills.none][
+    Transformation function to apply to every output item. Default: `none`.
+  ]
+  #setting-short[placeholder][#pills.auto #pills.bool #pills.function #pills.any][
+    Configuration for the placeholder to use when an output item or cell is missing. Default: `auto` to enable default placeholders when reading from an exported notebook.
+  ]
+]
 
 = Reading and rendering
 
@@ -422,6 +530,8 @@ This section presents a typical workflow for executing code blocks of a Typst do
 
 Note that this is just an example. How code blocks are selected for export, and read back from the exported notebook to show the result, is largely up to the user. There are many ways to use #func[export], #func[execute] and #func[evaluate], either directly or through show rules. 
 
+Workflow:
+
 + In the document, configure Callisto:
 
   - Choose a name for the notebook that will be created during export. This is also the notebook that Callisto will read from to show the code blocks and results.
@@ -430,9 +540,11 @@ Note that this is just an example. How code blocks are selected for export, and 
 
   - Set the `path` handler.
 
+  - Add a show rule to execute all code blocks with a given `lang` tag.
+
   Example:
 
-  ```typ
+  ``````typ
   #import "@preview/callisto:0.3.0"
 
   #let (execute, stage-notebook) = callisto.config(
@@ -440,11 +552,7 @@ Note that this is just an example. How code blocks are selected for export, and 
     kernel: "python3",
     handlers: (path: (x, ..args) => read(x, encoding: none)),
   )
-  ```
 
-+ In the document, process some code blocks through the #func[execute] function:
-
-  ``````typ
   // Workaround for https://github.com/typst/typst/issues/1331
   #show raw: set text(11pt * 0.8)
 
@@ -465,27 +573,22 @@ Note that this is just an example. How code blocks are selected for export, and 
   ```
   ``````  
 
-  Note: until you do the first export, Typst will complain that it doesn't find the notebook file. To avoid seeing errors, you can comment-out the ```txt nb: ... ``` line in the `config` call until you're ready to export the notebook.
+  Note: until you do the first export, Typst will complain that it doesn't find the notebook file. To avoid this error, comment-out the ```txt nb: ... ``` line in the `config` call until you're ready to export the notebook.
 
 
-+ Export the notebook to a file:
++ Export and execute the notebook:
 
   ```bash
   typst query --input callisto-export=true --one --field=value \
     document.typ '<notebook>' > export.ipynb
+  jupyter-nbconvert --to notebook --execute --inplace export.ipynb
   ```
 
   This will create (or overwrite) the file `export.ipynb`. Make sure you use the same filename as was specified in the ```txt nb: ...``` line of the `config` call.
 
-+ Execute the notebook:
-
-  ```bash
-  jupyter-nbconvert --to notebook --execute --inplace export.ipynb
-  ```
-
 That's it: the next time you compile `document.typ`, Callisto will read the execution results from `export.ipynb` and include them in the compiled document.
 
-In this example, we just exported some code blocks using #func[execute]. Here's a more complete example that also uses #func[export] and #func[evaluate]:
+In this example, we just exported some code blocks using #func[execute]. Here's a more comprehensive example that also uses #func[export] and #func[evaluate]:
 
 ``````typ
 #import "@preview/callisto:0.3.0"
@@ -516,7 +619,7 @@ a + 3
 We can do this computation inline: #evaluate(`a + 3`).
 ``````
 
-Here we included some "setup code" using #func[export], to create a notebook cell that will be executed along with the other cells, but not rendered in the document.
+Here we included some "setup code" using #func[export], to create a notebook cell that will be executed along with the other cells but not rendered in the document.
 
 === Automatic export/execution with a Makefile or justfile
 
@@ -541,9 +644,9 @@ watch:
 
 Running the `make` command will then export and execute the notebook. This also defines a `watch` target: assuming you have `watchexec` installed, you can:
 
-- run ```txt make watch``` in a terminal to monitor the current directory for changes to the `.typ` files: whenever one of these files changes it will run ```txt make export execute``` for us,
++ run ```txt make watch``` in a terminal to monitor the current directory for changes to the `.typ` files: whenever one of these files changes it will run ```txt make export execute``` for us,
 
-- run ```txt typst watch document.typ``` in another terminal (or use the preview feature in your editor) to see the execution results automatically included in the Typst output.
++ run ```txt typst watch document.typ``` in another terminal (or use the preview feature in your editor) to see the execution results automatically included in the Typst output.
 
 And here's an equivalent `justfile` to use with `just` instead of `make`:
 
@@ -723,7 +826,7 @@ Here `output` and `render` are configured to use `notebook.ipynb` as notebook, k
 
 This section lists all the settings that can be used as arguments to #func[config] or directly when calling #func[render], #func[outputs], #func[sources], #func[cells], #func[export], #func[execute], #func[evaluate] or any of their variants.
 
-#setting-doc(`nb`) #pills.str #pills.bytes #pills.dictionary #pills.none
+#setting-doc[`nb`] #pills.str #pills.bytes #pills.dictionary #pills.none
 
 The notebook to read from (default: `none`). This can be the path to a notebook file as string (currently this requires defining a path handler as in the example below). It can also be the content of a notebook file, either as `bytes` or as a dict as returned by the `json` function, or `none` (e.g. when exporting without reading back). Examples:
 
@@ -930,7 +1033,7 @@ Examples:
 
 #setting-doc[`handlers`] #pills.dictionary
 
-A dictionary mapping "MIME types" to handler functions. A "MIME type" can be an actual MIME type like `image/png`, or a pseudo MIME type used for internal processing such as `cell`. A handler is a function called to process a value of a particular type. Each handler should accept a positional argument for the data to process and any keyword argument, and return the processed data. The dict passed to `handlers` is merged with the dict of default handlers, overriding default values with the specified ones.
+A dictionary mapping "MIME types" to handler functions. A "MIME type" can be an actual MIME type like `image/png`, or a pseudo MIME type used for internal processing such as `cell`. A handler is a function called to process a value of a particular type. Each handler should accept a positional argument for the data to process and any keyword argument, and return the processed data. The dict passed to `handlers` is merged with the dict of default handlers, overriding default values with the specified ones. The default is an empty dict: `(:)`.
 
 Example:
 

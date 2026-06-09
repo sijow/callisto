@@ -49,7 +49,7 @@
 #let _code-cell-output(cell, ctx: none, ..args) = {
   let outs = outputs(cell, ..ctx.cfg, result: "value")
   if outs.len() == 0 { return }
-  // Undo global show rule for raw block
+  // Undo template show rule for raw block
   // (we don't want simple text outputs to be shown in rounded gray rects)
   show raw: set block(width: auto, inset: 0pt, radius: 0pt, fill: none)
   block(

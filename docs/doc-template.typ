@@ -71,7 +71,7 @@
   inset: (x: _pill-extent),
   outset: (y: _pill-extent),
   radius: _pill-extent,
-  raw(name),
+  raw(name, lang: "typst-pill"),
 )
 
 #let pills = for (name, bg) in pill-backgrounds {
@@ -86,6 +86,7 @@
 
   let code-fill = luma(96%)
 
+  show raw.where(lang: "typst-pill"): set text(font: "Cascadia Mono", size: 1em*14/15)
   let doc-block = raw.where(block: true, lang: "typc")
   show doc-block: set par(leading: 0.9em)
   show doc-block: set text(font: "Cascadia Mono")

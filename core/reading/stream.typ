@@ -9,13 +9,7 @@
 // Resolve 'stream' setting to a list of desired streams' names
 #let _stream-names(stream) = {
   if stream == "all" { return all-stream-names }
-  let names = ensure-array(stream)
-  for name in names {
-    if name not in all-stream-names {
-      panic("invalid stream name: " + repr(name))
-    }
-  }
-  return names
+  return (stream,)
 }
 
 // Get stream item text as a single string, if the item is a stream with

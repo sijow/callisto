@@ -138,12 +138,6 @@
 // Handler for LaTeX markup
 #let text-latex(data, ctx: none, ..args) = mitex.mitext(data, ..args)
 
-// Handler for rendering text that includes ANSI escape sequences.
-#let text-ansi-generic(data, ctx: none, ..args) = {
-  let (process, ..render-args) = ctx.ansi
-  ansi.render(data, ..render-args)
-}
-
 // Handler for text to render as console output, in particular text that can
 // include ANSI escape sequences for colors, etc. and box-drawing characters.
 #let text-console-block(data, ctx: none, ..args) = {

@@ -13,14 +13,14 @@
   if type(cfg.nb) == dictionary {
     return cfg.nb
   }
-  if type(cfg.nb) != str {
+  if type(cfg.nb) != path {
     panic("invalid notebook type: " + str(type(cfg.nb)))
   }
   if not read-enabled(cfg: cfg) {
     return none
   }
   let handlers = all-handlers(cfg: cfg)
-  return json(handlers.at("path")(cfg.nb, ctx: none))
+  return json(cfg.nb)
 }
 
 // Ensure each cell source is a single string.

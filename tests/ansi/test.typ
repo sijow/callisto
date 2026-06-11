@@ -80,7 +80,7 @@ callisto.ansi.console-block(
 // cannot be guessed.
 
 #let (render,) = callisto.config(
-  nb: json("ansi-table.ipynb"),
+  nb: path("ansi-table.ipynb"),
   console-text: (bg: white),
 )
 #render()
@@ -99,14 +99,14 @@ callisto.ansi.console-block(
 // #show raw: set text(font: "Noto Sans Mono")
 
 #let (Out,) = callisto.config(
-  nb: json("ansi-table.ipynb"),
+  nb: path("ansi-table.ipynb"),
   theme: "plain",
   console-text: (palette: gruvbox, bg: gruvbox.first(), fg: orange),
 )
 #Out(0)
 
 #let (Out,) = callisto.config(
-  nb: json("ansi-table.ipynb"),
+  nb: path("ansi-table.ipynb"),
   theme: "plain",
   console-text: "strip",
 )
@@ -117,7 +117,7 @@ callisto.ansi.console-block(
 = `errors.ipynb`
 
 #callisto.render(
-  nb: json("errors.ipynb"),
+  nb: path("errors.ipynb"),
 )
 
 #pagebreak()

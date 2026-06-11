@@ -1,6 +1,6 @@
 #import "/callisto.typ" as callisto: *
 
-#let render = callisto.render.with(nb: json("R.ipynb"))
+#let render = callisto.render.with(nb: path("R.ipynb"))
 
 = First cell, choosing plain text
 #render(0, format: "text/plain")

@@ -6,14 +6,14 @@
 }
 
 #callisto.render(
-  nb: json("images.ipynb"),
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
+  nb: path("images.ipynb"),
+  handlers: (path: (x, ..args) => path(x)),
 )
 
 
 Cell 3 showing attachment path instead of content:
 #callisto.render(
   3,
-  nb: json("images.ipynb"),
+  nb: path("images.ipynb"),
   handlers: ("image/png": (ctx: none, ..args) => raw(ctx.item-desc.metadata.path)),
 )

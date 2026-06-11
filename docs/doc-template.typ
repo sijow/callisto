@@ -1,3 +1,4 @@
+// Type pills
 #let _stripe-fg = rgb(82%, 99%, 100%)
 #let _stripe-bg = rgb(100%, 83%, 92%)
 #let _stripe-width = 4pt
@@ -26,9 +27,9 @@
   (rgb("f5e7d8"), 75%),
   (rgb("dbd1ce"), 100%),
 )
-
 #let pill-backgrounds = (
   str:        rgb("#d1ffe2"),
+  path:        rgb("#d1ffe2"),
   regex:      rgb("#d1ffe2"),
   symbol:     rgb("#d1ffe2"),
   array:      rgb("#fcdfff"),
@@ -64,16 +65,15 @@
   duration:   _time-gradient,
   tiling:     _stripes-tiling,
 )
-
 #let _pill-extent = 3pt
 #let _pill-box(name, bg) = box(
   fill: bg,
   inset: (x: _pill-extent),
   outset: (y: _pill-extent),
   radius: _pill-extent,
+  // text(weight: "regular", raw(name, lang: "typst-pill"),
   raw(name, lang: "typst-pill"),
 )
-
 #let pills = for (name, bg) in pill-backgrounds {
   ((name): _pill-box(name, bg))
 }
@@ -143,6 +143,10 @@
     separator: text(weight: "bold")[:] + _terms-sep-space,
     spacing: 1.2em,
   )
+  // show terms: it => {
+  //   show strong: s => text(weight: 400 + strong.delta, s.body)
+  //   it
+  // }
 
   show link: set text(blue)
 

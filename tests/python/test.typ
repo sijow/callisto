@@ -4,7 +4,7 @@
   render,
   source,
   Cell,
-) = callisto.config(nb: json("/tests/python/python.ipynb"))
+) = callisto.config(nb: path("/tests/python/python.ipynb"))
 
 = Python notebook
 
@@ -17,7 +17,7 @@
 #v(1em)
 #[
   #let (render, template) = callisto.config(
-    nb: json("python.ipynb"),
+    nb: path("python.ipynb"),
     theme: "neat",
   )
   #show: template

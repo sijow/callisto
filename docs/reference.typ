@@ -31,7 +31,7 @@ See #link(<cell-specification>)[Cell specification] for all the ways that cells 
 These functions also accept keyword arguments called _settings_. All functions accepts the same settings and can be preconfigured together using a single #func[config] call. For example, the following configures the `render` and `outputs` functions to read from the file `notebook.ipynb`:
 
 ```typ
-#let (render, outputs) = callisto.config(nb: json("notebook.ipynb"))
+#let (render, outputs) = callisto.config(nb: path("notebook.ipynb"))
 ```
 
 == Settings Overview
@@ -42,7 +42,10 @@ Making full sense of all the settings requires some familiarity with the reading
 //   #set par(first-line-indent: 1em, hanging-indent: 1em)
 //   #block(breakable: false)[/ #raw(name.text): #pills #parbreak() #desc]
 // ]
-#let setting-short(name, pills, desc) = [/ #raw(name.text): #desc]
+#let setting-short(name, pills, desc) = {
+  show link: set text(black)
+  [/ #setting(name): #desc]
+}
 
 #pad(left: 0em)[
   #setting-short[nb][#pills.str #pills.bytes #pills.dictionary #pills.none][
@@ -320,18 +323,12 @@ Examples:
 
 Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
-When using a notebook export as input, it is generally necessary to
-
-- specify the notebook as a string and
-- define the `path` handler to let Callisto access the project directory.
-
-Example:
+When using a notebook export as input, it is generally necessary to specify the notebook as a path. Example:
 
 ```typ
 #let (render, execute, stage-notebook) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 ```
 
@@ -416,7 +413,7 @@ it to integer and use that in a for loop to produce seven squares:
 )
 ```
 
-*Note for advanced users:* Usually, `evaluate` returns simple content (metadata + cell output) that can be introspected and manipulated, as long as care is taken to ensure that the export metadata is included in the document when "compiling" for export (during a `typst query` call from CLI). However when several exported cells have the exact same source and same header, Callisto will need a query with context to disambiguate the cells, and in that case the return value will be opaque. To get non-opaque return values in such cases, each cell can be given a unique header. Example:
+*Note for advanced usage:* Usually, `evaluate` returns simple content (metadata + cell output) that can be introspected and manipulated, as long as care is taken to ensure that the export metadata is included in the document when "compiling" for export (during a `typst query` call from CLI). However when several exported cells have the exact same source and same header, Callisto will need a query with context to disambiguate the cells, and in that case the return value will be opaque. To get non-opaque return values in such cases, each cell can be given a unique header. Example:
 
 ```typ
 // Make sure the return values can be introspected/manipulated
@@ -451,9 +448,8 @@ Example:
 
 ``````typ
 #let (execute, stage-notebook) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 // Insert the notebook metadata in the document so that typst query can find it
@@ -531,15 +527,11 @@ Note that this is just an example. How code blocks are selected for export, and 
 
 Workflow:
 
-+ In the document, configure Callisto:
++ In the document:
 
-  - Choose a name for the notebook that will be created during export. This is also the notebook that Callisto will read from to show the code blocks and results.
+  - Use #func[config] to configure the functions you want to use. Set the notebook path and Jupyter kernel with the #setting[nb] and #setting[kernel] settings. You can choose the notebook path but it must correspond to the file created during export. This is also the notebook that Callisto will read from to show the code blocks and results.
 
-  - Configure the export-execute functions with the #setting[kernel] setting, using the name of the kernel you want to use.
-
-  - Set the `path` handler.
-
-  - Add a show rule to execute all code blocks with a given `lang` tag.
+  - Choose a `lang` tag for code blocks that should be executed and add a show rule to execute them.
 
   Example:
 
@@ -547,9 +539,8 @@ Workflow:
   #import "@preview/callisto:0.3.0"
 
   #let (execute, stage-notebook) = callisto.config(
-    nb: "export.ipynb",
+    nb: path("export.ipynb"),
     kernel: "python3",
-    handlers: (path: (x, ..args) => read(x, encoding: none)),
   )
 
   // Workaround for https://github.com/typst/typst/issues/1331
@@ -593,9 +584,8 @@ In this example, we just exported some code blocks using #func[execute]. Here's 
 #import "@preview/callisto:0.3.0"
 
 #let (execute, export, evaluate, stage-notebook) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 // Workaround for https://github.com/typst/typst/issues/1331
@@ -778,7 +768,7 @@ Notes:
 
 = Configuration <configuration>
 
-The functions in the previous sections all accept the same settings which can be applied when the function is called, for example ```txt render(nb: json("notebook.ipynb"))```. However it is usually more convenient to configure the desired functions ahead of time using #func[config].
+The functions in the previous sections all accept the same settings which can be applied when the function is called, for example ```txt render(nb: path("notebook.ipynb"))```. However it is usually more convenient to configure the desired functions ahead of time using #func[config].
 
 == Preconfiguring Several Functions
 
@@ -800,7 +790,7 @@ Full example:
 #import "@preview/callisto:0.3.0"
 
 #let (output, render, template) = callisto.config(
-  nb: json("notebook.ipynb"),
+  nb: path("notebook.ipynb"),
   output-type: ("display", "result"),
   item: 0,
   theme: "neat",
@@ -823,26 +813,19 @@ Here `output` and `render` are configured to use `notebook.ipynb` as notebook, k
 
 This section lists all the settings that can be used as arguments to #func[config] or directly when calling #func[render], #func[outputs], #func[sources], #func[cells], #func[export], #func[execute], #func[evaluate] or any of their variants.
 
-#setting-doc[`nb`] #pills.str #pills.bytes #pills.dictionary #pills.none
+#setting-doc[`nb`] #pills.path #pills.bytes #pills.dictionary #pills.none
 
-The notebook to read from (default: `none`). This can be the path to a notebook file as string (currently this requires defining a path handler as in the example below). It can also be the content of a notebook file, either as `bytes` or as a dict as returned by the `json` function, or `none` (e.g. when exporting without reading back). Examples:
+The notebook to read from (default: `none`). This can be the path to a notebook file, or the content of a notebook either as `bytes` or as a dict as returned by the `json` function, or `none` (for example when exporting without reading back). Examples:
 
 ```typ
 // Specify the notebook by path
-#let (output, render) = callisto.config(
-   nb: "notebook.ipynb",
-   handlers: (path: (x, ..args) => read(x, encoding: none)),
-)
+#let (output, render) = callisto.config(nb: path("notebook.ipynb"))
 
-// Alternative: read notebook before passsing it to config
-#let (output, render) = callisto.config(
-   nb: json("notebook.ipynb"),
-)
+// Give the notebook content directly, as dictionary
+#let (output, render) = callisto.config(nb: json("notebook.ipynb"))
 ```
 
-The string form is required for export-execution so that a `typst query` can succeed when creating the exported notebook the first time, when the file doesn't exist yet. The path handler is required to give Callisto access to files in the project directory.
-
- Typst 0.15 will probably introduce a `path` type that will make the path handler unnecessary in many cases (but a similar handler will still be required  to properly process notebooks that have Markdown cells referring to external files).
+The path form is required for export-execution so that a `typst query` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
 
 #setting-doc[`cell-header-pattern`] #pills.str #pills.dictionary #pills.auto #pills.none
 
@@ -861,14 +844,14 @@ The default pattern matches lines of the form ```txt #| key: value``` and ```txt
       ```typ
       // Header pattern for languages that start line comments with //
       #let (render,) = callisto.config(
-         nb: json("notebook.ipynb"),
+         nb: path("notebook.ipynb"),
          cell-header-pattern: "//| %key: %value",
       )
 
       // Header pattern with strict format `#| key: value` without whitespace
       // between `#` and `|`
       #let (render,) = callisto.config(
-         nb: json("notebook.ipynb"),
+         nb: path("notebook.ipynb"),
          cell-header-pattern: (
             regex: regex("^#\|\s+(.*?):\s+(.*?)\s*$"),
             writer: (key, value) => "#| " + key + ": " + value,
@@ -1072,7 +1055,7 @@ For example one can register a handler for the `model/obj` MIME type to render c
 )
 
 #callisto.render(
-  nb: json("notebook.ipynb"),
+  nb: path("notebook.ipynb"),
   // Register new handler
   new-handlers: ("model/obj": obj-handler), 
   // Add OBJ format as first in the list of desired formats
@@ -1211,7 +1194,7 @@ Example:
 
 ```typ
 #let (template, render) = callisto.config(
-  nb: json("notebook.ipynb"),
+  nb: path("notebook.ipynb"),
   theme: "neat",
 )
 #show: template
@@ -1228,10 +1211,9 @@ Example:
 
 ```typ
 #let (execute, stage-notebook) = callisto.config(
-  nb: "notebooks/export-python.ipynb",
+  nb: path("notebooks/export-python.ipynb"),
   kernel: "python3",
   export-name: "python",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 #stage-notebook()
@@ -1284,9 +1266,8 @@ Example:
 
 ``````typ
 #let (execute, stage-notebook) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 #stage-notebook()
@@ -1334,9 +1315,8 @@ For example, we can transform a NumPy vector into a Typst math `vec`, to typeset
 #import "@preview/callisto:0.3.0"
 
 #let (output, execute, stage-notebook) = callisto.config(
-  nb: "notebook.ipynb",
+  nb: path("notebook.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 #show raw.where(lang: "py-x"): execute
 
@@ -1376,7 +1356,7 @@ Supported values:
 #pad(left: 1em)[
   / `false`: No placeholder is used and the missing value will cause a panic.
 
-  / `true`: A placeholder will be used in place of the missing value. The placeholder is obtained by calling the corresponding handler:
+  / `true`: A placeholder will be used in place of the missing value. The placeholder is obtained by calling the corresponding #link(<handlers>)[handler]:
 
     - `placeholder-output` for `output`, its variants such as `result`, and `evaluate`,
     - `placeholder-Cell` for `Cell` and `execute`,
@@ -1414,7 +1394,7 @@ Apart from the functions described in the previous sections, the top-level Calli
 
 #function-doc(`themes`)
 
-A dictionary holding the built-in themes: `plain`, `notebook` and `neat`.
+A dictionary holding the built-in #link(<themes>)[themes]: `plain`, `notebook` and `neat`.
 
 #function-doc(`default-handlers`)
 
@@ -1422,7 +1402,7 @@ A dictionary holding the default #link(<handlers>)[handlers].
 
 #function-doc(`handle`)
 
-This function is used in themes and custom handlers to defer processing of a value to another handler.
+This function is used in themes and custom #link(<handlers>)[handlers] to defer processing of a value to another handler.
 
 ```typc
 handle(
@@ -1735,7 +1715,7 @@ These handlers are described in the next sections.
 / `source-code-generic`: For rendering source code (called by default handlers for code cell inputs and raw cells).
 / `markdown-generic`: For rendering Markdown (should return inline content). The default uses #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] to convert Markdown to Typst content.
 / `text-console-block`: For rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
-/ `path`: For reading the content of files specified by path. By setting this handler the user can give Callisto permission to read any file under the project root.
+/ `path`: For reading the content of files specified by path. By setting this handler the user can give Callisto permission to read any file under the project root. This is necessary to render Markdown that uses external image files.
 
 == Arguments
 
@@ -1839,7 +1819,7 @@ The theme dictionary can also include an additional field `template` to define a
 For example the "neat" theme defines a template function that changes the text font, increases some spacings and styles raw elements. The template can be used as follows:
 
 ```typ
-#let (template, render) = callisto.config(nb: json("file.ipynb"), theme: "neat")
+#let (template, render) = callisto.config(nb: path("file.ipynb"), theme: "neat")
 
 #show: template
 
@@ -1871,7 +1851,7 @@ In the following, we extend the "neat" theme to wrap the cell output in a figure
 }
 
 #let (render,) = callisto.config(
-  nb: json("julia.ipynb"),
+  nb: path("julia.ipynb"),
   theme: callisto.themes.neat + (code-cell-output: caption-handler),
 )
 ```

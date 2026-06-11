@@ -10,7 +10,7 @@
   result,
   errors,
   error,
-) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
+) = callisto.config(nb: path("/tests/julia/julia.ipynb"))
 
 = Julia notebook
 

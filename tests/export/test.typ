@@ -23,9 +23,8 @@
   execute,
   evaluate,
 ) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 // Expose the exported notebook as labelled metadata for `typst query`
@@ -199,10 +198,9 @@ The square of 4 is `4*4`<x2>, and that of 5 is `5*5`<x2>.
   export: export-sympy,
   stage-notebook: stage-sympy,
 ) = callisto.config(
-  nb: "export-sympy.ipynb",
+  nb: path("export-sympy.ipynb"),
   kernel: "python3",
   export-name: "sympy",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 #stage-sympy()
@@ -259,10 +257,9 @@ Code can be generated dynamically for execution:
   execute: execute-julia,
   evaluate: evaluate-julia,
 ) = callisto.config(
-  nb: "export-julia.ipynb",
+  nb: path("export-julia.ipynb"),
   kernel: "julia-1.11",
   export-name: "julia",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
   theme: "neat",
   console-text: (bg: luma(30%)),
 )
@@ -324,7 +321,6 @@ cos(1.2)
 
 #show raw.where(lang: "julia-x"): execute-julia.with(
   handlers: (
-    path: (x, ..args) => read(x, encoding: none),
     code-cell-output: (auto, fig-wrapper),
   ),
 )

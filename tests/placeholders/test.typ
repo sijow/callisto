@@ -17,9 +17,8 @@
   execute,
   evaluate,
 ) = callisto.config(
-  nb: "export.ipynb",
+  nb: path("export.ipynb"),
   kernel: "python3",
-  handlers: (path: (x, ..args) => read(x, encoding: none)),
 )
 
 // Expose the exported notebook as labelled metadata for `typst query`

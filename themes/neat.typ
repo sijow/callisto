@@ -2,7 +2,7 @@
 #import "/core/util.typ": handle
 #import "/core/reading/output.typ": outputs
 
-#let _fill = rgb(233, 236, 239)
+#let _fill = luma(95%)
 #let _inset = 8pt
 #let _radius = 5pt
 #let _extent = 0pt // was 3pt but causes overlaps in case of syntax highlighting

@@ -13,6 +13,8 @@
 
 #outline()
 
+#pagebreak(to: "odd", weak: true)
+
 = Introduction
 
 The main functionality of Callisto is exposed through reading-rendering and export-execution functions. These functions accept a _cell specification_ as positional argument, such as a cell index, or a cell label or tag or an array of such values. Examples:
@@ -323,16 +325,7 @@ Examples:
 
 Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
-When using a notebook export as input, it is generally necessary to specify the notebook as a path. Example:
-
-```typ
-#let (render, execute, stage-notebook) = callisto.config(
-  nb: path("export.ipynb"),
-  kernel: "python3",
-)
-```
-
-This way the compilation can succeed during a `typst query` even if the specified notebook file doesn't exit yet (as the first version will be created using the result of the `typst query`).
+See #link(<complete-workflow>)[Complete Workflow] for the steps required to export and execute a notebook.
 
 == Cell Functions
 
@@ -349,7 +342,7 @@ export(raw-spec, ..args) yields content-pill
 The positional argument is a raw element.
 For the other arguments, see #link(<configuration>)[Configuration].
 
-Example:
+The `export` function exports a cell without rendering it. This can be used to add silent "setup code" in the notebook. Example:
 
 ```typ
 // Export a cell that configures the Python pandas library
@@ -413,7 +406,7 @@ it to integer and use that in a for loop to produce seven squares:
 )
 ```
 
-*Note for advanced usage:* Usually, `evaluate` returns simple content (metadata + cell output) that can be introspected and manipulated, as long as care is taken to ensure that the export metadata is included in the document when "compiling" for export (during a `typst query` call from CLI). However when several exported cells have the exact same source and same header, Callisto will need a query with context to disambiguate the cells, and in that case the return value will be opaque. To get non-opaque return values in such cases, each cell can be given a unique header. Example:
+*Note for advanced usage:* Usually, `evaluate` returns simple content (metadata + cell output) that can be introspected and manipulated, as long as care is taken to ensure that the export metadata is included in the document when "compiling" for export (during a `typst eval` call from CLI). However when several exported cells have the exact same source and same header, Callisto will need a query with context to disambiguate the cells, and in that case the return value will be opaque. To get non-opaque return values in such cases, each cell can be given a unique header. Example:
 
 ```typ
 // Make sure the return values can be introspected/manipulated
@@ -434,7 +427,7 @@ To export a notebook, individual cells must be exported using the functions in t
 
 #function-doc(`stage-notebook`)
 
-Returns metadata holding the exported cells gathered in a notebook dictionary (such that converting the dictionary to JSON gives a valid Jupyter notebook). This metadata is labeled with the #setting(content: [export name])[export-name]. It can be read from the command-line using `typst query` for storing as an `.ipynb` file.
+Returns metadata holding the exported cells gathered in a notebook dictionary (such that converting the dictionary to JSON gives a valid Jupyter notebook). This metadata is labeled with the #setting(content: [export name])[export-name]. It can be read from the command-line using `typst eval` for storing as an `.ipynb` file.
 
 ```typc
 stage-notebook(..args) yields content-pill
@@ -452,7 +445,7 @@ Example:
   kernel: "python3",
 )
 
-// Insert the notebook metadata in the document so that typst query can find it
+// Insert the notebook metadata in the document so that typst eval can find it
 #stage-notebook()
 
 // Export and render all Python code blocks
@@ -463,7 +456,7 @@ Example:
 ```
 ``````
 
-See the #link(<complete-workflow>)[Complete workflow] section for a full example including the terminal commands used to export and execute a notebook.
+See the #link(<complete-workflow>)[Complete Workflow] section for a full example including the terminal commands used to export and execute a notebook.
 
 #function-doc(`make-notebook`)
 
@@ -569,8 +562,8 @@ Workflow:
 + Export and execute the notebook:
 
   ```bash
-  typst query --input callisto-export=true --one --field=value \
-      document.typ '<notebook>' > export.ipynb
+  typst eval --input callisto-export=true --in document.typ \
+      'query(<notebook>).first().value' > export.ipynb
   jupyter-nbconvert --to notebook --execute --inplace export.ipynb
   ```
 
@@ -610,17 +603,17 @@ We can do this computation inline: #evaluate(`a + 3`).
 
 Here we included some "setup code" using #func[export], to create a notebook cell that will be executed along with the other cells but not rendered in the document.
 
-=== Automatic Export/Execution with a Makefile or justfile
+== Automatic Export/Execution with a Makefile or justfile
 
-The calls to `typst query` and `jupyter-nbconvert` can be automated using a simple Makefile:
+The calls to `typst eval` and `jupyter-nbconvert` can be automated using a simple Makefile:
 
 ```Makefile
-TYPST-VALUE := typst query --input callisto-export=true --one --field=value
+EVAL := typst eval --input callisto-export=true --in document.typ
 
 default: export execute
 
 export:
-	$(TYPST-VALUE) document.typ '<notebook>' > export.ipynb
+	$(EVAL) "query(<notebook>).first().value" > export.ipynb
 
 execute:
 	jupyter-nbconvert --to notebook --execute --inplace export.ipynb
@@ -642,17 +635,80 @@ And here's an equivalent `justfile` to use with `just` instead of `make`:
 ```just
 default: export execute
 
-TYPST-VALUE := "typst query --input callisto-export=true --one --field=value"
+EVAL := "typst eval --input callisto-export=true --in document.typ"
 
 export:
-	{{TYPST-VALUE}} document.typ '<notebook>' > export.ipynb
+	{{EVAL}} 'query(<notebook>).first().value' > export.ipynb
 
 execute:
 	jupyter-nbconvert --to notebook --execute --inplace export.ipynb
 
 watch:
-	watchexec -w . -f '**/*.typ' make export execute
+	watchexec -w . -f '**/*.typ' just export execute
 ```
+
+== Several Notebooks from a Single Typst Document
+
+Several notebooks can be used independently of each other in the same Typst document. This can be used to execute code using different kernels, or to have each chapter run code blocks in its own execution context.
+
+The #setting[nb] and #setting[export-name] settings must have different values for each export. Here's a complete example:
+
+``````typ
+#import "@preview/callisto:0.3.0"
+
+#let (execute: execute-python, stage-notebook: stage-python) = callisto.config(
+  nb: path("export-python.ipynb"),
+  kernel: "python3",
+  export-name: "python",
+)
+
+#let (execute: execute-julia, stage-notebook: stage-julia) = callisto.config(
+  nb: path("export-julia.ipynb"),
+  kernel: "julia-1.11",
+  export-name: "julia",
+)
+  
+#stage-python()
+#stage-julia()
+
+// Workaround for https://github.com/typst/typst/issues/1331
+#show raw: set text(11pt * 0.8)
+
+#show raw.where(lang: "py-x"): execute-python
+#show raw.where(lang: "julia-x"): execute-julia
+
+A computation in Python:
+
+```py-x
+2 + 2
+```
+
+And one in Julia:
+
+```julia-x
+2 + 3
+```
+``````
+
+The following justfile can be used to automate the export and execution of both notebooks:
+
+```just
+default: export execute
+
+EVAL := "typst eval --input callisto-export=true --in document.typ"
+
+export:
+	{{EVAL}} 'query(<python>).first().value' > export-python.ipynb
+	{{EVAL}} 'query(<julia>).first().value'  > export-julia.ipynb
+
+execute:
+	jupyter-nbconvert --to notebook --execute --inplace export-python.ipynb
+	jupyter-nbconvert --to notebook --execute --inplace export-julia.ipynb
+
+watch:
+	watchexec -w . -f '**/*.typ' just export execute
+```
+
 
 = Cell Specification <cell-specification>
 
@@ -825,7 +881,7 @@ The notebook to read from (default: `none`). This can be the path to a notebook 
 #let (output, render) = callisto.config(nb: json("notebook.ipynb"))
 ```
 
-The path form is required for export-execution so that a `typst query` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
+The path form is required for export-execution so that a `typst eval` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
 
 #setting-doc[`cell-header-pattern`] #pills.str #pills.dictionary #pills.auto #pills.none
 
@@ -1036,7 +1092,7 @@ In the case of an array, the handler functions are chained by calling the first 
 
 This setting can only be used to redefine handlers for known "MIME types": an error is raised if a dict field doesn't correspond to a known handler, to catch typos. New "MIME types" can be registered with the #setting[new-handlers] setting. 
 
-See the #link(<handlers>)[handler section] for more information.
+See the #link(<handlers>)[Handlers] sections for more information.
 
 #setting-doc[`new-handlers`] #pills.dictionary
 
@@ -1205,7 +1261,7 @@ Example:
 
 The name used to identify raw elements belonging to a particular export, and to get the exported notebook from the command line. The default is `notebook`.
 
-The export name is independent from the notebook file as the filename can be unwieldy, or undefined if the notebook is exported but not read back.
+The export name is independent from the notebook file: the filename can be unwieldy, or undefined if the notebook is exported but not read back.
 
 Example:
 
@@ -1222,8 +1278,8 @@ Example:
 The notebook staged in this example can be retrieved from the command line and written to a file using the following command:
 
 ```bash
-typst query --input callisto-export=true --one --field=value \
-    document.typ '<python>' > notebooks/export-python.ipynb
+typst eval --input callisto-export=true --in document.typ \
+    'query(<python>).first().value' > notebooks/export-python.ipynb
 ```
 
 #setting-doc[`cell-header`] #pills.dictionary #pills.none
@@ -1292,8 +1348,8 @@ And a minimal example without rendering (the notebook is prepared for export but
 In both cases, the exported notebook can be obtained from the command-line using the command
 
 ```bash
-typst query --input callisto-export=true --one --field=value \
-    document.typ '<notebook>' > notebook.ipynb
+typst eval --input callisto-export=true --in document.typ \
+    'query(<notebook>).first().value' > notebook.ipynb
 ```
 
 #setting-doc[`transform`] #pills.function #pills.none
@@ -1307,7 +1363,7 @@ Example:
 #output("plot1", transform: rect)
 ```
 
-This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst query`) functions such as #link(<section:singular-extract>)[output] and #func[evaluate] return a placeholder instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst query` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
+This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #link(<section:singular-extract>)[output] and #func[evaluate] return a placeholder instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
 
 For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here's a complete example:
 
@@ -1382,7 +1438,7 @@ Examples:
 #evaluate(`1+1`, placeholder: text.with(red))
 ```
 
-Note: placeholders are used during regular compilation (`typst compile ...`). During export (`typst query`), functions such as `output` and `Cell` are "disabled" and always return `none`.
+Note: placeholders are used during regular compilation (`typst compile ...`). During export (`typst eval`), functions such as `output` and `Cell` are "disabled" and always return `none`.
 
 = Modules and Utility Functions
 

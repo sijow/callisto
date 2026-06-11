@@ -1,9 +1,9 @@
 default: export execute
     
 export:
-    typst query --root=../.. --input callisto-export=true --one --field=value test.typ '<notebook>' > export.ipynb
-    typst query --root=../.. --input callisto-export=true --one --field=value test.typ '<sympy>' > export-sympy.ipynb
-    typst query --root=../.. --input callisto-export=true --one --field=value test.typ '<julia>' > export-julia.ipynb
+    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<notebook>).first().value' > export.ipynb
+    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<sympy>).first().value'    > export-sympy.ipynb
+    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<julia>).first().value'    > export-julia.ipynb
 
 execute:
     jupyter-nbconvert --to notebook --execute --inplace export.ipynb

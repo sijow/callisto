@@ -27,7 +27,7 @@
   kernel: "python3",
 )
 
-// Expose the exported notebook as labelled metadata for `typst query`
+// Expose the exported notebook as labelled metadata for `typst eval`
 #stage-notebook()
 
 // Embed the notebook (unexecuted) in the PDF

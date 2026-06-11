@@ -100,17 +100,6 @@
 // as code cells all the raw blocks exported with the configured export-name.
 //
 // This function requires context.
-// 
-// The exported notebook can be obtained from the command line using a command
-// such as
-//
-//   typst query --input callisto-export=true --one --field=value \
-//     file.typ '<export-name>' > file.ipynb
-//
-// This should generate a valid Jupyter notebook named file.ipynb. This
-// notebook can be executed with
-// 
-//   jupyter nbconvert --to notebook --execute --inplace file.ipynb 
 #let make-notebook(..args) = {
   let (cell-spec, cfg) = configuration.parse-main-args(..args)
 
@@ -139,7 +128,7 @@
 }
 
 // Return the labeled metadata that should be inserted in the document so that
-// `typst query` can find the exported notebook.
+// `typst eval` can find the exported notebook.
 #let stage-notebook(..args) = {
   let (cfg,) = configuration.parse-main-args(..args)
   return context {

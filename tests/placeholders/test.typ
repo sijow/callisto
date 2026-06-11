@@ -21,7 +21,7 @@
   kernel: "python3",
 )
 
-// Expose the exported notebook as labelled metadata for `typst query`
+// Expose the exported notebook as labelled metadata for `typst eval`
 #stage-notebook()
 
 #show raw.where(lang: "py-x"): execute

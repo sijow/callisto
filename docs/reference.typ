@@ -17,24 +17,42 @@
 
 = Introduction
 
-The main functionality of Callisto is exposed through reading-rendering and export-execution functions. These functions accept a _cell specification_ as positional argument, such as a cell index, or a cell label or tag or an array of such values. Examples:
+The main functionality of Callisto is exposed through reading-rendering and export-execution functions. These functions accept keyword arguments called _settings_. All functions accepts the same settings and can be preconfigured together using a single #func[config] call. For example, the following configures the `render` and `errors` functions to read from the file `notebook.ipynb`:
 
 ```typ
-// Get all outputs of all code cells
-#outputs()
-// Get outputs of cells with label or tag "plot"
-#outputs("plot")
-// Get outputs of first two cells
-#outputs((0, 1)) 
+#import "@preview/callisto:0.3.0"
+
+#let (render, errors) = callisto.config(nb: path("notebook.ipynb"))
+
+// Check that there are no errors
+#if errors().len() > 0 { panic("Notebook has errors") }
+
+// Render the whole notebook
+#render()
+```
+
+These functions also accept a _cell specification_ as positional argument, such as a cell index, or a cell label or tag or an array of such values. Examples:
+
+```typ
+// Render the first two cells
+#render((0, 1))
+// Get the errors of the cell cell with label or tag "plot"
+#errors("plot")
 ```
 
 See #link(<cell-specification>)[Cell specification] for all the ways that cells can be specified.
 
-These functions also accept keyword arguments called _settings_. All functions accepts the same settings and can be preconfigured together using a single #func[config] call. For example, the following configures the `render` and `outputs` functions to read from the file `notebook.ipynb`:
+
+Some notebooks contain Markdown that includes images from external files. To correctly render such Markdown, a _path handler_ must be defined to give Callisto access to the files in the project directory:
 
 ```typ
-#let (render, outputs) = callisto.config(nb: path("notebook.ipynb"))
+#let (render, errors) = callisto.config(
+  nb: path("notebook.ipynb"),
+  handlers: (path: (x, ..args) => path(x)),
+)
 ```
+
+// Markdown and LaTeX from the notebook are rendered using #link("https://typst.app/universe/package/cmarker/")[cmarker] and #link("https://typst.app/universe/package/mitex/")[MiTeX]. It is possible to configure these packages or replace them with something else by setting custom `markdown-generic` and `math-generic` #link(<handlers>)[handlers].
 
 == Settings Overview
 
@@ -150,7 +168,7 @@ Making full sense of all the settings requires some familiarity with the reading
 
 = Reading and Rendering
 
-There are many functions for extracting items from a notebook and for rendering notebook content as Typst content. However they are all variants of four main functions: `render`, `outputs`, `sources` and `cells`. 
+There are many functions for extracting items from a notebook and for rendering notebook content as Typst content. However they are all variants of four main functions: #func[render], #func[outputs], #func[sources] and #func[cells]. 
 
 == Main Functions
 
@@ -201,8 +219,8 @@ Example:
 Returns the source of cells as an array of `raw` elements. The value of the `lang` field on the `raw` element depends on the cell type:
 
 - For Markdown: `"markdown"`.
-- For code cells: the notebook language (configured `lang` value, or language name from notebook metadata if `lang` is not configured).
-- For raw cells: the configured `raw-lang`, or `none` if not configured.
+- For code cells: the notebook language (configured #setting[lang] value, or language name from notebook metadata if `lang` is not configured).
+- For raw cells: the configured #setting[raw-lang], or `none` if not configured.
 
 ```typc
 sources(cell-spec, ..args) yields array-pill
@@ -242,13 +260,13 @@ The functions in the previous section have many variants that work similarly, bu
 
 === `Cell`, `In`, `Out` <section:singular-render>
 
-The `render` function has three variants that work on a single cell, raising an error if zero or more than one are found:
+The #func[render] function has three variants that work on a single cell, raising an error if zero or more than one are found:
 
-/ `Cell`: Renders one cell.
+/ `Cell`<function:Cell>: Renders one cell.
 
-/ `In`: Renders only the source of a code cell.
+/ `In`<function:In>: Renders only the source of a code cell.
 
-/ `Out`: Renders only the outputs of a code cell.
+/ `Out`<function:Out>: Renders only the outputs of a code cell.
 
 Examples:
 
@@ -261,11 +279,11 @@ Examples:
 
 === `output`, `source`, `cell` <section:singular-extract>
 
-The `outputs`, `sources` and `cells` functions have "singular" variants that return a single value (raising an error if zero or more than one are found):
+The #func[outputs], #func[sources] and #func[cells] functions have "singular" variants that return a single value (raising an error if zero or more than one are found):
 
-/ `output`: Returns a single output. The #setting[item] setting can be used to pick one output when several are found.
-/ `source`: Returns a single cell's source.
-/ `cell`: Returns a single cell.
+/ `output`<function:output>: Returns a single output. The #setting[item] setting can be used to pick one output when several are found.
+/ `source`<function:source>: Returns a single cell's source.
+/ `cell`<function:cell>: Returns a single cell.
 
 Examples:
 
@@ -280,17 +298,17 @@ Examples:
 
 === `displays`, `results`, `streams`, `full-streams`, `errors` <section:outputs-type-specific>
 
-The `outputs` function has further variants to target a specific type of output:
+The #func[outputs] function has further variants to target a specific type of output:
 
-/ `displays`: Returns "display" outputs (a single cell can produce several display outputs on top of its "execution result").
+/ `displays`<function:displays>: Returns "display" outputs (a single cell can produce several display outputs on top of its "execution result").
 
-/ `results`: Returns the execution results of the selected cells (generally the value produced by the last line in the cell code).
+/ `results`<function:results>: Returns the execution results of the selected cells (generally the value produced by the last line in the cell code).
 
-/ `streams`: Returns the text streams produced by the cells.
+/ `streams`<function:streams>: Returns the text streams produced by the cells.
 
-/ `full-streams`: Works like `streams` but merging all stream items produced by the same cell into a single value.
+/ `full-streams`<function:full-streams>: Works like `streams` but merging all stream items produced by the same cell into a single value.
 
-/ `errors`: Returns the errors produced by the cells.
+/ `errors`<function:errors>: Returns the errors produced by the cells.
 
 Examples:
 
@@ -305,11 +323,11 @@ Examples:
 
 Type-specific output functions also come in singular versions:
 
-/ `display`: Returns a single display output.
-/ `result`: Returns a single result output.
-/ `stream`: Returns a single stream output.
-/ `full-stream`: Returns the merged streams for a single cell.
-/ `error`: Returns a single error output.
+/ `display`<function:display>: Returns a single display output.
+/ `result`<function:result>: Returns a single result output.
+/ `stream`<function:stream>: Returns a single stream output.
+/ `full-stream`<function:full-stream>: Returns the merged streams for a single cell.
+/ `error`<function:error>: Returns a single error output.
 
 Examples:
 
@@ -323,17 +341,17 @@ Examples:
 
 = Export and Execution <section:export-and-execution>
 
-Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Juypter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
+Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Jupyter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
 See #link(<complete-workflow>)[Complete Workflow] for the steps required to export and execute a notebook.
 
 == Cell Functions
 
-The following functions are used to export individual cells. While the reading-rendering functions accept all kinds of cell specifications, the functions shown here accept only a raw element. This element is used as source for the exported cell. In the case of `execute` and `evaluate`, this element is also used together with the cell header and cell position to find the executed cell when reading from the notebook.
+The following functions are used to export individual cells. While the reading-rendering functions accept all kinds of cell specifications, the functions shown here accept only a raw element. This element is used as source for the exported cell. In the case of #func[execute] and #func[evaluate], this element is also used together with the cell header and cell position to find the executed cell when reading from the notebook.
 
 #function-doc(`export`)
 
-Wraps the given `raw` element in a metadata element labeled for export. The return value should be inserted in the document so that `stage-notebook` and `make-notebook` can find it.
+Wraps the given raw element in a metadata element labeled for export. The return value should be inserted in the document so that #func[stage-notebook] and #func[make-notebook] can find it.
 
 ```typc
 export(raw-spec, ..args) yields content-pill
@@ -351,7 +369,7 @@ export(`pd.set_option('display.max_columns', None)`)
 
 #function-doc(`execute`)
 
-Exports the given raw element and renders it from the notebook file. It is essentially equivalent to calling `export` + `Cell`.
+Exports the given raw element and renders it from the notebook file. It is essentially equivalent to calling #func[export] + #func[Cell].
 
 ```typc
 execute(raw-spec, ..args) yields content-pill
@@ -376,7 +394,7 @@ Examples:
 
 #function-doc(`evaluate`)
 
-Exports the given raw element and renders the single output of the corresponding cell in the notebook file. It is essentially equivalent to calling `export` + `output`.
+Exports the given raw element and renders the single output of the corresponding cell in the notebook file. It is essentially equivalent to calling #func[export] + #func[output].
 
 ```typc
 evaluate(raw-spec, ..args) yields content-pill
@@ -393,7 +411,7 @@ The sum of 3 and 4 is #evaluate(`3+4`).
 
 The return value of `evaluate` is not the cell output itself, but
 content made of the export metadata and the cell output. To work with the
-output value, the easiest is generally to use the `transform` setting:
+output value, the easiest is generally to use the #setting[transform] setting:
 The transform function gets the actual output value (generally as string)
 and can transform it before it is joined with the export metadata.
 For example in the following we get the result of `3+4` (as string), convert
@@ -435,7 +453,7 @@ stage-notebook(..args) yields content-pill
 
 For the arguments, see #link(<configuration>)[Configuration].
 
-The #setting[kernel] setting must be set, either directly on `stage-notebook`, or on the #func[export]/#func[execute]/#func[evaluate] function that exported the first raw element.
+The #setting[kernel] setting must be set, either directly on `stage-notebook`, or on the `export`/`execute`/`evaluate` function that exported the first raw element.
 
 Example:
 
@@ -470,7 +488,7 @@ For the arguments, see #link(<configuration>)[Configuration].
 
 This function is used by `stage-notebook` to prepare the notebook dictionary, but it can be useful for other purposes as shown in the examples below.
 
-The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the #func[export]/#func[execute]/#func[evaluate] function that exported the first raw element.
+The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the `export`/`execute`/`evaluate` function that exported the first raw element.
 
 #example[Notebook as PDF attachment]
 Here Callisto is not used to render notebooks but to add a notebook as attachment to the compiled PDF. The notebook contains a cell for every Python code block found in the document.
@@ -556,7 +574,7 @@ Workflow:
   ```
   ``````  
 
-  Note: until you do the first export, Typst will complain that it doesn't find the notebook file. To avoid this error, comment-out the ```txt nb: ... ``` line in the `config` call until you're ready to export the notebook.
+  Note: until you do the first export, Typst will complain that it doesn't find the notebook file. To avoid this error, comment-out the ```txt nb: ... ``` line in the `config` call until you are ready to export the notebook.
 
 
 + Export and execute the notebook:
@@ -601,7 +619,7 @@ a + 3
 We can do this computation inline: #evaluate(`a + 3`).
 ``````
 
-Here we included some "setup code" using #func[export], to create a notebook cell that will be executed along with the other cells but not rendered in the document.
+Here we included some "setup code" using `export`, to create a notebook cell that will be executed along with the other cells but not rendered in the document.
 
 == Automatic Export/Execution with a Makefile or justfile
 
@@ -624,7 +642,7 @@ watch:
 .PHONY: default export execute watch
 ```
 
-Running the `make` command will then export and execute the notebook. This also defines a `watch` target: assuming you have `watchexec` installed, you can:
+Running the `make` command will then export and execute the notebook. This also defines a `watch` target: assuming you have #link("https://watchexec.github.io/")[`watchexec`] installed, you can:
 
 + run ```txt make watch``` in a terminal to monitor the current directory for changes to the `.typ` files: whenever one of these files changes it will run ```txt make export execute``` for us,
 
@@ -714,15 +732,15 @@ watch:
 
 The Callisto functions that operate on cells accept a positional argument to select the cells that should be processed. This argument is called the _cell specification_.
 
-The functions `render`, `outputs`, `sources`, `cells` and all their variants accept all the forms listed below.
+The functions #func[render], #func[outputs], #func[sources], #func[cells] and all their variants accept all the forms listed below.
 
-The functions `export`, `execute` and `evaluate` only accept the "raw element" form.
+The functions #func[export], #func[execute] and #func[evaluate] only accept the "raw element" form.
 
 Notes:
 
 - One form of specification is notably missing from the list: `none`. Indeed the `none` value is used internally to represent that no specification was provided by the user (meaning that all cells should be selected). To specify "no cell", use the empty array `()`.  
 
-- The `render`, `outputs`, `sources`, `cells` functions and the "plural" variants of `outputs` don't raise an error if no matching cell is found. The "singular" variants however do raise an error in this case, and can be combined with `map` to work with multiple cells:
+- The #func[render], #func[outputs], #func[sources], #func[cells] functions and the "plural" variants of `outputs` don't raise an error if no matching cell is found. The "singular" variants however do raise an error in this case, and can be combined with `map` to work with multiple cells:
 
   ```typ
   // Render the first 10 cells, raising an error if fewer are found
@@ -760,9 +778,9 @@ Notes:
   #render("scatter", name-path: "metadata.callisto.header.type")
   ```
 
-/ #pills.content (a single `raw` element)<raw-spec>: This will find all the code cells in the notebook that have exactly the same source code and #link(<cell-preprocessing>)[header] as the raw element.
+/ #pills.content (a single `raw` element)<raw-spec>: This finds all the code cells in the notebook that have exactly the same source code and #link(<cell-preprocessing>)[header] as the raw element.
 
-  The header for the provided raw element is computed by merging the `cell-header` setting with the header rows found in the raw element text. The result is compared to the header built from the source of each code cell in the notebook. Examples:
+  The header for the provided raw element is computed by merging the #setting[cell-header] setting with the header rows found in the raw element text. The result is compared to the header built from the source of each code cell in the notebook. Examples:
 
   ``````typ
   // Render the code cell(s) with label "calc" and single line of code: `2 + 2`
@@ -838,7 +856,7 @@ config(..args) yields dictionary-pill
 
 Arguments can include any of the settings defined in the next section.
 
-The returned dictionary includes preconfigured versions of all the functions from the previous sections, as well as a `template` function as defined by the selected theme (or a do-nothing template if the theme defines no template).
+The returned dictionary includes preconfigured versions of all the functions from the previous sections, as well as a `template` function as defined by the selected #link(<themes>)[theme] (or a do-nothing template if the theme defines no template).
 
 Full example:
 
@@ -881,17 +899,17 @@ The notebook to read from (default: `none`). This can be the path to a notebook 
 #let (output, render) = callisto.config(nb: json("notebook.ipynb"))
 ```
 
-The path form is required for export-execution so that a `typst eval` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
+When using #link(<section:export-and-execution>)[export and execution], the path form is required so that a `typst eval` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
 
 #setting-doc[`cell-header-pattern`] #pills.str #pills.dictionary #pills.auto #pills.none
 
 The pattern that defines which lines at the start of a code cell constitute a #link(<cell-preprocessing>)[header] holding metadata (default: `auto`).
 
-If given as string, the pattern must include the "words" ```txt %key``` and ```txt %value```, and any whitespace in the string will be considered as representing any amount of whitespace (possibly none).
+If given as string, the pattern must include the "words" ```txt %key``` and ```txt %value```, and any whitespace in the string is considered as representing any amount of whitespace (possibly none).
 
 If `auto`, a default pattern string is used: ```txt "# | %key: %value"```
 
-For more control, a dictionary with fields `regex` and/or `writer` can be specified. The regular expression must define a first capture group for the key and a second one for the value. The `writer` field must be a function that takes key and value strings as positional arguments and returns a header line without trailing newline. If the `regex` field is missing or `none`, cells will be treated as having no header. If the `writer` field is missing or none, attempts to generate a cell dict (e.g. for export) will fail.
+For more control, a dictionary with fields `regex` and/or `writer` can be specified. The regular expression must define a first capture group for the key and a second one for the value. The `writer` field must be a function that takes key and value strings as positional arguments and returns a header line without trailing newline. If the `regex` field is missing or `none`, cells are treated as having no header. If the `writer` field is missing or none, attempts to generate a cell dict (e.g. for export) will fail.
 
 A value `none` is equivalent to ```typc (regex: none, writer: none)```.
 
@@ -926,7 +944,7 @@ When `true`, the cell #link(<cell-preprocessing>)[header] is not removed from th
 
 #setting-doc[`count`] #pills.str
 
-Can be `"index"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count. Example:
+Can be `"index"` or `"execution"`, to select if a cell number refers to its position in the notebook (zero-based) or to its execution count. The default is `"index"`. Example:
 
       ```typ
       // Cells with execution count between 5 and 9
@@ -935,20 +953,22 @@ Can be `"index"` or `"execution"`, to select if a cell number refers to its posi
 
 #setting-doc[`name-path`] #pills.str #pills.array #pills.auto
 
-If given as string, it defines the "path" in the cell dict where Callisto will look for cell names when cells are #link(<cell-specification>)[specified] by string. A string of the form `x.y.z` refers to the field `z` of the field `y` of the field `x` in the cell dict. The cell is selected if the value found in this path is either the cell specification string, or an array containing that string. Example:
+If given as string, it defines the "path" in the cell dict where Callisto looks for cell names when cells are #link(<cell-specification>)[specified] by string. A string of the form `x.y.z` refers to the field `z` of the field `y` of the field `x` in the cell dict. The cell is selected if the value found in this path is either the cell specification string, or an array containing that string.
+
+The cell dict always includes a `metadata` dict with cell metadata, which itself always includes a `callisto.header` dict with all the key-value pairs defined in the #link(<cell-preprocessing>)[cell header]. Example:
 
 ```typ
 // Render cells that have `#| type: scatter` in the cell header
 #render("scatter", name-path: "metadata.callisto.header.type")
 ```
 
-An array of strings can be given, in which case each value will be considered as a possible path.
+An array of strings can be given, in which case each value is considered as a possible path.
 
 The value `auto` (the default) corresponds to the array `("metadata.callisto.header.label", "id", "metadata.tags")`.
 
 #setting-doc[`cell-type`] #pills.str #pills.array
 
-Can be `"markdown"`, `"raw"`, `"code"`, an array of these values, or `"all"`. The default is `"all"`. This setting can be used to restrict the cell selection to specific cell types. This filtering out has no effect on the cell indices, which refer always to the position in unfiltered notebook. Examples:
+Can be `"markdown"`, `"raw"`, `"code"`, an array of these values, or `"all"`. The default is `"all"`. This setting can be used to restrict the cell selection to specific cell types. This filtering out has no effect on the cell indices, which refer always to the position in the unfiltered notebook. Examples:
 
 ```typ
 // Render all Markdown cells
@@ -967,7 +987,7 @@ Can be `"markdown"`, `"raw"`, `"code"`, an array of these values, or `"all"`. Th
 
 #setting-doc[`lang`] #pills.str #pills.auto #pills.none
 
-The language of the notebook's code cells. This will be used as language tag for the raw blocks holding source of code cells. If `auto` (the default), the language is read from the notebook metadata. Example:
+The language of the notebook's code cells. This is used as language tag for the raw blocks holding the source of code cells. If `auto` (the default), the language is read from the notebook metadata. Example:
 
 ```typ
 // Get source of all cells, setting the language to python for code cells
@@ -976,7 +996,7 @@ The language of the notebook's code cells. This will be used as language tag for
 
 #setting-doc[`raw-lang`] #pills.str #pills.none
 
-The language of the notebook's raw cells. This will be used as language tag for the raw blocks holding the source of raw cells. Example:
+The language of the notebook's raw cells. This is used as language tag for the raw blocks holding the source of raw cells. The default is `none`. Example:
 
 ```typ
 // Get source of all cells, setting `lang` to `typ` for raw cells
@@ -985,7 +1005,7 @@ The language of the notebook's raw cells. This will be used as language tag for 
 
 #setting-doc[`item`] #pills.int #pills.str
 
-This controls wich item should be returned by the "singular" output functions: `output`, `display`, `result`, `stream`, `full-stream`, `error`.
+This controls wich item should be returned by the "singular" output functions: #func[output], #func[display], #func[result], #func[stream], #func[full-stream], #func[error].
 
 The default is `"unique"`. In this case an error is raised when zero or more than one items are found. An integer value can be specified to pick one item in case of multiple matches. A negative value can be used to count from the end.
 
@@ -998,10 +1018,9 @@ Examples:
 #result(item: -1)
 ```
 
-
 #setting-doc[`output-type`] #pills.str #pills.array
 
-Can be `"display"`, `"result"`, `"stream"`, `"error"`, an array of these values, or `"all"`.
+Selects which output types should be included in the result. Can be `"display"`, `"result"`, `"stream"`, `"error"`, an array of these values, or `"all"` (the default).
 
 A `result` output is usually the value returned by the last line in a code cell; this output is usually missing if the last line returns nothing. It is possible to have other cell lines generate results (for example using `sys.displayhook` in Python) but that is uncommon and not recommended. In the notebook file, a single result is often stored as multiple values in different formats to let the reader choose a preferred format. Use the #setting[format] setting to choose a particular format.
 
@@ -1044,7 +1063,7 @@ By default an error is raised if a selected output is not available in one of th
 
 #setting-doc[`stream`] #pills.str
 
-For stream outputs, this selects the type of streams that should be returned. Can be `"stdout"`, `"stderr"` or `"all"`. Example:
+For stream outputs, this selects the type of streams that should be returned. Can be `"stdout"`, `"stderr"` or `"all"` (the default). Example:
 
 ```typ
 // Get all errors, and all messages written to stderr
@@ -1053,7 +1072,7 @@ For stream outputs, this selects the type of streams that should be returned. Ca
 
 #setting-doc[`result`] #pills.str
 
-How the function should return its result: `"value"` to return each result as a simple value, or `"dict"` to return it as a dictionary that contains a `"value"` field plus other fields holding metadata.
+How the function should return its result: `"value"` (the default) to return each result as a simple value, or `"dict"` to return it as a dictionary that contains a `"value"` field plus other fields holding metadata.
 
 The additional fields depend on the function called but include at least a `cell` dict holding the cell index, ID, metadata, type and (for code cells) execution count.
 
@@ -1069,7 +1088,7 @@ Examples:
 
 #setting-doc[`handlers`] #pills.dictionary
 
-A dictionary mapping "MIME types" to handler functions. A "MIME type" can be an actual MIME type like `image/png`, or a pseudo MIME type used for internal processing such as `cell`. A handler is a function called to process a value of a particular type. Each handler should accept a positional argument for the data to process and any keyword argument, and return the processed data. The dict passed to `handlers` is merged with the dict of default handlers, overriding default values with the specified ones. The default is an empty dict: `(:)`.
+A dictionary mapping "MIME types" to #link(<handlers>)[handler functions]. A "MIME type" can be an actual MIME type like `image/png`, or a pseudo MIME type used for internal processing such as `cell`. A handler is a function called to process a value of a particular type. Each handler should accept a positional argument for the data to process and any keyword argument, and return the processed data. The dict passed to `handlers` is merged with the dict of default handlers, overriding default values with the specified ones. The default is an empty dict: `(:)`.
 
 Example:
 
@@ -1092,11 +1111,9 @@ In the case of an array, the handler functions are chained by calling the first 
 
 This setting can only be used to redefine handlers for known "MIME types": an error is raised if a dict field doesn't correspond to a known handler, to catch typos. New "MIME types" can be registered with the #setting[new-handlers] setting. 
 
-See the #link(<handlers>)[Handlers] sections for more information.
-
 #setting-doc[`new-handlers`] #pills.dictionary
 
-This works like `handlers`, but allows registering new handlers, for example to support additional output formats.
+This works like #setting[handlers], but allows registering new handlers, for example to support additional output formats. Default: `(:)`.
 
 For example one can register a handler for the `model/obj` MIME type to render cell outputs that hold 3D models in the OBJ format:
 
@@ -1147,7 +1164,7 @@ Example:
 
 #setting-doc[`h1-level`] #pills.int
 
-The Typst heading level corresponding to top-level headings in the notebook (default: 1). If set to 0, the top-level heading(s) in the notebook will be converted to `title` elements in Typst. Example:
+The Typst heading level corresponding to top-level headings in the notebook (default: 1). If set to 0, the top-level heading(s) in the notebook are converted to `title` elements in Typst. Example:
 
 ```typ
 // Render notebook with top-level heading converted to document title,
@@ -1169,7 +1186,7 @@ A value larger than 1 can be useful to include a notebook as a chapter/section o
 
 Whether all the LaTeX command definitions (of the form `\newcommand`) in the notebook should be gathered into into a single "preamble" to be used when rendering any part of the notebook.
 
-Jupyter allows defining a LaTeX command in an equation and using it in another equation (contrary to actual LaTeX, where a definition in some equation is local to that equation). This can cause difficulties in Callisto: the default LaTeX renderer (mitex) doesn't allow a command local to one equation to be used in another. Also the user might render a single cell that uses a command defined in another. To address these issues, by default Callisto gathers all command definitions in a single preamble string: at render time, such definitions are removed from the equation (to avoid duplicate definitions) and the whole preamble is inserted at the beginning of the equation. This whole processing can be disabled by setting `gather-latex-defs: false`.
+Jupyter allows defining a LaTeX command in an equation and using it in another equation (contrary to actual LaTeX, where a definition in some equation is local to that equation). This can cause difficulties in Callisto: the default LaTeX renderer (MiTeX) doesn't allow a command local to one equation to be used in another. Also the user might render a single cell that uses a command defined in another. To address these issues, by default Callisto gathers all command definitions in a single preamble string: at render time, such definitions are removed from the equation (to avoid duplicate definitions) and the whole preamble is inserted at the beginning of the equation. This whole processing can be disabled by setting `gather-latex-defs: false`.
 
 
 ```typ
@@ -1197,7 +1214,7 @@ Use a dictionary for more control on the processing:
 
 - The `render` field can hold `true`/`false`/`auto`/`"strip"`. These values have the same meaning as when passed directly to `console-text`.
 
-- Additional fields are passed as arguments to `ansi.render`. Supported fields include `palette` (an array of 16 standard ANSI colors), `fg` and `bg` (foreground and background colors) and `bold-is-bright` (whether bold text in a standard normal color should be rendered in the corresponding bright color).
+- Additional fields are passed as arguments to #func[ansi.render]. Supported fields include `palette` (an array of 16 standard ANSI colors), `fg` and `bg` (foreground and background colors) and `bold-is-bright` (whether bold text in a standard normal color should be rendered in the corresponding bright color).
 
 Examples:
 
@@ -1240,7 +1257,7 @@ The theme used for rendering content (default: `"notebook"`). This can be the na
 
 Currently available built-in themes:
 
-- `notebook`: renders cells in a style similar to the Jupyter interface, with code cell execution counts shown in square brackets in the left margin.
+- `notebook`: renders cells in a style similar to the Jupyter graphical interface, with code cell execution counts shown in square brackets in the left margin.
 
 - `neat`: a simpler theme, more appropriate for regular documents such such as reports. This theme provides a document template.
 
@@ -1259,7 +1276,7 @@ Example:
 
 #setting-doc[`export-name`] #pills.str
 
-The name used to identify raw elements belonging to a particular export, and to get the exported notebook from the command line. The default is `notebook`.
+The name used to identify raw elements belonging to a particular export, and to get the exported notebook from the command line. The default is `"notebook"`.
 
 The export name is independent from the notebook file: the filename can be unwieldy, or undefined if the notebook is exported but not read back.
 
@@ -1284,7 +1301,7 @@ typst eval --input callisto-export=true --in document.typ \
 
 #setting-doc[`cell-header`] #pills.dictionary #pills.none
 
-If a dictionary is given, each key-value pair will be added as a #link(<cell-preprocessing>)[header line] in the source of exported cells. All field values in the dictionary must be strings.
+If a dictionary is given, each key-value pair is added as a #link(<cell-preprocessing>)[header line] in the source of exported cells. All field values in the dictionary must be strings.
 
 This setting is especially useful when generating cells programmatically. Example:
 
@@ -1363,7 +1380,7 @@ Example:
 #output("plot1", transform: rect)
 ```
 
-This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #link(<section:singular-extract>)[output] and #func[evaluate] return a placeholder instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
+This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #func[output] and #func[evaluate] return a placeholder instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
 
 For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here's a complete example:
 
@@ -1412,20 +1429,20 @@ Supported values:
 #pad(left: 1em)[
   / `false`: No placeholder is used and the missing value will cause a panic.
 
-  / `true`: A placeholder will be used in place of the missing value. The placeholder is obtained by calling the corresponding #link(<handlers>)[handler]:
+  / `true`: A placeholder is used in place of the missing value. The placeholder is obtained by calling the corresponding #link(<handlers>)[handler]:
 
-    - `placeholder-output` for `output`, its variants such as `result`, and `evaluate`,
-    - `placeholder-Cell` for `Cell` and `execute`,
-    - `placeholder-In` for `In`,
-    - `placeholder-Out` for `Out`.
+    - `placeholder-output` for #func[output] (and its variants) and #func[evaluate],
+    - `placeholder-Cell` for #func[Cell] and #func[execute],
+    - `placeholder-In` for #func[In],
+    - `placeholder-Out` for #func[Out].
 
   / `auto`: The default. Resolves to `false` when reading from a regular notebook, and `true` when reading from a notebook that was created by export.
 
   / A function: The function is called with the #link(<cell-specification>)[cell specification] of the missing value and must return the placeholder to use.
 
-    Note: for code blocks passed to `execute` and `evaluate`, the cell specification is the code block (raw element) itself, while for calls such as `#output("my-cell")`, the specification is `"my-cell"`.
+    Note: for code blocks passed to #func[execute] and #func[evaluate], the cell specification is the code block (raw element) itself, while for calls such as ```txt #output("my-cell")```, the specification is `"my-cell"`.
 
-  / Any other value: Other values such as a string, number, content or `none` are be used directly as placeholder.
+  / Any other value: Other values such as a string, number, content or `none` are used directly as placeholder.
 ]
 
 Examples:
@@ -1446,7 +1463,7 @@ Callisto also exports various variables and utility functions.
 
 == Module `callisto`
 
-Apart from the functions described in the previous sections, the top-level Callisto module also exports some dictionaries and helper functions.
+Apart from the functions described in the previous sections, the top-level Callisto module exports the following functions and variables:
 
 #function-doc(`themes`)
 
@@ -1458,7 +1475,7 @@ A dictionary holding the default #link(<handlers>)[handlers].
 
 #function-doc(`handle`)
 
-This function is used in themes and custom #link(<handlers>)[handlers] to defer processing of a value to another handler.
+This function is used in #link(<handlers>)[handlers] to defer processing of a value to another handler.
 
 ```typc
 handle(
@@ -1469,13 +1486,11 @@ handle(
 )
 ```
 
-/ `mime`: The "MIME type" of the handler to call to process the value for the value passed as positional argument.
+/ `mime`: The "MIME type" of the handler to call to process the value passed as positional argument.
 
-/ `ctx`: The #link(<handler-context>)[handler context]. This dict is usually received by the handler that makes the `handle` call, and simply forwarded to `handle`. The dict contains the user configuration as well as contextual values regarding the output item or cell being processed..
+/ `ctx`: The #link(<handler-context>)[handler context]. This dict is usually received by the handler that makes the `handle` call, and simply forwarded to `handle`. The dict contains the user configuration as well as contextual values relevant to the output item or cell being processed.
 
-The positional argument is the data to process.
-
-Additional arguments are forwarded to the handler called by `handle`.
+The positional argument is the data to process. Additional arguments are forwarded to the handler called by `handle`.
 
 For example, here is the definition of the default handler for Markdown cells:
 
@@ -1523,7 +1538,7 @@ Header fields are not processed in any way, they are returned as strings as foun
 ```typc
 parse-text(
   pattern: str-pill dictionary-pill auto-pill none-pill,
-Subm str-pill,
+  str-pill,
 ) yields dictionary-pill
 ```
 
@@ -1570,7 +1585,7 @@ This module holds the code for dealing with ANSI escape sequences in textual out
 
 Converts a string with ANSI escape sequences into styled text. How a particular ANSI sequence is rendered can be configured using the parameters that accept a `function`: the function will receive content as positional argument, and `fg` and `bg` keyword arguments for the current colors, which are always of type `color` or `none`.
 
-When colors are reversed and one of `fg` or `bg` is `none`, the `none` value will be replaced with `white` or `black` to guarantee good contrast. (When both are `none`, the reversing will have no effect.)
+When colors are reversed and one of `fg` or `bg` is `none`, the `none` value is replaced with `white` or `black` to guarantee good contrast. (When both are `none`, the reversing has no effect.)
 
 ```typc
 render(
@@ -1599,7 +1614,7 @@ render(
 / `bg`: Initial background color (default `none`). How this color is used can be changed with `apply-bg`. By default, with `bg: none` the background color is left as-is .
 
 / `bold-is-bright`: If `true`, bold text in standard normal color (one of the
-  first 8 colors in the palette) will also be rendered "bright" by using
+  first 8 colors in the palette) is also rendered "bright" by using
   the corresponding bright color from the palette. Default: `false`.
 
 / `apply-fg`: The function to apply the foreground color. The default uses `text` if `fg != none`.
@@ -1668,7 +1683,7 @@ console-block-template(
 
 = Cell Preprocessing and Header<cell-preprocessing>
 
-The lower-level #func[cells] function (and its #link(<section:singular-render>)[cell] variant) can be used to retrieve literal cell dicts as found in the notebook JSON, with the following processing applied:
+The lower-level #func[cells] function (and its #func[cell] variant) can be used to retrieve literal cell dicts as found in the notebook JSON, with the following processing applied:
 
 -  A cell ID is generated if missing (this field is mandatory since nbformat 4.5).
 
@@ -1697,7 +1712,7 @@ Cell dicts returned by `cells` can be used as a form of cell specification when 
 
 = Handlers <handlers>
 
-A handler is a function called to process a value such as: a cell source, a cell output such as a PNG image, or even a whole cell. Each handler is associated with a "MIME type", which is really an arbitrary string used to identify the kind of value being processed. In the case of rich outputs (of type `display` or `result`) which can be available in multiple formats, the item is rendered by calling the handler for the selected format. In this case the "MIME type" is a real MIME type, for example `image/png`. Other handlers use pseudo MIME types without slash character, for example `code-cell`.
+A handler is a function called to process a value such as a cell source, a cell output such as a PNG image, or even a whole cell. Each handler is associated with a "MIME type", which is really an arbitrary string used to identify the kind of value being processed. In the case of rich outputs (of type `display` or `result`) which can be available in multiple formats, the item is rendered by calling the handler for the selected format. In this case the "MIME type" is a real MIME type, for example `image/png`. Other handlers use pseudo MIME types without slash character, for example `code-cell`.
 
 Handlers offer a powerful mechanism for customization. A particular value is typically processed in several steps by chaining calls to different handlers from more abstract to more concrete. This allows the theme or the user to plug in their code at the right step in the chain. 
 
@@ -1723,15 +1738,15 @@ These handlers are described in the next sections.
 / `raw-cell`: For raw cells.
 
 === For Output Items
-/ `output`: For any output. Called before `display`, `result`, `error` or `stream`. For rich outputs (`display` and `result`) which can be available in multiple formats, the handler receives a dict holding the selected format (based on the #setting[format] setting) and the corresponding data and metadata. The default delegates to the handler specific to the output type (display, etc.).
+/ `output`: For any output. For rich outputs (`display` and `result`) which can be available in multiple formats, the handler receives a dict holding the selected format (based on the #setting[format] setting) and the corresponding data and metadata. The default delegates to the handler specific to the output type, such as `display`.
 / `display`: For display output. The default delegates to `rich-output-specific`.
 / `result`: For result output. The default delegates to `rich-output-specific`.
 / `error`: For error output.
-/ `rich-output-generic`: For processing the actual content of rich outputs ("display" and "result").
+/ `rich-output-generic`: For processing the actual content of rich outputs (display and result outputs).
 / `stream`: For any stream. The default delegates to the stream-specific handler.
 / `stream-stdout`: For an "stdout" stream.
 / `stream-stderr`: For an "stderr" stream.
-/ `stream-merged`: For a stream that merges "stdout" and "stderr" items. Such outputs are produced by #link(<section:outputs-type-specific>)[`full-streams`] with setting `stream: "all"`.
+/ `stream-merged`: For a stream that merges "stdout" and "stderr" items. Such outputs are produced by #func[full-streams] with setting #setting(content: `stream: "all"`)[stream].
 / `stream-generic`: Base handler used by stream-specific handlers for processing the stream content.
 
 === For Output Item Data
@@ -1753,14 +1768,14 @@ These handlers are described in the next sections.
 
 === For LaTeX Math
 / `math-markdown`: For processing math formulas in Markdown. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions). See the #setting[gather-latex-defs] setting.
-/ `math-generic`: Base handler for math. The default uses #link("https://github.com/mitex-rs/mitex")[MiTeX] to convert LaTeX formulas to Typst.
+/ `math-generic`: Base handler for math formulas. The default uses #link("https://github.com/mitex-rs/mitex")[MiTeX] to convert LaTeX formulas to Typst.
 
 === For Placeholders
 
-/ `placeholder-Cell`: Produces a placeholder for the #link(<section:singular-render>)[Cell] function.
-/ `placeholder-In`: Produces a placeholder for the #link(<section:singular-render>)[In] function. 
-/ `placeholder-Out`: Produces a placeholder for the #link(<section:singular-render>)[Out] function. 
-/ `placeholder-output`: Produces a placeholder for the #link(<section:singular-extract>)[output] function and its #link(<section:singular-output>)[variants].
+/ `placeholder-Cell`: Produces a placeholder for the #func[Cell] function.
+/ `placeholder-In`: Produces a placeholder for the #func[In] function. 
+/ `placeholder-Out`: Produces a placeholder for the #func[Out] function. 
+/ `placeholder-output`: Produces a placeholder for the #func[output] function and its #link(<section:singular-output>)[variants].
 / `placeholder-input-from-source`: Produces a placeholder for a code cell input using the cell source. This is used in cases where the cell cannot be found in the notebook, but the source is known because it is given as a #link(<raw-spec>)[raw element in the cell specification].
 / `placeholder-function-call`: Produces a placeholder that shows the function name and cell specification of the call that requires a placeholder.
 / `placeholder-inline-generic`: Implements the generic layout of an inline placeholder.
@@ -1827,7 +1842,7 @@ To call a particular handler from inside your own, use #func[handle]. For exampl
 )
 ```
 
-This simply delegates the processing of the cell source to the `source-code-generic` handler, with the handler's `lang` parameter set to the notebooks "raw lang" (as configured by the user). The default `source-code-generic` handler is defined as
+This simply delegates the processing of the cell source to the `source-code-generic` handler, with the handler's `lang` parameter set to the notebook's #setting[raw-lang]. The default `source-code-generic` handler is defined as
 
 ```typ
 #let source-code-generic(txt, ctx: none, lang: none, ..args) = {
@@ -1860,15 +1875,15 @@ This also calls the `source-code-generic` handler to process the cell source, bu
 
 When Callisto processes a particular value, which handler gets called is determined as follows:
 
-- During rendering (when the user calls `render`, `Cell`, `In`, `Out` or `execute`), the handlers defined by the theme replace the default handlers. For example the "plain" theme replaces the `text/plain`, `stream-generic` and `error` handlers with functions that delegates to the `text-console-block` handler (to convert into text styles the ANSI escape sequences that might appear in these text messages).
+- During rendering (when the user calls #func[render], #func[Cell], #func[In], #func[Out] or #func[execute]), the handlers defined by the #link(<themes>)[theme] replace the default handlers. For example the "plain" theme replaces the `text/plain`, `stream-generic` and `error` handlers with functions that delegates to the `text-console-block` handler (to convert into text styles the ANSI escape sequences that might appear in these text messages).
 
-- During other function calls (like `source` or `outputs`), the theme handlers are _not_ used unless the user set #setting[apply-theme] to `true`.
+- During other function calls (like #func[source] or #func[outputs]), the theme handlers are _not_ used unless the user set #setting[apply-theme] to `true`.
 
 - The handlers defined by the user through the #setting[handlers] setting always take precedence.
 
 = Themes <themes>
 
-A theme is basically a dictionary of handlers to be used in place of the default handlers during rendering (i.e. during calls to `render`, `Cell`, `In`, `Out` or `execute`).
+A theme is basically a dictionary of #link(<handlers>)[handlers] to be used in place of the default handlers during rendering (i.e. during calls to #func[render], #func[Cell], #func[In], #func[Out] or #func[execute]).
 
 The theme dictionary can also include an additional field `template` to define a document template. This can be useful to maintain a cohesive style in documents that mix Typst-native content with notebook cells, or to separate global styles from element-specific styles. 
 
@@ -1884,7 +1899,7 @@ For example the "neat" theme defines a template function that changes the text f
 
 == Writing Themes
 
-A theme only needs to define the handlers it wants to modify. The default handlers will be used as fallback. An existing theme can be customized by adding to its dictionary. The dictionaries for the standard themes are available in the #func[themes] variable.
+A theme only needs to define the handlers it wants to modify. The default handlers will be used as fallback. An existing theme can be customized by adding to its dictionary. The dictionaries for the standard themes are available in the #func(content: `callisto.themes`)[themes] variable.
 
 #example[A theme that wraps cell outputs in figures]
 

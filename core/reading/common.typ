@@ -1,4 +1,4 @@
-#import "/core/configuration.typ": parse-main-args, read-enabled
+#import "/core/configuration.typ": parse-main-args, read-enabled, exporting
 #import "/core/util.typ"
 #import "notebook.typ"
 
@@ -8,19 +8,23 @@
   return "callisto" in nb-json.metadata
 }
 
-// Return true if the configuration allows using placeholders
-#let placeholder-enabled(cfg: none) = {
-  if read-enabled(cfg: cfg) and not _from-export(cfg: cfg) {
-    // Enabled if anything but false or auto (can be true/content/function)
-    return cfg.placeholder not in (false, auto)
-  }
-  // If read disabled or from export, we use it unless explicitly disabled
-  return cfg.placeholder != false
-}
+// Return true if the configuration allows using placeholders, that is
+// - if the current compilation is an export, or
+// - if 'placeholder' is true, or
+// - if 'placeholder' is auto and the notebook is unspecified or was produced
+//   by an export, or
+// - if 'placeholder' is a function or a value to use as-is (i.e. not a
+//   boolean or auto).
+#let placeholder-enabled(cfg: none) = (
+  exporting() or
+  cfg.placeholder == true or
+  cfg.placeholder == auto and (cfg.nb == none or _from-export(cfg: cfg)) or
+  type(cfg.placeholder) not in (bool, type(auto))
+)
 
 // Return the placeholder value to use for "mime" type
 #let get-placeholder(mime: none, ctx: none) = {
-  if ctx.placeholder in (auto, true) {
+  if type(ctx.placeholder) in (bool, type(auto)) {
     return util.handle(none, mime: mime, ctx: ctx)
   }
   if type(ctx.placeholder) == function {

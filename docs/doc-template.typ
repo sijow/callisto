@@ -184,12 +184,18 @@
   [#heading(depth: 3, content)#label("function:" + it.text)]
 }
 
-#let setting-doc(it, content: none) = {
-  if content == none { content = it }
+#let setting-doc(name, pills, content: none) = {
+  if content == none { content = name }
   show heading: it => it.body
-  v(1.6em, weak: true)
-  [#heading(depth: 3, content)#label("setting:" + it.text)]
-  _terms-sep-space
+  block(
+    above: 1.6em,
+    sticky: true,
+    {
+      [#heading(depth: 3, content)#label("setting:" + name.text)]
+      _terms-sep-space
+      pills
+    },
+  )
 }
 #let example(it) = heading(depth: 4, [Example: ] + it)
 

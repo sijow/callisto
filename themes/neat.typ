@@ -47,7 +47,7 @@
 }
 
 #let _code-cell-output(cell, ctx: none, ..args) = {
-  let outs = outputs(cell, ..ctx.cfg, result: "value")
+  let outs = outputs(cell, ..ctx.cfg)
   if outs.len() == 0 { return }
   // Undo template show rule for raw block
   // (we don't want simple text outputs to be shown in rounded gray rects)

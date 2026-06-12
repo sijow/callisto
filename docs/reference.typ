@@ -2056,7 +2056,7 @@ Note: The `code-cell-output` handler receives the cell as positional argument. I
 }
 
 #let _code-cell-output(cell, ctx: none, ..args) = {
-  let outs = callisto.outputs(cell, ..ctx.cfg, result: "value")
+  let outs = callisto.outputs(cell, ..ctx.cfg)
   if outs.len() == 0 { return }
   // Undo template show rule for raw block
   // (we don't want simple text outputs to be shown in rounded gray rects)

@@ -57,7 +57,7 @@
 })
 
 #let _handler-code-cell-output(cell, ctx: none, ..args) = {
-  let outs = outputs(cell, ..ctx.cfg, result: "value")
+  let outs = outputs(cell, ..ctx.cfg)
   if outs.len() == 0 { return }
   block(
     above: if ctx.input { 0pt } else { 2em },

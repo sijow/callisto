@@ -161,9 +161,13 @@
       let sel = selector(_export-label(cfg.export-name)).before(here())
       let matches = query(sel).filter(x => x.value.text == exported-text)
       let n = matches.len()
-      // Use the nth cell as cell spec, or an empty array (which matches no
+      // Use the nth cell ID as cell spec, or an empty array (which matches no
       // cell) if there is no nth cell.
-      let new-spec = cs.at(n, default: ())
+      let new-spec = if cs.len() >= n {
+        cs.at(n).id
+      } else {
+        ()
+      }
       export-md + [#value-func(new-spec, ..cfg)]
     }
   }

@@ -19,6 +19,6 @@
 See @Some-heading and #ref(label("Here’s-a-heading-with-a-quote"))
 
 #callisto.render(
-  nb: json("notebook.ipynb"),
+  nb: path("notebook.ipynb"),
   h1-level: 0,
 )

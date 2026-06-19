@@ -23,6 +23,7 @@
   node(<placeholder-inline-generic>),
   node(<placeholder-block-generic>),
   edge(<placeholder-function-call>, <placeholder-inline-generic>),
+  edge(<placeholder-function-call>, <placeholder-block-generic>),
   edge(<placeholder-input-from-source>, <placeholder-block-generic>),
 
   node(<source-code-generic>),

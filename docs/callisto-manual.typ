@@ -258,7 +258,7 @@ Example:
 
 The functions in the previous section have many variants that work similarly, but for only a single cell or a single output, or for a specific output type.
 
-=== `Cell`, `In`, `Out` <section:singular-render>
+=== `Cell`, `In`, `Out` <singular-render>
 
 The #func[render] function has three variants that work on a single cell, raising an error if zero or more than one are found:
 
@@ -277,7 +277,7 @@ Examples:
 #Out("plot")
 ```
 
-=== `output`, `source`, `cell` <section:singular-extract>
+=== `output`, `source`, `cell` <singular-extract>
 
 The #func[outputs], #func[sources] and #func[cells] functions have "singular" variants that return a single value (raising an error if zero or more than one are found):
 
@@ -298,7 +298,7 @@ Examples:
 #outputs(cell("plot"))
 ```
 
-=== `displays`, `results`, `streams`, `full-streams`, `errors` <section:outputs-type-specific>
+=== `displays`, `results`, `streams`, `full-streams`, `errors` <outputs-type-specific>
 
 The #func[outputs] function has further variants to target a specific type of output:
 
@@ -321,7 +321,7 @@ Examples:
 #errors()
 ```
 
-=== `display`, `result`, `stream`, `full-stream`, `error` <section:singular-output>
+=== `display`, `result`, `stream`, `full-stream`, `error` <singular-output>
 
 Type-specific output functions also come in singular versions:
 
@@ -343,7 +343,7 @@ Examples:
 #full-stream("plot")
 ```
 
-= Export and Execution <section:export-and-execution>
+= Export and Execution <export-and-execution>
 
 Callisto can be used to export raw elements (e.g. code blocks) from the Typst document into a Jupyter notebook file. This notebook can be executed outside of Typst, for example with `jupyter-nbconvert`. This notebook can also be used as the input file for Callisto, to automatically include execution results in the Typst document.
 
@@ -375,6 +375,22 @@ The `export` function exports a cell without rendering it. This can be used to a
 export(`pd.set_option('display.max_columns', None)`)
 ```
 
+Cell header key-value pairs can be specified either as header lines or with the #setting[cell-header] setting so the following are equivalent:
+
+``````typ
+#export(```
+#| label: calc
+2+2
+```)
+
+#export(
+  cell-header: (label: "calc"),
+  ```
+  2+2
+  ```
+)
+``````
+
 #function-doc(`execute`)
 
 Exports the given raw element and renders it from the notebook file. It is essentially equivalent to calling #func[export] + #func[Cell].
@@ -402,7 +418,7 @@ Examples:
 
 #function-doc(`evaluate`)
 
-Exports the given raw element and renders the single output of the corresponding cell in the notebook file. It is essentially equivalent to calling #func[export] + #func[output].
+Exports the given raw element and returns the single output of the corresponding cell in the notebook file. It is essentially equivalent to calling #func[export] + #func[output].
 
 ```typc
 evaluate(raw-spec, ..args) yields content-pill
@@ -589,7 +605,7 @@ Problems appear also when the `execute` function produces a raw element: the raw
 
 These issues might get resolved if/when Typst adds support for #link("https://github.com/typst/typst/issues/7165")[replacing show rules].
 
-Finally, when selecting blocks with ```txt #show raw.where(lang: ...): execute```, it is generally a bad idea to use the canonical language name (e.g. "python") for the raw blocks: the show rule can inadvertently select blocks that should not be executed, in particular blocks that are produced by the `execute` call itself when it renders the code input, which can lead to infinite recursion. Prefer a non-standard `lang` value, for example `"py-x"` instead of `"py"`.
+Finally, when selecting blocks with ```txt #show raw.where(lang: ...): execute```, it is generally a bad idea to use the standard language name (e.g. "python") for the raw blocks: the show rule can inadvertently select blocks that should not be executed, in particular blocks that are produced by the `execute` call itself when it renders the code input, which can lead to infinite recursion. Prefer a non-standard `lang` value, for example `"py-x"` instead of `"py"`.
 
 === Complete Workflow with the Command Line <complete-workflow>
 
@@ -675,16 +691,16 @@ Some computation with Python:
 a + 3
 ```
 
-We can do this computation inline: #evaluate(`a + 3`).
+The same, getting just the result: #evaluate(`a + 3`).
 ``````
 
 Here we included some "setup code" using `export`, to create a notebook cell that will be executed along with the other cells but not rendered in the document.
 
-== Automatic Export/Execution with a Makefile or justfile
+== Automatic Export/Execution with a Makefile or justfile <makefile>
 
 The calls to `typst eval` and `jupyter-nbconvert` can be automated using a simple Makefile:
 
-```Makefile
+```makefile
 EVAL := typst eval --input callisto-export=true --in document.typ
 
 default: export execute
@@ -958,7 +974,7 @@ The notebook to read from (default: `none`). This can be the path to a notebook 
 #let (output, render) = callisto.config(nb: json("notebook.ipynb"))
 ```
 
-When using #link(<section:export-and-execution>)[export and execution], the path form is required so that a `typst eval` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
+When using #link(<export-and-execution>)[export and execution], the path form is required so that a `typst eval` can succeed when creating the exported notebook the first time, when the file doesn't exist yet.
 
 #setting-doc[`cell-header-pattern`][#pills.str #pills.dictionary #pills.auto #pills.none]
 
@@ -1380,7 +1396,7 @@ The result of the second computation is #output("calc2").
 
 The name of the Jupyter kernel to use when exporting a notebook (default: `none`).
 
-To see the list of kernels available in your Jupyter installation, use the command `jupyter kernelspec list` which prints a list like the following:
+To see the list of kernels available in your Jupyter installation, use the command ```txt jupyter kernelspec list``` which prints a list like the following:
 
 ```txt
 $ jupyter kernelspec list
@@ -1425,7 +1441,7 @@ In both cases, the exported notebook can be obtained from the command-line using
 
 ```bash
 typst eval --input callisto-export=true --in document.typ \
-    'query(<notebook>).first().value' > notebook.ipynb
+    'query(<notebook>).first().value' > export.ipynb
 ```
 
 #setting-doc[`transform`][#pills.function #pills.none]
@@ -1439,7 +1455,7 @@ Example:
 #output("plot1", transform: rect)
 ```
 
-This setting is useful for manipulating cell outputs in documents that use #link(<section:export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #func[output] and #func[evaluate] return a #setting[placeholder] instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
+This setting is useful for manipulating cell outputs in documents that use #link(<export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #func[output] and #func[evaluate] return a #setting[placeholder] instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
 
 For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here's a complete example:
 
@@ -1447,7 +1463,7 @@ For example, we can transform a NumPy vector into a Typst math `vec`, to typeset
 #import "@preview/callisto:0.3.0"
 
 #let (output, execute, stage-notebook) = callisto.config(
-  nb: path("notebook.ipynb"),
+  nb: path("export.ipynb"),
   kernel: "python3",
 )
 #show raw.where(lang: "py-x"): execute
@@ -1481,7 +1497,7 @@ The value to use in place of a missing value.
 
 Placeholders are used by functions that extract a single output and functions that render a single cell. For example `output` and `result` should always return a single output. If none is found, we know that one is missing, so a placeholder is used if this feature is enabled. On the other hand, `outputs` and `results` can very well return an empty array if the target cells have no such outputs; this doesn't mean that a value is missing, so no placeholder is used. Similarly, `Cell` uses placeholders since it is supposed to find exactly one cell, while `render` doesn't since any number of matches is valid.
 
-Placeholders are particularly useful when using #link(<section:export-and-execution>)[export and execution]: it is annoying to get an error in the editor every time a code block is added/edited and the corresponding execution result not yet available. With placeholders, Callisto can render the source of the code block as "work in progress" instead of raising an error.
+Placeholders are particularly useful when using #link(<export-and-execution>)[export and execution]: it is annoying to get an error in the editor every time a code block is added/edited and the corresponding execution result not yet available. With placeholders, Callisto can render the source of the code block as "work in progress" instead of raising an error.
 
 During an export run (`typst eval` with `--input callisto-export=true`), placeholders are always enabled, to prevent functions such as #func[Cell] and #func[output] from raising an error.
 
@@ -1513,6 +1529,8 @@ Examples:
 // Show source in red if execution result no available
 #evaluate(`1+1`, placeholder: text.with(red))
 ```
+
+By default a placeholder for `execute`, `Cell`, `In` or `Out` is rendered as a block element, while for `output` and `evaluate` a heuristic is used: the placeholder is rendered as block if the cell specification is an inline raw element, and as block otherwise.
 
 = Modules and Utility Functions
 
@@ -1832,7 +1850,7 @@ The role of each handler is described in the next sections.
 / `placeholder-Cell`: Produces a placeholder for the #func[Cell] function.
 / `placeholder-In`: Produces a placeholder for the #func[In] function. 
 / `placeholder-Out`: Produces a placeholder for the #func[Out] function. 
-/ `placeholder-output`: Produces a placeholder for the #func[output] function and its #link(<section:singular-output>)[variants].
+/ `placeholder-output`: Produces a placeholder for the #func[output] function and its #link(<singular-output>)[variants].
 / `placeholder-input-from-source`: Produces a placeholder for a code cell input using the cell source. This is used in cases where the cell cannot be found in the notebook, but the source is known because it is given as a #link(<raw-spec>)[raw element in the cell specification].
 / `placeholder-function-call`: Produces a placeholder that shows the function name and cell specification of the call that requires a placeholder.
 / `placeholder-inline-generic`: Implements the generic layout of an inline placeholder.

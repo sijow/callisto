@@ -1,6 +1,8 @@
-#import "doc-template.typ": template, function-doc, example, pills, setting-doc, setting, func
+#import "doc-template.typ": template, function-doc, example, pills, setting-doc, setting, func, doc-block
 
 #show: template
+
+#set document(date: none)
 
 #let ver = toml("../typst.toml").package.version
 
@@ -178,9 +180,9 @@ Used to render notebook cells as Typst content. A `render` call can be used to r
 
  Markdown cells are converted to Typst content: Markdown headings to Typst headings, LaTeX equations to Typst equations, etc. By default, both the source and outputs of code cells are rendered (in a style that depends on the selected theme), and raw cells are rendered as simple raw blocks.
 
-```typc
+#doc-block(```typc
 render(cell-spec, ..args) yields content-pill
-```
+```)
 
 The positional argument is a #link(<cell-specification>)[cell specification].
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -200,9 +202,9 @@ Examples:
 
 Returns the outputs of the selected cells, as an array of output items: strings, images, etc. It operates only on code cells; other cell types are ignored.
 
-```typc
+#doc-block(```typc
 outputs(cell-spec, ..args) yields array-pill
-```
+```)
 
 The positional argument is a #link(<cell-specification>)[cell specification].
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -222,9 +224,9 @@ Returns the source of cells as an array of `raw` elements. The value of the `lan
 - For code cells: the notebook language (configured #setting[lang] value, or language name from notebook metadata if `lang` is not configured).
 - For raw cells: the configured #setting[raw-lang], or `none` if not configured.
 
-```typc
+#doc-block(```typc
 sources(cell-spec, ..args) yields array-pill
-```
+```)
 
 The positional argument is a #link(<cell-specification>)[cell specification].
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -240,9 +242,9 @@ Example:
 
 Returns the cells themselves, as Typst dictionaries holding the JSON data found in the notebook file. This is a low-level function to be used for further processing.
 
-```typc
+#doc-block(```typc
 cells(cell-spec, ..args) yields array-pill
-```
+```)
 
 The positional argument is a #link(<cell-specification>)[cell specification].
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -361,9 +363,9 @@ The following functions are used to export individual cells. While the reading-r
 
 Wraps the given raw element in a metadata element labeled for export. The return value should be inserted in the document so that #func[stage-notebook] and #func[make-notebook] can find it.
 
-```typc
+#doc-block(```typc
 export(raw-spec, ..args) yields content-pill
-```
+```)
 
 The positional argument is a raw element.
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -395,9 +397,9 @@ Cell header key-value pairs can be specified either as header lines or with the 
 
 Exports the given raw element and renders it from the notebook file. It is essentially equivalent to calling #func[export] + #func[Cell].
 
-```typc
+#doc-block(```typc
 execute(raw-spec, ..args) yields content-pill
-```
+```)
 
 The positional argument is a raw element.
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -420,9 +422,9 @@ Examples:
 
 Exports the given raw element and returns the single output of the corresponding cell in the notebook file. It is essentially equivalent to calling #func[export] + #func[output].
 
-```typc
+#doc-block(```typc
 evaluate(raw-spec, ..args) yields content-pill
-```
+```)
 
 The positional argument is a raw element.
 For the other arguments, see #link(<configuration>)[Configuration].
@@ -471,9 +473,9 @@ To export a notebook, individual cells must be exported using the functions in t
 
 Returns metadata holding the exported cells gathered in a notebook dictionary (such that converting the dictionary to JSON gives a valid Jupyter notebook). This metadata is labeled with the #setting(content: [export name])[export-name]. It can be read from the command-line using `typst eval` for storing as an `.ipynb` file.
 
-```typc
+#doc-block(```typc
 stage-notebook(..args) yields content-pill
-```
+```)
 
 For the arguments, see #link(<configuration>)[Configuration].
 
@@ -504,9 +506,9 @@ See the #link(<complete-workflow>)[Complete Workflow] section for a full example
 
 Looks for the metadata holding the exported cells and returns a notebook dictionary. This function must be called with `context` (unlike `stage-notebook`).
 
-```typc
+#doc-block(```typc
 make-notebook(..args) yields dictionary-pill
-```
+```)
 
 For the arguments, see #link(<configuration>)[Configuration].
 
@@ -925,9 +927,9 @@ The functions in the previous sections all accept the same settings which can be
 
 A single `config` call can apply the same settings to several functions:
 
-```typc
+#doc-block(```typc
 config(..args) yields dictionary-pill
-```
+```)
 
 Arguments can include any of the settings defined in the next section.
 
@@ -1118,7 +1120,22 @@ Used to select the format for an output items, as Jupyter notebooks can store th
 
 This can be a MIME string such as `"image/png"`, or an array of such strings. The array order sets the preference: the first match is used. Every listed format must have a corresponding #link(<handlers>)[handler].
 
-The value `auto` (the default) represents the default array `("image/svg+xml", "image/png", "image/gif", "image/jpeg", "text/markdown", "text/latex", "text/plain", "application/json")`. The value `auto` can also be used as one element of an array of values; in this case the default array will be inserted at that position. Example:
+The value `auto` (the default) represents the default array:
+
+```typc
+(
+  "image/svg+xml",
+  "image/png",
+  "image/gif",
+  "image/jpeg",
+  "text/markdown",
+  "text/latex",
+  "text/plain",
+  "application/json",
+)
+```
+
+The value `auto` can also be used as one element of an array of values; in this case the default array will be inserted at that position. Example:
 
 ```typ
 // Get PNG version of all display outputs, error if a display has no PNG
@@ -1552,14 +1569,14 @@ A dictionary holding the default #link(<handlers>)[handlers].
 
 This function is used in #link(<handlers>)[handlers] to defer processing of a value to another handler.
 
-```typc
+#doc-block(```typc
 handle(
   mime: str-pill,
   ctx: dictionary-pill,
   ..args,
   any-pill,
 )
-```
+```)
 
 / `mime`: The "MIME type" of the handler to call to process the value passed as positional argument.
 
@@ -1610,12 +1627,12 @@ dict and `code` field holding the rest of the cell source as a string.
 
 Header fields are not processed in any way, they are returned as strings as found according to the header pattern. This means that `echo` and `output` fields if present will hold `"true"` or `"false"` rather than boolean values.
 
-```typc
+#doc-block(```typc
 parse-text(
   pattern: str-pill dictionary-pill auto-pill none-pill,
   str-pill,
 ) yields dictionary-pill
-```
+```)
 
 / `pattern`: The header pattern as configured with #setting[cell-header-pattern].
 
@@ -1634,12 +1651,12 @@ Example:
 
 Builds a cell header string for the given header dictionary.
 
-```typc
+#doc-block(```typc
 make-text(
   pattern: str-pill dictionary-pill auto-pill none-pill,
   dictionary-pill,
 ) yields str-pill
-```
+```)
 
 / `pattern`: The header pattern as configured with #setting[cell-header-pattern].
 
@@ -1662,7 +1679,7 @@ Converts a string with ANSI escape sequences into styled text. How a particular 
 
 When colors are reversed and one of `fg` or `bg` is `none`, the `none` value is replaced with `white` or `black` to guarantee good contrast. (When both are `none`, the reversing has no effect.)
 
-```typc
+#doc-block(```typc
 render(
   palette: auto-pill/array-pill,
   fg: color-pill/none-pill,
@@ -1679,7 +1696,7 @@ render(
   conceal: function-pill,
   str-pill,
 ) yields content-pill
-```
+```)
 
 / `palette`: An array of 16 colors to use for the standard ANSI colors.
   The default is `auto` which currently resolves to a palette based on Tango colors.
@@ -1714,21 +1731,21 @@ render(
 #function-doc(`strip`)
 Strips escape sequences from the given string.
 
-```typc
+#doc-block(```typc
 strip(str-pill) yields str-pill
-```
+```)
 
 #function-doc(`console-block`)
 
 Renders the given string as a "console block", processing ANSI escape sequences to render colors, etc. correctly.
 
-```typc
+#doc-block(```typc
 console-block(
   template: function-pill,
   str-pill,
   ..args,
 ) yields content-pill
-```
+```)
 
 / `template`: A template function to apply when rendering a console block.
 
@@ -1742,14 +1759,14 @@ During processing, the given string is wrapped in a raw block, but the raw block
 
 The default template used by `console-block`.
 
-```typc
+#doc-block(```typc
 console-block-template(
   target: selector-pill,
   text-edges: dictionary-pill,
   inset: dictionary-pill,
   content-pill
 ) yields content-pill
-```
+```)
 
 / target: The selector to be used as target for the show-set rules. Defaults to `raw.where(lang: "ansi")`.
 / text-edges: A dictionary with fields `top-edge` and `bottom-edge`.
@@ -1791,91 +1808,16 @@ A handler is a function called to process a value such as a cell source, a cell 
 
 Handlers offer a powerful mechanism for customization. A particular value is typically processed in several steps by chaining calls to different handlers from more abstract to more concrete. This allows the theme or the user to plug in their code at the right step in the chain. 
 
-== Default Handlers
-
-The following diagrams shows which handlers can call which other handlers in the default configuration. Handlers with names ending in `-generic` are close to the bottom of the chain: they deal with fairly concrete value types that need to be processed by several higher-level handlers. Dashed lines indicate handlers called only during rendering.
-
-#block(
-  inset: -1cm,
-  image("handler-tree.svg"),
-)
-
-#image("handler-tree-placeholders.svg")
-
-The role of each handler is described in the next sections.
-
-=== For Cell Rendering
-/ `cell`: For any type of cell. The default delegates to the type-specific handler.
-/ `markdown-cell`: For Markdown cells.
-/ `code-cell`: For a whole code cell. The default delegates to `code-cell-input` and/or `code-cell-output`.
-/ `code-cell-input`: For the source of code cells.
-/ `code-cell-output`: For the output of code cells.
-/ `raw-cell`: For raw cells.
-
-=== For Output Items
-/ `output`: For any output. For rich outputs (`display` and `result`) which can be available in multiple formats, the handler receives a dict holding the selected format (based on the #setting[format] setting) and the corresponding data and metadata. The default delegates to the handler specific to the output type, such as `display`.
-/ `display`: For display output. The default delegates to `rich-output-specific`.
-/ `result`: For result output. The default delegates to `rich-output-specific`.
-/ `error`: For error output.
-/ `rich-output-generic`: For processing the actual content of rich outputs (display and result outputs).
-/ `stream`: For any stream. The default delegates to the stream-specific handler.
-/ `stream-stdout`: For an "stdout" stream.
-/ `stream-stderr`: For an "stderr" stream.
-/ `stream-merged`: For a stream that merges "stdout" and "stderr" items. Such outputs are produced by #func[full-streams] with setting #setting(content: `stream: "all"`)[stream].
-/ `stream-generic`: Base handler used by stream-specific handlers for processing the stream content.
-
-=== For Output Item Data
-
-/ `image/svg+xml`: For SVG images.
-/ `image/png`: For PNG images.
-/ `image/jpeg`: For JPEG images.
-/ `image/gif`: For GIF images.
-/ `text/markdown`: For Markdown text.
-/ `text/latex`: For LaTeX text.
-/ `text/plain`: For plain text.
-
-=== For Image Processing
-
-/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file.
-/ `image-base64`: For base64 encoded image.
-/ `image-text`: For text-encoded images such as some SVGs.
-/ `image-generic`: Base handler used by others.
-
-=== For LaTeX Math
-/ `math-markdown`: For processing math formulas in Markdown. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions). See the #setting[gather-latex-defs] setting.
-/ `math-generic`: Base handler for math formulas. The default uses #link("https://github.com/mitex-rs/mitex")[MiTeX] to convert LaTeX formulas to Typst.
-
-=== For Placeholders
-
-/ `placeholder-Cell`: Produces a placeholder for the #func[Cell] function.
-/ `placeholder-In`: Produces a placeholder for the #func[In] function. 
-/ `placeholder-Out`: Produces a placeholder for the #func[Out] function. 
-/ `placeholder-output`: Produces a placeholder for the #func[output] function and its #link(<singular-output>)[variants].
-/ `placeholder-input-from-source`: Produces a placeholder for a code cell input using the cell source. This is used in cases where the cell cannot be found in the notebook, but the source is known because it is given as a #link(<raw-spec>)[raw element in the cell specification].
-/ `placeholder-function-call`: Produces a placeholder that shows the function name and cell specification of the call that requires a placeholder.
-/ `placeholder-inline-generic`: Implements the generic layout of an inline placeholder.
-/ `placeholder-block-generic`: Implements the generic layout of block placeholder.
-
-=== Other
-/ `attachment`: For items stored as attachment in the notebook.
-/ `source-code-generic`: For rendering source code (called by default handlers for code cell inputs and raw cells).
-/ `markdown-generic`: For rendering Markdown (should return inline content). The default uses #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] to convert Markdown to Typst content.
-/ `text-console-block`: For rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next.
-/ `path`: For reading the content of files specified by path. By setting this handler the user can give Callisto permission to read any file under the project root. This is necessary to render Markdown that uses external image files.
-
 == Arguments
 
-Handlers are always called with a positional argument for the data to render, and a `ctx` keyword argument for contextual data (see Context section below). Some handlers also take additional arguments:
+Handlers are always called with a positional argument for the data to render, and a `ctx` keyword argument for contextual data (see Context section below). Some handlers also take additional arguments, such as `alt` for image handlers.
 
-- Image handlers must accept an `alt` argument.
+When defining a handler, it is good practice to add an `..args` sink for possible extra arguments (especially as additional arguments might be introduced in a future version):
 
-- Math handlers must accept a `block` argument (`true` for block equations).
+#doc-block(```typ
+#let handler(data, ctx: none, ..args) = ...
+```)
 
-- The `source-code-generic` handler (used by the default raw cell and code input handlers) takes a `lang` argument.
-
-- The `attachment` handler gets `metadata`, `type` and `subhandler-args` arguments.
-
-When defining a handler, it is good practice to add an `..args` sink for possible extra arguments (especially as additional arguments might be introduced in a future version).
 
 === Context <handler-context>
 
@@ -1910,6 +1852,149 @@ A `ctx` dict is passed to all handler calls and holds resolved settings (replaci
 -  `latex-preamble`: a string with all the LaTeX command definitions (of the `\newcommmand` form) found in the notebook, or `none` if `gather-latex-defs` is `false`.
 
 For example suppose the #setting[input] setting is `auto`. When Callisto processes a cell with header line ```txt #| echo: false```, the `auto` value resolves to `false`, so handlers are called with `ctx.cfg.input` set to `auto` and `ctx.input` set to `false`.
+
+
+== Default Handlers
+
+The following diagrams shows which handlers can call which other handlers in the default configuration. Handlers with names ending in `-generic` are close to the bottom of the chain: they deal with fairly concrete value types that need to be processed by several higher-level handlers. Dashed lines indicate handlers called only during rendering.
+
+#block(
+  inset: -1cm,
+  image("handler-tree.svg"),
+)
+
+#image("handler-tree-placeholders.svg")
+
+The next sections describe these handlers in some details.
+
+Note: The descriptions below include information on the default implementation of the handlers. These implementations are subject to change so this information is not covered by the semver stability guarantees.
+
+
+=== For Cell Rendering
+
+The following handlers take a cell dict and return a rendered cell (or part thereof).
+
+/ `cell`: For any type of cell. The default delegates to the type-specific handler.
+/ `markdown-cell`: For Markdown cells.
+/ `code-cell`: For a whole code cell. The default delegates to `code-cell-input` and/or `code-cell-output`.
+/ `code-cell-input`: For the source of code cells.
+/ `code-cell-output`: For the output of code cells.
+/ `raw-cell`: For raw cells.
+
+=== For Output Items
+
+The following handlers take an output item as dict and return the processed value. The dict fields depend on the output type (see below).
+
+/ `output`: For any output item. The default delegates to the handler specific to the output type, such as `display`.
+
+/ `display`: For display items. The data fields are:
+
+  #pad(left: 1em)[
+    - `data`: the item data encoded in the selected format.
+    - `metadata`: the metadata dictionary associated with the selected format (or with the whole output item if no format-specific metadata is found).
+    - `format`: the selected format, as string.
+  ]
+
+  The default delegates to `rich-output-specific`.
+
+/ `result`: For result items. The data fields are as for `display`. The default delegates to `rich-output-specific`.
+
+/ `rich-output-generic`: For processing display and result items. The data fields are as for `display`.
+
+/ `error`: For error items. The data fields are:
+
+  #pad(left: 1em)[
+    - `name`: the error name, as string.
+    - `message`: the full error message, as string.
+    - `traceback`: the function call stack, as an array of strings.
+  ]
+
+  The default returns the message unmodified. The default themes (active during rendering) override this by processing the message through the `text-console-block` handler.
+
+/ `stream`: For any stream item. The data fields are:
+
+  #pad(left: 1em)[
+    - `name`: the stream name: `"stdout"`, `"stderr"`, or `"all"` (when merging both `stdout` and `stderr` in a #func[full-streams] call with setting #setting(content: `stream: "all"`)[stream]).
+    - `text`: the content as string.
+  ]
+
+  The default delegates to the stream-specific handler.
+  
+/ `stream-stdout`: For an "stdout" item. See `stream` for the data fields.
+
+/ `stream-stderr`: For an "stderr" item. See `stream` for the data fields.
+
+/ `stream-merged`: For an item obtained by merging the `stdout` and `stderr` streams. The data fields are as. stream produced by #func[full-streams] with setting . See `stream` for the data fields.
+
+/ `stream-generic`: Base handler used by stream-specific handlers for processing the stream content. See `stream` for the data fields. The default returns the text unmodified. The default themes (active during rendering) override this by delegating to `text-console-block`.
+
+=== For Output Item Data
+
+The following handlers process raw data.
+
+The image handlers turn encoded data into an `image` element. They all accept an `alt` keyword argument. The default image handlers delegate to one of the image processing handlers in the next section.
+
+/ `image/svg+xml`: For SVG images.
+/ `image/png`: For PNG images.
+/ `image/jpeg`: For JPEG images.
+/ `image/gif`: For GIF images.
+/ `text/markdown`: For Markdown text. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block.
+/ `text/latex`: For LaTeX text. The data is a string. The default renders the string using #link("https://github.com/mitex-rs/mitex")[MiTeX].
+/ `text/plain`: For plain text. The data is a string. The default returns the string unmodified. The default themes (active during rendering) override this by delegating to `text-console-block`.
+
+=== For Image Processing
+
+The following handlers process image data and return an `image` element. They all accept an `alt` keyword argument.
+
+/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary.
+
+/ `image-base64`: For base64 encoded image. The data is a base64-encoded string. The default decodes the string and delegates the result to `image-generic`.
+
+/ `image-text`: For text-encoded images such as some SVGs. The data is a string. The default passes the string as `bytes` to `image-generic`.
+
+/ `image-generic`: Base handler used by others. The data is of a type that can be passed to the `image` function. The default calls the `image` function with the data and extra handler arguments (such as `alt`). If the data is a string however, it is first converted to a `path` by calling the `path` handler (triggering a panic if the `path` handler was not defined by the user).
+
+=== For LaTeX Math
+
+The following handlers are used to process LaTeX math found in Markdown or in cell outputs.
+
+/ `math-markdown`: For processing math formulas in Markdown. This handler is responsible for inserting the "preamble" of all LaTeX command definitions found in the notebook (and removing existing definitions from the equation to avoid duplicate definitions). See the #setting[gather-latex-defs] setting.
+
+  The data is a string. The default deals with the "preamble" and passes the result to the `math-generic` handler.
+
+/ `math-generic`: Base handler for math formulas. The data is a string. The default uses #link("https://github.com/mitex-rs/mitex")[MiTeX] to convert LaTeX formulas to Typst.
+
+=== For Placeholders
+
+The following handlers generate placeholders for functions that render a single cell or return a single output item when the cell or item is missing. Unless otherwise specified, the data is always `none`. These handlers can nonetheless produce informative placeholders using the function name (`Cell`, `output`, etc.) and the cell specification available in `ctx.cell-spec` (which can be the cell source itself, for example for #func[Cell] calls made by the #func[execute] function).
+
+The default handlers all eventually delegate to `placeholder-inline-generic` and `placeholder-inline-block`. 
+
+/ `placeholder-Cell`: Produces a placeholder for the #func[Cell] function.
+/ `placeholder-In`: Produces a placeholder for the #func[In] function. 
+/ `placeholder-Out`: Produces a placeholder for the #func[Out] function. 
+/ `placeholder-output`: Produces a placeholder for the #func[output] function and its #link(<singular-output>)[variants].
+/ `placeholder-input-from-source`: Produces a placeholder for a code cell input using the cell source. This is used in cases where the cell cannot be found in the notebook, but the source is known because it is given as a #link(<raw-spec>)[raw element in the cell specification]. The data is the cell source as string.
+/ `placeholder-function-call`: Produces a placeholder that shows the function name and cell specification of the call that requires a placeholder. The data is the function name as a string. This handler accepts an extra argument `block` which can be `true` to render as block, `false` to render inline, or `auto` to use some heuristic (the default is to render as block except for `output` placeholders when the cell specification is an inline raw element).
+/ `placeholder-inline-generic`: Implements the generic layout of an inline placeholder. The data is the placeholder value. The default wraps the value in a box with dashed stroke.
+/ `placeholder-block-generic`: Implements the generic layout of block placeholder. The data is the placeholder value. The default wraps the value in a block with dashed stroke.
+
+=== Other
+/ `attachment`: For items stored as attachment in the notebook. The data is a dictionary keyed by MIME types. This handler accepts extra arguments `metadata` and `subhandler-args`. The `metadata` value can be a simple dict of metadata, or a dict keyed by MIME types where every value is a metadata dict.
+
+  The handler should pick a format among those available in the data dict, and process the corresponding data with the appropriate handler, passing it `subhandler-args` as extra arguments.
+
+  For example this handler is used to render Markdown that refers to images stored as cell attachment. In this case `subhandler-args` might include an `alt` argument that should be forwarded to the image handler.
+
+/ `source-code-generic`: For rendering source code. The data is the source as string. This handler accepts an extra `lang` argument for the source language. The default wraps the source in a raw element. This handler is called by the default handlers for code cell inputs and raw cells.
+
+/ `markdown-generic`: For rendering Markdown. The data is the Markdown string. This handler should return inline content. The default uses #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] to convert Markdown to Typst content.
+
+/ `text-console-block`: For rendering text as console output, correctly handling ANSI escape sequences and adjusting text edges to have the background color and box-drawing characters connect nicely from one line to the next. The data is the string to render. The default renders the text according to the #setting[console-text] setting.
+
+/ `path`: For reading the content of files specified by path. By setting this handler the user can give Callisto permission to read any file under the project root. This is necessary to render Markdown that uses external image files. The data is a string. The default panics with a message asking the user to define the handler.
+
+<end-default-handlers>
 
 == Delegation
 

@@ -87,26 +87,6 @@
   let code-fill = luma(96%)
 
   show raw.where(lang: "typst-pill"): set text(font: "Cascadia Mono", size: 1em*14/15)
-  let doc-block = raw.where(block: true, lang: "typc")
-  show doc-block: set par(leading: 0.9em)
-  show doc-block: set text(font: "Cascadia Mono")
-  show doc-block: block.with(
-    width: 100%,
-    stroke: luma(90%),
-    inset: 1em,
-    radius: 0.5em,
-    breakable: false,
-  )
-  show doc-block: it => {
-    show regex("[a-z]+-pill"): s => {
-      // Undo text scaling by doc-block raw element
-      set text(1em/0.8)
-      pills.at(s.text.split("-").first())
-    }
-    show "yields": "->"
-    show "/": h(0.3em)
-    it
-  }
 
   let _radius = 5pt
   let inline-code = selector.or(
@@ -123,6 +103,7 @@
   let code-block = selector.or(
     raw.where(block: true, lang: "txt"),
     raw.where(block: true, lang: "typ"),
+    raw.where(block: true, lang: "typc"),
     raw.where(block: true, lang: "bash"),
     raw.where(block: true, lang: "Makefile"),
     raw.where(block: true, lang: "just"),
@@ -177,6 +158,27 @@
   }
   
   doc
+}
+
+#let doc-block(blk) = {
+  let sel = raw.where(block: true)
+  show sel: set par(leading: 0.9em)
+  show sel: set text(font: "Cascadia Mono")
+  show sel: set block(
+    fill: none,
+    stroke: luma(90%),
+  )
+  show sel: it => {
+    show regex("[a-z]+-pill"): s => {
+      // Undo text scaling by doc-block raw element
+      set text(1em/0.8)
+      pills.at(s.text.split("-").first())
+    }
+    show "yields": sym.arrow
+    show "/": h(0.3em)
+    it
+  }
+  blk
 }
 
 #let function-doc(it, content: none) = {

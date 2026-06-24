@@ -133,8 +133,8 @@ Making full sense of all the settings requires some familiarity with the reading
   #setting-short[output][#pills.bool #pills.auto][
     Whether to render the output of code cells. Default: `true`.
   ]
-  #setting-short[h1-level][#pills.int][
-    The level to use for notebook top-level headings. Default: 1.
+  #setting-short[cmarker][#pills.dictionary][
+    Additional configuration for the `cmarker` package, such as `h1-level`. Default: `(:)`.
   ]
   #setting-short[gather-latex-defs][#pills.bool][
     Whether LaTeX command definitions should be gathered from the whole notebook and made available to every formula. Default: `true`.
@@ -1254,14 +1254,24 @@ Example:
 #render(range(5), output: false)
 ```
 
-#setting-doc[`h1-level`][#pills.int]
+#setting-doc[`cmarker`][#pills.dictionary]
 
-The Typst heading level corresponding to top-level headings in the notebook (default: 1). If set to 0, the top-level heading(s) in the notebook are converted to `title` elements in Typst. Example:
+Additional settings to pass to `cmarker.render` when converting Markdown to Typst. Default: `(:)`. Notable settings:
+
+#pad(left: 1em)[
+  / `h1-level`: The Typst heading level corresponding to top-level headings in the notebook. All other levels are shifted accordingly. The value can be negative, in which case a heading shifted to level 0 is converted to a `title` element. Default: `1`.
+
+  / `task-list-marker`: A callback for rendering the markers in Markdown task lists. Default: `none`.
+]
+
+See the #link("https://github.com/SabrinaJewson/cmarker.typ#readme")[cmarker documentation] for more information on the available settings.
+
+Example for `h1-level`:
 
 ```typ
 // Render notebook with top-level heading converted to document title,
 // second-level headings converted to level 1, etc.
-#render(h1-level: 0)
+#render(cmarker: (h1-level: 0))
 ```
 
 A value larger than 1 can be useful to include a notebook as a chapter/section of a larger document:
@@ -1269,9 +1279,9 @@ A value larger than 1 can be useful to include a notebook as a chapter/section o
 ```typ
 = Chapter 1
 
-// Render notebook with top-level headings shown as level 2, second-level
+// Render notebook with top-level headings converted to level 2, second-level
 // headings converted to level 3, etc.
-#render(h1-level: 2)
+#render(cmarker: (h1-level: 2))
 ```
 
 #setting-doc[`gather-latex-defs`][#pills.bool]

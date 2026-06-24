@@ -20,5 +20,16 @@ See @Some-heading and #ref(label("Here’s-a-heading-with-a-quote"))
 
 #callisto.render(
   nb: path("notebook.ipynb"),
-  h1-level: 0,
+  cmarker: (h1-level: 0),
 )
+
+And the notebook inside a container:
+
+#rect(callisto.render(
+  nb: path("notebook.ipynb"),
+  cmarker: (
+    h1-level: 0,
+    set-document-title: false,
+    heading-labels: none,
+  )
+))

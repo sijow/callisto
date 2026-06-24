@@ -23,7 +23,7 @@
   // Rendering
   input: auto,
   output: auto,
-  h1-level: 1,
+  cmarker: (:),
   gather-latex-defs: true,
   console-text: auto,
   apply-theme: false, // default for all but render functions

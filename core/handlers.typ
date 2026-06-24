@@ -126,7 +126,7 @@
     image: handle.with(mime: "image-markdown", ctx: ctx),
   ),
   heading-labels: "jupyter",
-  h1-level: ctx.h1-level,
+  ..ctx.cmarker,
   ..args,
 )
 

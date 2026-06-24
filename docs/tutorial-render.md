@@ -49,17 +49,19 @@ The content is converted to Typst so it can be styled with show/set rules!
 
 ### Using a notebook as chapter or section
 
-A common use case is to include a notebook as a chapter or section in a larger document (maybe for a computation-heavy chapter). In this case it might be useful to play with the `h1-level` setting, so that headings in the notebook are converted to the right level in the Typst document:
+A common use case is to include a notebook as a chapter or section in a larger document, maybe for a computation-heavy chapter. In this case it might be useful to control the level of headings generated from Markdown. For example we might want the top-level headings in the notebook to be used as level 2 headings in Typst.
+
+Callisto uses #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker] to parse Markdown and convert it to Typst content. The [`cmarker` setting](callisto-manual.pdf#nameddest=setting:cmarker) can be used to configure this conversion. In particular we can set the `h1-level` field to shift the levels of Markdown headings:
 
 ```typst
 = Results
 Some text.
 
 // Render notebook top-level headings as subsections
-#render(h1-level: 2)
+#render(cmarker: (h1-level: 2))
 ```
 
-The `h1-level` specifies the desired Typst level for H1 (top-level) headings found in the notebook. This setting also accepts negative values: `h1-level: -1` will convert H2 headings to level 1, and H1 headings to `title` elements. Use this if your notebook contains a single H1 heading that you want to use as document title.
+This way, H1 (top-level) headings in Markdown will be shifted to level 2 in Typst, H2 will be shifted to level 3 and so on. Negative values are also allowed: `h1-level: -1` will convert H2 headings to level 1, and H1 headings to `title` elements; Use this if your notebook contains a single H1 heading that you want to use as document title.
  
 ## Rendering Specific Cells
 

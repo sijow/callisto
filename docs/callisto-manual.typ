@@ -1810,7 +1810,7 @@ Handlers offer a powerful mechanism for customization. A particular value is typ
 
 == Arguments
 
-Handlers are always called with a positional argument for the data to render, and a `ctx` keyword argument for contextual data (see Context section below). Some handlers also take additional arguments, such as `alt` for image handlers.
+Handlers are always called with a positional argument for the data to render, and a `ctx` keyword argument for contextual data (see Context section below). Some handlers also take additional arguments, such as `alt`, `width` and `height` for image handlers.
 
 When defining a handler, it is good practice to add an `..args` sink for possible extra arguments (especially as additional arguments might be introduced in a future version):
 
@@ -1932,7 +1932,7 @@ The following handlers take an output item as dict and return the processed valu
 
 The following handlers process raw data.
 
-The image handlers turn encoded data into an `image` element. They all accept an `alt` keyword argument. The default image handlers delegate to one of the image processing handlers in the next section.
+The image handlers turn encoded data into an `image` element. They all accept `alt`, `width` and `height` keyword arguments. The default image handlers delegate to one of the image processing handlers in the next section.
 
 / `image/svg+xml`: For SVG images.
 / `image/png`: For PNG images.
@@ -1944,7 +1944,7 @@ The image handlers turn encoded data into an `image` element. They all accept an
 
 === For Image Processing
 
-The following handlers process image data and return an `image` element. They all accept an `alt` keyword argument.
+The following handlers process image data and return an `image` element. They all accept `alt`, `width` and `height` keyword arguments.
 
 / `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary.
 

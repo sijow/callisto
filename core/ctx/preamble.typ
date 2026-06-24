@@ -1,4 +1,4 @@
-#import "@preview/cmarker:0.1.8"
+#import "@preview/cmarker:0.1.9"
 
 #import "/core/latex.typ"
 #import "/core/reading/notebook.typ"

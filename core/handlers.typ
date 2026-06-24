@@ -1,5 +1,5 @@
 #import "@preview/based:0.2.0": base64
-#import "@preview/cmarker:0.1.8"
+#import "@preview/cmarker:0.1.9"
 #import "@preview/mitex:0.2.7"
 
 #import "util.typ": handle

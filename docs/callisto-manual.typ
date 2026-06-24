@@ -1130,6 +1130,7 @@ The value `auto` (the default) represents the default array:
   "image/jpeg",
   "text/markdown",
   "text/latex",
+  "text/html",
   "text/plain",
   "application/json",
 )
@@ -1949,6 +1950,7 @@ The image handlers turn encoded data into an `image` element. They all accept `a
 / `image/jpeg`: For JPEG images.
 / `image/gif`: For GIF images.
 / `text/markdown`: For Markdown text. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block.
+/ `text/html`: For HTML. The data is a string. The default delegates to the `markdown-generic` handler and wraps the result in a block. Therefore, by default HTML rendering is limited to the tags supported by #link("https://github.com/SabrinaJewson/cmarker.typ")[cmarker]. Support for additional tags can be implemented using the `html` field of the #setting[cmarker] setting.
 / `text/latex`: For LaTeX text. The data is a string. The default renders the string using #link("https://github.com/mitex-rs/mitex")[MiTeX].
 / `text/plain`: For plain text. The data is a string. The default returns the string unmodified. The default themes (active during rendering) override this by delegating to `text-console-block`.
 
@@ -1956,7 +1958,9 @@ The image handlers turn encoded data into an `image` element. They all accept `a
 
 The following handlers process image data and return an `image` element. They all accept `alt`, `width` and `height` keyword arguments.
 
-/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary.
+/ `image-markdown`: For images in Markdown, which can refer to an attachment (an image stored in the notebook itself) or to an external file. The data is a string that holds the path to an external file, or a string of the form `"attachment:<name>"` where `<name>` is the name of an attachment in the cell dictionary. The default dispatches to the `attachment`, `image-data-url` or `image-generic` handler.
+
+/ `image-data-url`: For images encoded as data URLs, for example in `<img>` HTML tags. The data is a string that includes the `data:` prefix.
 
 / `image-base64`: For base64 encoded image. The data is a base64-encoded string. The default decodes the string and delegates the result to `image-generic`.
 

@@ -1,4 +1,5 @@
 #import "@preview/based:0.2.0": base64
+#import "@preview/percencode:0.1.0": percent-decode
 #import "@preview/cmarker:0.1.9"
 #import "@preview/mitex:0.2.7"
 
@@ -74,8 +75,25 @@
     } else {
       panic("cell attachment " + name + " not found")
     }
+  } else if path.starts-with("data:") {
+    // This can happen for images in HTML in Markdown
+    handle(path, mime: "image-data-url", ctx: ctx, ..args)
   } else {
     handle(path, mime: "image-generic", ctx: ctx, ..args)
+  }
+}
+
+// Handler for images encoded as a 'data:' URL
+#let image-data-url(url, ctx: none, ..args) = {
+  // We assume there are no MIME parameter values with literal commas
+  let comma = url.position(",")
+  if comma == none { panic("invalid data URL") }
+  let media-type = url.slice(0, comma).trim()
+  let data = url.slice(comma + 1).trim()
+  if media-type.ends-with(";base64") {
+    handle(data, mime: "image-base64", ctx: ctx, ..args)
+  } else {
+    handle(percent-decode(data), mime: "image-text", ctx: ctx,  ..args)
   }
 }
 
@@ -132,6 +150,11 @@
 
 // Handler for Markdown outputs
 #let text-markdown(data, ctx: none, ..args) = {
+  block(handle(data, mime: "markdown-generic", ctx: ctx, ..args))
+}
+
+// Handler for HTML outputs
+#let text-html(data, ctx: none, ..args) = {
   block(handle(data, mime: "markdown-generic", ctx: ctx, ..args))
 }
 
@@ -456,6 +479,7 @@
   "image/jpeg"      : handle.with(mime: "image-base64"),
   "image/gif"       : handle.with(mime: "image-base64"),
   "text/markdown"   : text-markdown,
+  "text/html"       : text-html,
   "text/latex"      : text-latex,
   "text/plain"      : text-plain,
   "application/json": application-json,
@@ -463,6 +487,7 @@
   "image-generic" : image-generic, // base handler used by others
   "image-base64"  : image-base64,  // base64 encoded image
   "image-text"    : image-text,    // text encoded image
+  "image-data-url": image-data-url, // data: URL encoded image
   "image-markdown": image-markdown, // image in Markdown
   // Handlers for output items
   "rich-output-generic": rich-output-generic,

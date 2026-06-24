@@ -81,6 +81,11 @@
   node(<image-text>),
   edge(<image-text>, <image-generic>),
 
+  node(<image-data-url>),
+  edge(<image-markdown>, <image-data-url>),
+  edge(<image-data-url>, <image-base64>),
+  edge(<image-data-url>, <image-text>),
+
   node(label("image/svg+xml")),
   edge(label("image/svg+xml"), <image-base64>), 
   edge(label("image/svg+xml"), <image-text>), 
@@ -100,6 +105,9 @@
   edge(label("image/jpeg"), <image-base64>),
   edge(label("image/gif"), <image-base64>),
 
+  node(label("text/html")),
+  edge(label("text/html"), <markdown-generic>),
+
   edge(<rich-output-generic>, label("image/svg+xml")),
   edge(<rich-output-generic>, label("image/png")),
   edge(<rich-output-generic>, label("image/jpeg")),
@@ -107,4 +115,5 @@
   edge(<rich-output-generic>, label("text/markdown")),
   edge(<rich-output-generic>, label("text/latex")),
   edge(<rich-output-generic>, label("text/plain")),
+  edge(<rich-output-generic>, label("text/html")),
 )

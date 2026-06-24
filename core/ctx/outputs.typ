@@ -7,6 +7,7 @@
   "image/gif",
   "text/markdown",
   "text/latex",
+  "text/html",
   "text/plain",
   "application/json",
 )

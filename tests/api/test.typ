@@ -24,7 +24,7 @@
   Cell,
   In,
   Out,
-) = callisto.config(nb: json("/tests/julia/julia.ipynb"))
+) = callisto.config(nb: path("/tests/julia/julia.ipynb"))
 
 // Check that all functions work without error
 #assert.ne(cells(0), none)
@@ -60,7 +60,7 @@
 #assert.eq(cells(..cell-spec).len(), 1)
 #assert.eq(cells(..cell-spec, cell-header-pattern: strict-header-pattern).len(), 0)
 #let cpp-pattern = (regex: regex("^//\|\s+(.*?):\s+(.*?)\s*$"))
-#let cpp-cell-spec = arguments("calc", nb: json("/tests/api/cpp.ipynb"))
+#let cpp-cell-spec = arguments("calc", nb: path("/tests/api/cpp.ipynb"))
 #assert.eq(cells(..cpp-cell-spec).len(), 0)
 #assert.eq(cells(..cpp-cell-spec, cell-header-pattern: cpp-pattern).len(), 1)
 
@@ -106,7 +106,7 @@
 
 // Tests for 'item'
 #{
-  let (output,) = callisto.config(nb: json("/tests/julia/julia.ipynb"), item: 4)
+  let (output,) = callisto.config(nb: path("/tests/julia/julia.ipynb"), item: 4)
   assert.eq(output("plot3"), "5")
 }
 
@@ -131,7 +131,7 @@
 
 // Allow multiple items in singular functions, pick the first
 #[
-  #let (display, result) = callisto.config(nb: json("../julia/julia.ipynb"), item: 0)
+  #let (display, result) = callisto.config(nb: path("../julia/julia.ipynb"), item: 0)
   #assert.eq(display("plot3").func(), image)
   #assert.eq(result("scatter", name-path: "metadata.callisto.header.type", theme: "plain").func(), image)
 ]
@@ -147,7 +147,7 @@
   stream,
   output,
   outputs,
-) = callisto.config(nb: json("/tests/python/python.ipynb"))
+) = callisto.config(nb: path("/tests/python/python.ipynb"))
 
 
 #assert.eq(cells(cell-type: "markdown").len(), 2)
@@ -203,7 +203,7 @@
   "image/png": callisto.handle.with(mime: "custom"),
 )
 #assert(catch(() => outputs(handlers: handlers)).starts-with(
-    "panicked with: \"unknown handler \\\"custom\\\""
+    "panicked with: unknown handler \"custom\""
 ))
 
 // check custom handlers
@@ -248,7 +248,7 @@ $$
 #assert.eq(callisto.render(my-cell, nb: my-nb).children.at(1).func(), math.equation)
 
 // Check cell header functionality
-#let (Cell,) = callisto.config(nb: json("cell-header.ipynb"), theme: "plain")
+#let (Cell,) = callisto.config(nb: path("cell-header.ipynb"), theme: "plain")
 #assert.eq(Cell("only-input").text, "10 + 1")
 #assert.eq(Cell("only-output").text, "12")
 
@@ -262,7 +262,7 @@ $$
   }
 }
 #let (render,) = callisto.config(
-  nb: json("cell-header.ipynb"),
+  nb: path("cell-header.ipynb"),
   theme: "neat",
   handlers: (code-cell-output: (auto, caption-handler)),
 )

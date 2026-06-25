@@ -1424,6 +1424,8 @@ The result of the second computation is #output("calc2").
 
 The name of the Jupyter kernel to use when exporting a notebook (default: `none`).
 
+Setting the kernel name enables the #link(<export-and-execution>)[export and execution] functionality.
+
 To see the list of kernels available in your Jupyter installation, use the command ```txt jupyter kernelspec list``` which prints a list like the following:
 
 ```txt
@@ -1527,7 +1529,7 @@ Placeholders are used by functions that extract a single output and functions th
 
 Placeholders are particularly useful when using #link(<export-and-execution>)[export and execution]: it is annoying to get an error in the editor every time a code block is added/edited and the corresponding execution result not yet available. With placeholders, Callisto can render the source of the code block as "work in progress" instead of raising an error.
 
-During an export run (`typst eval` with `--input callisto-export=true`), placeholders are always enabled, to prevent functions such as #func[Cell] and #func[output] from raising an error.
+During an export run (`typst eval` with `--input callisto-export=true`), placeholders are always enabled when #setting[kernel] is set, to prevent functions such as #func[Cell] and #func[output] from raising an error.
 
 Here is how the possible values for this setting are interpreted when a value is missing:
 
@@ -1539,9 +1541,9 @@ Here is how the possible values for this setting are interpreted when a value is
     - `placeholder-In` for #func[In],
     - `placeholder-Out` for #func[Out].
 
-  / `false`: During normal compilation: no placeholder is used and the missing value causes a panic. During export, placeholders are always enabled so this behaves like `true`.
+  / `false`: During normal compilation: no placeholder is used and the missing value causes a panic. During export when #setting[kernel] is set, placeholders are always enabled so this behaves like `true`.
 
-  / `auto`: The default. Behaves like `false` when reading from a regular notebook, and `true` when reading from a notebook that was created by export or when the notebook is undefined (#setting(content: `nb: none`)[nb]).
+  / `auto`: The default. Behaves like `false` when reading from a regular notebook, and `true` when export is enabled (#setting[kernel] not `none`) or when the notebook is undefined (#setting(content: `nb: none`)[nb]).
 
   / A function: A placeholder is obtained by calling the function with the #link(<cell-specification>)[cell specification] of the missing value as positional argument. For code blocks passed to #func[execute] and #func[evaluate], the cell specification is the code block (raw element) itself (except when the raw text + cell header is ambiguous, in which case the cell ID is used as cell spec). For calls such as ```txt #output("my-cell")```, the specification is `"my-cell"`.
 

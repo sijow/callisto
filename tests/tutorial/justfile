@@ -1,0 +1,11 @@
+default: export execute
+    
+export:
+    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<notebook>).first().value' > export.ipynb
+
+execute:
+    jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+
+watch:
+    watchexec -w . -f '**/*.typ' just export execute
+    

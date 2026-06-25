@@ -2,12 +2,6 @@
 #import "/core/util.typ"
 #import "notebook.typ"
 
-// Knowing that reading is enabled, is it from an exported notebook?
-#let _from-export(cfg: none) = {
-  let nb-json = notebook.get-json(cfg: cfg)
-  return "callisto" in nb-json.metadata
-}
-
 // Return true if the configuration allows using placeholders, that is
 // - if the current compilation is an export, or
 // - if 'placeholder' is true, or
@@ -15,12 +9,23 @@
 //   by an export, or
 // - if 'placeholder' is a function or a value to use as-is (i.e. not a
 //   boolean or auto).
-#let placeholder-enabled(cfg: none) = (
-  exporting() or
-  cfg.placeholder == true or
-  cfg.placeholder == auto and (cfg.nb == none or _from-export(cfg: cfg)) or
-  type(cfg.placeholder) not in (bool, type(auto))
-)
+// During export we enable placeholders for *all* exported notebooks, even
+// those not being exported during this compilation: otherwise compilation
+// could fail if exporting A before B and B doesn't exist yet
+#let placeholder-enabled(cfg: none) = {
+  let is-static-notebook = cfg.nb != none and cfg.kernel == none
+
+  let enabled = cfg.placeholder
+  if enabled == auto {
+    enabled = not is-static-notebook
+  }
+  if enabled == false {
+    // We still enable placeholders for exported notebooks during export, to
+    // make compilation possible
+    return exporting() and cfg.kernel != none
+  }
+  return true
+}
 
 // Return the placeholder value to use for "mime" type
 #let get-placeholder(mime: none, ctx: none) = {

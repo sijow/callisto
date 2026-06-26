@@ -1937,7 +1937,7 @@ The following handlers take an output item as dict and return the processed valu
 
 / `stream-stderr`: For an "stderr" item. See `stream` for the data fields.
 
-/ `stream-merged`: For an item obtained by merging the `stdout` and `stderr` streams. The data fields are as. stream produced by #func[full-streams] with setting . See `stream` for the data fields.
+/ `stream-merged`: For an item obtained by merging the `stdout` and `stderr` streams produced by #func[full-streams] with setting #setting(content: `stream: "all"`)[stream]. See `stream` for the data fields.
 
 / `stream-generic`: Base handler used by stream-specific handlers for processing the stream content. See `stream` for the data fields. The default returns the text unmodified. The default themes (active during rendering) override this by delegating to `text-console-block`.
 

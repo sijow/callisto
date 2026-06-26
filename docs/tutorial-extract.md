@@ -206,6 +206,36 @@ We can also use the special value `auto` as an element of the array; The default
 
 Every value given in `format` must have a matching handler function to process values of that format. To add support for a new format we can register our own handlers with the `new-handlers` setting, see the [reference manual](callisto-manual.pdf#nameddest=setting:new-handlers).
 
+## Producing Math or Arbitrary Values from Notebook Cells
+
+Jupyter kernels often provide functions that a cell can use to produce rich outputs with arbitrary MIME type. Let's look at two cells of our `example.ipynb` notebook (which uses the Python kernel).
+
+The `some-math` cell uses SymPy to produce math formulas. The notebook stores each formula in two versions: a LaTeX version and a plain text version. By default Callisto will use the LaTeX version and convert it to Typst math, but we can request the text version:
+
+```typst
+// Get formula as Typst math
+#output("some-math")
+
+// Get formula as text
+#output("some-math", format: "text/plain")
+```
+
+The `json-result` cell uses `IPython.display.JSON` to encode a Python variable as a JSON string. This technique can be used to store all kind of data types in the notebook and retrieve them from Typst! However the notebook stores two values for this output: the JSON string itself under the MIME type `application/json`, and an uninformative description `"<IPython.core.display.JSON object>"` under the MIME type `text/plain`. By default the `text/plain` value has priority. To get the JSON we can request it explicitly:
+
+```typst
+#output("json-result", format: "application/json")
+```
+
+We can also redefine the priority to always take the JSON value if available:
+
+```typst
+#let (output,) = callisto.config(
+  nb: path("example.ipynb"),
+  format: ("application/json", auto),
+)
+#output("json-result")
+```
+
 ## Next
 
 In the [next tutorial](tutorial-export.md) we will see how code blocks in Python (or other languages) written directly in the Typst file can be executed through Jupyter, to have the execution result included in the document.

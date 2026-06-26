@@ -106,64 +106,171 @@ Note that we also defined a `watch` target in the Makefile: if you have the [`wa
 
 See the [reference manual](callisto-manual.pdf#nameddest=makefile) for an example Justfile if you prefer to use `just` instead of `make`.
 
-## A Larger Example
+## More Features
 
-The following example illustrates some more features:
+Let's see some other execution-related features offered by Callisto. We will need new functions:
 
-- Code blocks can be selected using a Typst label instead of the language tag.
-
-- A Typst label can also be used as cell specification, for example to render all cells that were exported from code blocks with the given label.
-
-- The `export` function can be used to include in the exported notebook some "setup" code that should be executed silently, without the source or execution result appearing in the final document.
-
-- The `evaluate` function can be used to export some code and get a single output from the result. One can think of `execute` as `export` + `Cell` while `evaluate` is like `export` + `output`.
-
-- To include a cell header in the notebook cell produced by `export`/`execute`/`evaluate` we can pass it with the `cell-header` setting or write the header directly in the raw element.
-
-Here are these features in action:
-
-
-``````typ
-#import "@preview/callisto:0.3.0"
-
-#let (render, In, Out, execute, export, evaluate, stage-notebook) = callisto.config(
+```typst
+#let (output, export, execute, evaluate, stage-notebook, render, Out) = callisto.config(
   nb: path("export.ipynb"),
   kernel: "python3",
 )
-
 #stage-notebook()
+```
 
-#show <exec>: execute
+
+### Adding Setup Code
+
+The `export` function can be used to include code in the exported notebook to be executed silently, without the source or execution result appearing in the final document. This can be useful for "setup" code for example:
+
+``````typst
+#export(
+  ```
+  #| label: pandas-setup
+  import pandas as pd
+  pd.options.display.float_format = '{:.2f}'.format
+  ```
+)
+``````
+
+### Getting the Result of a Computation
+
+Sometimes we want to run some code just to get a result (rather than showing a code block and its full output). This can be done with the `evaluate` function:
+
+```typst
+The square of 3 is #evaluate(`3+3`).
+```
+
+You can think of `evaluate` as equivalent to `export` + `output`, while `execute` is like `export` + `Cell`.
+
+
+### Giving the Cell Header as a Dictionary
+
+In the `export` example above we wrote a header line in the code block to define the cell label. Header values can also be passed as a dictionary to the `execute`/`evaluate`/`export` functions:
+
+```typst
+The square of 3 is #evaluate(`3+3`, cell-header: (label: "square")).
+
+Recall that the square of 3 is #output("square").
+```
+
+Here the same execution result is used twice in the document: the `#output("square")` call looks in the notebook for a cell named `"square"` and finds the cell that was exported by `evaluate`.
+
+### Placeholders
+
+If you try to compile the above example, during the export/execution phase you will see the following before execution is complete:
+
+#![Placeholder for output call](placeholder-output.png)
+
+The dashed rectangles are placeholders. This feature is enabled by default for notebooks that use the export functionality (when the `kernel` setting is set), to make compilation possible when the notebook is not yet exported/executed.
+
+Placeholders are only used by functions that render a single cell or extract a single output item: These functions expect to find one match, and without placeholders they would raise an error. Functions like `outputs` just return an empty array when no match is found.
+
+An interesting case is when we process a code block with `execute`:
+
+``````typst
+#show raw.where(lang: "py-x"): execute
 #show raw: set text(11pt * 0.8)
 
-// Setup code, specifying cell header with a dict
-#export(`a = 2`, cell-header: (label: "setup"))
+```py-x
+import random
+random.randint(0, 5)
+```
+``````
 
+After export and execution, the `execute` call will render the notebook cell that contains this code (using the cell position for disambiguation if necessary). If we then change the code block in the Typst document, for example replacing the second line with `random.randint(0, 6)`, the `execute` call won't find a corresponding cell anymore and will instead show the code block itself as placeholder, with dashed stroke:
+
+#![Placeholder for execute call](placeholder-execute.png)
+
+The value used as placeholder can be configured with the `placeholder` setting (see the [reference manual](callisto-manual.pdf#nameddest=setting:placeholder)).
+
+### Hiding the Cell Source or Output
+
+The cell header can be used to show only the source or output of an executed cell:
+
+``````typst
 Executed block, rendering only the output:
-```python
+```py-x
 #| echo: false
-a + 3
-```<exec>
+2 + 3
+```
 
 Executed block, rendering only the source:
-```python
+```py-x
 #| label: calc
 #| output: false
-a + 3
+2 + 3
+```
+
+Showing the output here:
+#Out("calc")
+``````
+
+
+### Selecting Blocks and Cells using Typst Labels
+
+Code blocks can be selected for execution using a Typst label instead of the language tag:
+
+``````typst
+#show <exec>: execute
+
+```python
+2 + 3
 ```<exec>
 
-Let's render the output here:
-#Out("calc")
-
-Let's get just a result, inline: #evaluate(`a + 4`).
-
-Here is the setup code:
-#In("setup")
-
-And here are all the code blocks passed to `execute`:
-#render(<exec>, input: true, output: false)
-
+```python
+2 + 4
+```<exec>
 ``````
+
+This also works for inline raw elements, which can be useful together with `evaluate`:
+
+```typst
+#show <x>: evaluate
+
+The square of 3 is `3*3`<x>.
+```
+
+However using `evaluate` or an alias is preferred:
+
+```typst
+#let python = evaluate
+
+The square of 3 is #python(`3*3`).
+```
+
+This avoids the problem with recursive show rules so we don't need hacks like `#show raw: set text(11pt * 0.8)`.
+
+Typst labels can also used as cell specification, to find all cells that where exported from code blocks with the given label:
+
+```typst
+// Render all cells that were passed to `execute`
+#render(<exec>)
+```
+
+Typst labels should not be confused with cell labels. Cell labels are strings and should be unique IDs, while the same Typst label can be used for many code blocks. Ideally we would use different terms for these two concepts, but we try to be compatible with #link("https://quarto.org/docs/computations/execution-options.html")[Quarto chunk options].
+
+
+## Transforming Output Values
+
+When reading from a notebook like `example.iynb`, we can manipulate output items like any Typst value. For example the `calc` cell computes the value `4`, though in the notebook it's actually stored as string. Let's use it to make a table with a dynamic number of columns:
+
+```typst
+// Make table with n columns holding numbers 0 to n-1
+#let my-table(n) = table(columns: n, ..range(n).map(str))
+
+// Configure output function for example.ipynb, and name it output-ex
+#let (output: output-ex,) = callisto.config(nb: path("/docs/example.ipynb"))
+
+// Use output of "calc" cell for the number of columns
+#my-table(int(output-ex("calc")))
+```
+
+Can we do this with `evaluate`? Not quite, unfortunately: `evaluate` is like `export` + `output`, so it returns not only the result `"4"` but also the metadata for the exported code (and during export with `typst eval`, it returns a placeholder). Instead of dealing with this complexity, we can use the `transform` setting to transform the output value:
+
+```typst
+#evaluate(`2+3`, transform: x => my-table(int(x)))
+```
 
 ## Next
 

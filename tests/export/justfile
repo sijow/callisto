@@ -1,15 +1,23 @@
 default: export execute
+
+EVAL := "typst eval --root=../.. --input callisto-export=true --in test.typ"
+EXEC := "jupyter-nbconvert --to notebook --execute --inplace"
     
+export-individually:
+    {{EVAL}} 'query(<python>).first().value' > export-python.ipynb
+    {{EVAL}} 'query(<sympy>).first().value'  > export-sympy.ipynb
+    {{EVAL}} 'query(<julia>).first().value'  > export-julia.ipynb
+
 export:
-    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<notebook>).first().value' > export.ipynb
-    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<sympy>).first().value'    > export-sympy.ipynb
-    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<julia>).first().value'    > export-julia.ipynb
+    #!/usr/bin/env bash
+    {{EVAL}} 'query(<notebook>).map(x => x.value)' |
+        jq -c '.[]' | while read -r nb; do
+            filename=$(jq -r '.metadata.callisto."export-name"' <<<"$nb")
+            echo "$nb" > "export-${filename}.ipynb"
+        done
 
 execute:
-    jupyter-nbconvert --to notebook --execute --inplace export.ipynb
-    jupyter-nbconvert --to notebook --execute --inplace export-sympy.ipynb
-    jupyter-nbconvert --to notebook --execute --inplace export-julia.ipynb
+    for file in export-*.ipynb; do {{EXEC}} "$file"; done
 
 watch:
     watchexec -w . -f '**/*.typ' just export execute
-    

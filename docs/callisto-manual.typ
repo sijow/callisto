@@ -791,19 +791,74 @@ The following justfile can be used to automate the export and execution of both 
 default: export execute
 
 EVAL := "typst eval --input callisto-export=true --in document.typ"
+EXEC := "jupyter-nbconvert --to notebook --execute --inplace"
 
 export:
 	{{EVAL}} 'query(<python>).first().value' > export-python.ipynb
 	{{EVAL}} 'query(<julia>).first().value'  > export-julia.ipynb
 
 execute:
-	jupyter-nbconvert --to notebook --execute --inplace export-python.ipynb
-	jupyter-nbconvert --to notebook --execute --inplace export-julia.ipynb
+	{{EXEC}} export-python.ipynb
+	{{EXEC}} export-julia.ipynb
 
 watch:
 	watchexec -w . -f '**/*.typ' just export execute
 ```
 
+
+=== Exporting Multiple Notebooks Together
+With #func[stage-notebook], the metadata holding the exported notebook is labelled with the #setting[export-name] value. This way each notebook can be extracted by its own `typst eval` call as shown above. However for large documents it can be interesting to get all the notebooks with a single `tyst eval` command for performance reasons. This could be done by specifying all the labels in `query`:
+
+```bash
+typst eval --input callisto-export=true --in document.typ \
+  'query(selector.or(<python>,<julia>)).map(x => x.value)'
+```
+
+Maybe a better way is to export all the notebooks under the same label, using #func[make-notebook] instead of #func[stage-notebook] in the Typst document:
+
+```typ
+// This replaces the stage-notebook call
+#context [
+  #metadata(callisto.make-notebook(export-name: "python"))<notebook>
+  #metadata(callisto.make-notebook(export-name: "julia"))<notebook>
+]
+```
+
+A `query(<notebook>`) in `typst eval` will then return a JSON array of notebooks. The export name of each notebook is available in the field `metadata.callisto.export-name` of each array value. Here's a Bash command that writes each array value to its own notebook file:
+
+```bash
+typst eval --input callisto-export=true --in document.typ \
+  'query(<notebook>).map(x => x.value)' |
+  jq -c '.[]' | while read -r nb; do
+    filename=$(jq -r '.metadata.callisto."export-name"' <<<"$nb")
+    echo "$nb" > "export-${filename}.ipynb"
+  done
+```
+
+And here's a justfile that can be used to export and execute all notebooks from a Typst document:
+
+```just
+default: export execute
+
+EVAL := "typst eval --root=../.. --input callisto-export=true --in test.typ"
+EXEC := "jupyter-nbconvert --to notebook --execute --inplace"
+
+export:
+    #!/usr/bin/env bash
+    {{EVAL}} 'query(<notebook>).map(x => x.value)' |
+        jq -c '.[]' | while read -r nb; do
+            filename=$(jq -r '.metadata.callisto."export-name"' <<<"$nb")
+            echo "$nb" > "export-${filename}.ipynb"
+        done
+
+execute:
+    for file in export-*.ipynb; do {{EXEC}} "$file"; done
+
+watch:
+    watchexec -w . -f '**/*.typ' just export execute
+```
+
+(This assumes that every notebook is exported under the `<notebook>` label.)
 
 = Cell Specification <cell-specification>
 

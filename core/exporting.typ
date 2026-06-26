@@ -65,9 +65,12 @@
 }
 
 // Make notebook metadata
-#let _notebook-metadata(kernel, lang) = {
+#let _notebook-metadata(kernel, lang, export-name) = {
   let md = (
-    callisto: (version: toml("/typst.toml").package.version),
+    callisto: (
+      version: toml("/typst.toml").package.version,
+      export-name: export-name,
+    ),
     // A kernelspec must contain a display name, but it's
     // not used to find the kernel so we can pick one ourselves
     kernelspec: (name: kernel, display_name: kernel),
@@ -84,12 +87,12 @@
 // same fields as raw), language_info and kernelspec. The lang parameter is used
 // to infer lang-info if unspecified.
 // If lang is auto, the lang of the first element is used.
-#let notebook-from-raw-elements(elems, kernel, lang) = {
+#let _notebook-from-raw-elements(elems, kernel, lang, export-name) = {
   let cells = elems.enumerate().map(x => _make-cell(..x))
   let md
   let nb = (
     cells: cells,
-    metadata: _notebook-metadata(kernel, lang),
+    metadata: _notebook-metadata(kernel, lang, export-name),
     nbformat: 4,
     nbformat_minor: 5,
   )
@@ -124,7 +127,7 @@
     panic("the Jupyter kernel must be specified")
   }
 
-  return notebook-from-raw-elements(elems, kernel, cfg.lang)
+  return _notebook-from-raw-elements(elems, kernel, cfg.lang, cfg.export-name)
 }
 
 // Return the labeled metadata that should be inserted in the document so that

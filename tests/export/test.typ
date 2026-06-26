@@ -346,10 +346,3 @@ println(read("../ansi/model_summary_output.txt", String))
 #show raw.where(lang: "jx").or(<jx>): set text(font: "Libertinus Serif", size: 1em/0.8, fill: black)
 
 Here's an inline computation: ```jx 2+3``` and another one: `2+4`<jx>
-
-// Export multiple notebooks together
-#context [
-  #metadata(callisto.make-notebook(export-name: "python"))<notebook>
-  #metadata(callisto.make-notebook(export-name: "sympy"))<notebook>
-  #metadata(callisto.make-notebook(export-name: "julia"))<notebook>
-]

@@ -1,19 +1,26 @@
 #import "/core/header-pattern.typ"
 #import "/core/rendering.typ"
 #import "/core/reading/reading.typ"
-#import "ctx/ctx.typ": get-ctx
 #import "configuration.typ"
 
 // Make label for exported raw elements
-#let _export-label(name) = label("__callisto-export:" + name)
+#let _element-label(cfg: none) = {
+  label("__callisto-export:" + cfg.export-name)
+}
 
 // Return the export metadata for the given raw element.
 #let export(..args) = {
+
   // The cell-spec is a raw element in this case
   let (cell-spec: elem, cfg) = configuration.parse-main-args(..args)
   if type(elem) != content or elem.func() != raw {
     panic("expecting a raw element, got " +
       repr(if type(elem) == content { elem.func() } else { type(elem) }))
+  }
+
+  // Export functionality is enabled when the kernel is specified
+  if cfg.kernel == none {
+    panic("the Jupyter kernel must be specified")
   }
 
   // First get header dict and rest of source from raw source
@@ -37,7 +44,7 @@
     block: elem.at("block", default: true),
     label: elem.at("label", default: none),
   )
-  return [#metadata(dict)#_export-label(cfg.export-name)]
+  return [#metadata(dict)#_element-label(cfg: cfg)]
 }
 
 // Make cell metadata for given raw element dict
@@ -112,19 +119,24 @@
   }
 
   // Get all raw elements to export
-  let elems = query(_export-label(cfg.export-name)).map(x => x.value)
+  let elems = query(_element-label(cfg: cfg)).map(x => x.value)
 
-  // Default kernel is taken from metadata of fist exported raw element.
-  // This way a simple
+  // Check that all raw elements have the same kernel
+  let kernels = elems.map(x => x.kernel).dedup()
+  if kernels.len() > 1 {
+    panic("export \" + export-name + \"" +
+      "includes elements with different kernels: " + repr(kernels))
+  }
+
+  // Default kernel is taken from exported elements, so that a simple
   // `typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook()"`
   // can work.
   let kernel = cfg.kernel
-  if kernel == none and elems.len() > 0 {
-    kernel = elems.first().kernel
-  }
-
   if kernel == none {
-    panic("the Jupyter kernel must be specified")
+    if kernels.len() == 0 {
+      panic("the Jupyter kernel must be specified")
+    }
+    kernel = kernels.first()
   }
 
   return _notebook-from-raw-elements(elems, kernel, cfg.lang, cfg.export-name)
@@ -134,9 +146,13 @@
 // `typst eval` can find the exported notebook.
 #let stage-notebook(..args) = {
   let (cfg,) = configuration.parse-main-args(..args)
+  let export-label = cfg.export-label
+  if export-label == auto {
+    export-label = label(cfg.export-name)
+  }
   return context {
     let md = metadata(make-notebook(..args))
-    return [#md#label(cfg.export-name)]
+    return [#md#export-label]
   }
 }
 
@@ -161,7 +177,7 @@
       // If there are already n exports for this cell source, they have indices
       // 0...n-1 and we are index n.
       let exported-text = export(..args).value.text
-      let sel = selector(_export-label(cfg.export-name)).before(here())
+      let sel = selector(_element-label(cfg: cfg)).before(here())
       let matches = query(sel).filter(x => x.value.text == exported-text)
       let n = matches.len()
       // Use the nth cell ID as cell spec, or an empty array (which matches no

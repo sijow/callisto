@@ -30,6 +30,7 @@
   theme: "notebook",
   // Export
   export-name: "notebook",
+  export-label: auto,
   cell-header: none,
   kernel: none,
   transform: none,

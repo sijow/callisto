@@ -514,7 +514,7 @@ For the arguments, see #link(<configuration>)[Configuration].
 
 This function is used by `stage-notebook` to prepare the notebook dictionary, but it can be useful for other purposes as shown in the examples below.
 
-The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the `export`/`execute`/`evaluate` function that exported the first raw element.
+The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the `export`/`execute`/`evaluate` function that exported the raw elements.
 
 #example[Notebook as PDF attachment]
 Here Callisto is not used to render notebooks but to add a notebook as attachment to the compiled PDF. The notebook contains a cell for every Python code block found in the document.
@@ -858,7 +858,7 @@ watch:
     watchexec -w . -f '**/*.typ' just export execute
 ```
 
-(This assumes that every notebook is exported under the `<notebook>` label.)
+This assumes that notebook paths are of the form `export-xxx.ipynb` where `xxx` is the #setting[export-name].
 
 = Cell Specification <cell-specification>
 

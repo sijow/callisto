@@ -29,7 +29,8 @@
   apply-theme: false, // default for all but render functions
   theme: "notebook",
   // Export
-  export-name: "notebook",
+  export-name: auto,
+  export-label: <notebook>,
   cell-header: none,
   kernel: none,
   transform: none,

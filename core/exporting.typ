@@ -3,10 +3,8 @@
 #import "/core/reading/reading.typ"
 #import "configuration.typ"
 
-// Make label for exported raw elements
-#let _element-label(cfg: none) = {
-  label("__callisto-export:" + cfg.export-name)
-}
+// Label for exported raw elements
+#let _element-label = label("__callisto:exported-element")
 
 // Return the export metadata for the given raw element.
 #let export(..args) = {
@@ -44,7 +42,7 @@
     block: elem.at("block", default: true),
     label: elem.at("label", default: none),
   )
-  return [#metadata(dict)#_element-label(cfg: cfg)]
+  return [#metadata(dict)#_element-label]
 }
 
 // Make cell metadata for given raw element dict
@@ -119,7 +117,9 @@
   }
 
   // Get all raw elements to export
-  let elems = query(_element-label(cfg: cfg)).map(x => x.value)
+  let elems = query(_element-label)
+    .filter(x => x.value.export-name == cfg.export-name)
+    .map(x => x.value)
 
   // Check that all raw elements have the same kernel
   let kernels = elems.map(x => x.kernel).dedup()
@@ -177,7 +177,7 @@
       // If there are already n exports for this cell source, they have indices
       // 0...n-1 and we are index n.
       let exported-text = export(..args).value.text
-      let sel = selector(_element-label(cfg: cfg)).before(here())
+      let sel = selector(_element-label).before(here())
       let matches = query(sel).filter(x => x.value.text == exported-text)
       let n = matches.len()
       // Use the nth cell ID as cell spec, or an empty array (which matches no

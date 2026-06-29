@@ -1,23 +1,33 @@
 default: export execute
 
 EVAL := "typst eval --root=../.. --input callisto-export=true --in test.typ"
-EXEC := "jupyter-nbconvert --to notebook --execute --inplace"
-    
+
+SPLIT := '''
+import json
+for nb in json.load(open(0)):
+    name = nb["metadata"]["callisto"]["export-name"]
+    with open(f"export-{name}.ipynb", "w", encoding="utf-8") as f:
+        json.dump(nb, f)
+'''
+
+EXEC := '''
+import subprocess, glob
+args = ["jupyter-nbconvert", "--to", "notebook", "--execute", "--inplace"]
+for file in glob.glob("export-*.ipynb"):
+    subprocess.run(args + [file], check=True)
+'''
+
+
 export-individually:
     {{EVAL}} 'query(<python>).first().value' > export-python.ipynb
     {{EVAL}} 'query(<sympy>).first().value'  > export-sympy.ipynb
     {{EVAL}} 'query(<julia>).first().value'  > export-julia.ipynb
 
 export:
-    #!/usr/bin/env bash
-    {{EVAL}} 'query(<notebook>).map(x => x.value)' |
-        jq -c '.[]' | while read -r nb; do
-            filename=$(jq -r '.metadata.callisto."export-name"' <<<"$nb")
-            echo "$nb" > "export-${filename}.ipynb"
-        done
+    @{{EVAL}} 'query(<notebook>).map(x => x.value)' | python3 -c '{{SPLIT}}'   
 
 execute:
-    for file in export-*.ipynb; do {{EXEC}} "$file"; done
+    @python3 -c '{{EXEC}}'
 
 watch:
     watchexec -w . -f '**/*.typ' just export execute

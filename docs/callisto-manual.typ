@@ -58,7 +58,7 @@ Some notebooks contain Markdown that includes images from external files. To cor
 
 == Settings Overview
 
-Making full sense of all the settings requires some familiarity with the reading-rendering and export-execution functions, so these functions are documented first, and the settings are presented in detail later in the #link(<configuration>)[Configuration] section. Here is however a brief overview of the available settings:
+Making full sense of all the settings requires some familiarity with the reading-rendering and export-execution functions, so these functions are documented first, and the settings are presented in detail later in @configuration. Here is however a brief overview of the available settings:
 
 // #let setting-short(name, pills, desc) = [
 //   #set par(first-line-indent: 1em, hanging-indent: 1em)
@@ -152,6 +152,10 @@ Making full sense of all the settings requires some familiarity with the reading
   #setting-short[export-name][#pills.str][
     Identifier to use for this notebook export.
     Default: `"notebook"`.
+  ]
+  #setting-short[export-label][#pills.str #pills.auto][
+    Label for the metadata holding the exported notebook.
+    Default: `auto` to derive the label from `export-name`.
   ]
   #setting-short[cell-header][#pills.dictionary #pills.none][
     Keys and values to add to the header of exported cells.
@@ -260,7 +264,7 @@ Example:
 
 The functions in the previous section have many variants that work similarly, but for only a single cell or a single output, or for a specific output type.
 
-=== `Cell`, `In`, `Out` <singular-render>
+#heading(level: 3, numbering: none)[`Cell`, `In`, `Out`] <singular-render>
 
 The #func[render] function has three variants that work on a single cell, raising an error if zero or more than one are found:
 
@@ -279,7 +283,7 @@ Examples:
 #Out("plot")
 ```
 
-=== `output`, `source`, `cell` <singular-extract>
+#heading(level: 3, numbering: none)[`output`, `source`, `cell`] <singular-extract>
 
 The #func[outputs], #func[sources] and #func[cells] functions have "singular" variants that return a single value (raising an error if zero or more than one are found):
 
@@ -300,7 +304,7 @@ Examples:
 #outputs(cell("plot"))
 ```
 
-=== `displays`, `results`, `streams`, `full-streams`, `errors` <outputs-type-specific>
+#heading(level: 3, numbering: none)[`displays`, `results`, `streams`, `full-streams`, `errors`] <outputs-type-specific>
 
 The #func[outputs] function has further variants to target a specific type of output:
 
@@ -323,7 +327,7 @@ Examples:
 #errors()
 ```
 
-=== `display`, `result`, `stream`, `full-stream`, `error` <singular-output>
+#heading(level: 3, numbering: none)[`display`, `result`, `stream`, `full-stream`, `error`] <singular-output>
 
 Type-specific output functions also come in singular versions:
 
@@ -353,7 +357,7 @@ Export is done by compiling with ```txt typst eval --input callisto-export=true`
 
 When rendering the execution result, the notebook works like a portable cache holding the result of every code block. You can share the Typst document together with the notebook and your collaborators will be able to edit the Typst code and recompile the document (though this will include outdated results if the executed blocks are changed). The notebook can also be uploaded to the Web App to edit the document online.
 
- See #link(<complete-workflow>)[Complete Workflow] for the steps required to export and execute a notebook.
+ See @complete-workflow for the steps required to export and execute a notebook.
 
 == Cell Functions
 
@@ -471,7 +475,7 @@ To export a notebook, individual cells must be exported using the functions in t
 
 #function-doc(`stage-notebook`)
 
-Returns metadata holding the exported cells gathered in a notebook dictionary (such that converting the dictionary to JSON gives a valid Jupyter notebook). This metadata is labeled with the #setting(content: [export name])[export-name]. It can be read from the command-line using `typst eval` for storing as an `.ipynb` file.
+Make a notebook out of all the raw elements exported with the specified #setting[export-name] and return the result as a metadata element labelled with #setting[export-label]. The metadata value is a dictionary that can be converted to JSON to obtain a valid Jupyter notebook. This JSON can be read from the command-line using `typst eval` for storing as an `.ipynb` file.
 
 #doc-block(```typc
 stage-notebook(..args) yields content-pill
@@ -479,7 +483,7 @@ stage-notebook(..args) yields content-pill
 
 For the arguments, see #link(<configuration>)[Configuration].
 
-The #setting[kernel] setting must be set, either directly on `stage-notebook`, or on the `export`/`execute`/`evaluate` function that exported the first raw element.
+If the #setting[kernel] setting is not specified, the value recorded in the raw elements at the time of the `export`/`execute`/`evaluate` calls is used.
 
 Example:
 
@@ -500,11 +504,11 @@ Example:
 ```
 ``````
 
-See the #link(<complete-workflow>)[Complete Workflow] section for a full example including the terminal commands used to export and execute a notebook.
+See @complete-workflow for a full example including the terminal commands used to export and execute a notebook.
 
 #function-doc(`make-notebook`)
 
-Looks for the metadata holding the exported cells and returns a notebook dictionary. This function must be called with `context` (unlike `stage-notebook`).
+Looks for the exported raw elements with matching #setting[export-name] and returns a notebook dictionary. This function must be called with `context` (unlike `stage-notebook`).
 
 #doc-block(```typc
 make-notebook(..args) yields dictionary-pill
@@ -512,9 +516,9 @@ make-notebook(..args) yields dictionary-pill
 
 For the arguments, see #link(<configuration>)[Configuration].
 
-This function is used by `stage-notebook` to prepare the notebook dictionary, but it can be useful for other purposes as shown in the examples below.
+If the #setting[kernel] setting is not specified, the value recorded in the raw elements at the time of the `export`/`execute`/`evaluate` calls is used.
 
-The #setting[kernel] setting must be set, either directly on `make-notebook`, or on the `export`/`execute`/`evaluate` function that exported the raw elements.
+This function is used by `stage-notebook` to prepare the notebook dictionary, but it can be useful for other purposes as shown in the examples below.
 
 #example[Notebook as PDF attachment]
 Here Callisto is not used to render notebooks but to add a notebook as attachment to the compiled PDF. The notebook contains a cell for every Python code block found in the document.
@@ -666,7 +670,7 @@ Here is a complete workflow using show rules to select code blocks for execution
 
 That's it: the next time you compile `document.typ`, Callisto will read the execution results from `export.ipynb` and include them in the compiled document.
 
-In this example, we just exported some code blocks using #func[execute]. Here's a more comprehensive example that also uses #func[export] and #func[evaluate]:
+In this example, we just exported some code blocks using #func[execute]. Here is a more comprehensive example that also uses #func[export] and #func[evaluate]:
 
 ``````typ
 #import "@preview/callisto:0.3.0"
@@ -725,7 +729,7 @@ Running the `make` command will then export and execute the notebook. This also 
 
 + run ```txt typst watch document.typ``` in another terminal (or use the preview feature in your editor) to see the execution results automatically included in the Typst output.
 
-And here's an equivalent `justfile` to use with `just` instead of `make`:
+And here is an equivalent `justfile` to use with `just` instead of `make`:
 
 ```just
 default: export execute
@@ -746,7 +750,7 @@ watch:
 
 Several notebooks can be used independently of each other in the same Typst document. This can be used to execute code using different kernels, or to have each chapter run code blocks in its own execution context.
 
-The #setting[nb] and #setting[export-name] settings must have different values for each export. Here's a complete example:
+The #setting[nb] and #setting[export-name] settings must have distinct values for each export. Here is a complete example:
 
 ``````typ
 #import "@preview/callisto:0.3.0"
@@ -806,25 +810,17 @@ watch:
 ```
 
 
-=== Exporting Multiple Notebooks Together
-With #func[stage-notebook], the metadata holding the exported notebook is labelled with the #setting[export-name] value. This way each notebook can be extracted by its own `typst eval` call as shown above. However for large documents it can be interesting to get all the notebooks with a single `tyst eval` command for performance reasons. This could be done by specifying all the labels in `query`:
+=== Exporting Multiple Notebooks Together <section:export-together>
+By default, #func[stage-notebook] derives the label for the exported notebook from the #setting[export-name] value, so each notebook can be extracted by its own `typst eval` call as shown above. For large documents it can be interesting to get all the notebooks with a single `tyst eval` command for performance reasons.
 
-```bash
-typst eval --input callisto-export=true --in document.typ \
-  'query(selector.or(<python>,<julia>)).map(x => x.value)'
-```
-
-Maybe a better way is to export all the notebooks under the same label, using #func[make-notebook] instead of #func[stage-notebook] in the Typst document:
+Something like ```typc query(selector.or(<python>,<julia>))``` could be used in `typst eval` to retrieve several notebooks. Maybe a better way is to export all notebooks under the same label using the #setting[export-label] setting:
 
 ```typ
-// This replaces the stage-notebook call
-#context [
-  #metadata(callisto.make-notebook(export-name: "python"))<notebook>
-  #metadata(callisto.make-notebook(export-name: "julia"))<notebook>
-]
+#stage-notebook(export-name: "python", export-label: <notebook>)
+#stage-notebook(export-name: "julia",  export-label: <notebook>)
 ```
 
-A `query(<notebook>`) in `typst eval` will then return a JSON array of notebooks. The export name of each notebook is available in the field `metadata.callisto.export-name` of each array value. Here's a Bash command that writes each array value to its own notebook file:
+Using ```typc query(<notebook>)``` in `typst eval` will then return a JSON array of notebooks. The export name of each notebook is available in the field `metadata.callisto.export-name` of each array value. A Bash command could be used to write each array value to its own notebook file:
 
 ```bash
 typst eval --input callisto-export=true --in document.typ \
@@ -835,30 +831,70 @@ typst eval --input callisto-export=true --in document.typ \
   done
 ```
 
-And here's a justfile that can be used to export and execute all notebooks from a Typst document:
+Even better: we can use the #func(content: `callisto.export-names`)[export-names] function to automatically find and stage all the notebooks under the same label. Here is a complete example:
+
+```typ
+#import "@preview/callisto:0.3.0"
+
+#let (execute: execute-a,) = callisto.config(
+  nb: path("export-python-a.ipynb"),
+  kernel: "python3",
+  export-name: "python-a",
+)
+#let (execute: execute-b,) = callisto.config(
+  nb: path("export-python-b.ipynb"),
+  kernel: "python3",
+  export-name: "python-b",
+)
+
+// Stage all exported notebooks under <notebook> label
+#context for name in callisto.export-names() {
+  callisto.stage-notebook(export-name: name, export-label: <notebook>)
+}
+
+#execute-a(`a = 1`)
+#execute-b(`a = 10`)
+#execute-a(`a += 3; print(a)`)
+#execute-b(`print(a)`)
+```
+
+And here is a justfile to automatically retrieve all the notebooks and write them to separate files, and to execute them:
 
 ```just
 default: export execute
 
-EVAL := "typst eval --root=../.. --input callisto-export=true --in test.typ"
-EXEC := "jupyter-nbconvert --to notebook --execute --inplace"
+EVAL := "typst eval --input callisto-export=true --in document.typ"
+
+SPLIT := '''
+import json
+for nb in json.load(open(0, encoding="utf-8")):
+    name = nb["metadata"]["callisto"]["export-name"]
+    with open(f"export-{name}.ipynb", "w", encoding="utf-8") as f:
+        json.dump(nb, f)
+'''
+
+EXEC := '''
+import subprocess, glob
+args = ["jupyter-nbconvert", "--to", "notebook", "--execute", "--inplace"]
+for file in glob.glob("export-*.ipynb"):
+    subprocess.run(args + [file], check=True)
+'''
 
 export:
-    #!/usr/bin/env bash
-    {{EVAL}} 'query(<notebook>).map(x => x.value)' |
-        jq -c '.[]' | while read -r nb; do
-            filename=$(jq -r '.metadata.callisto."export-name"' <<<"$nb")
-            echo "$nb" > "export-${filename}.ipynb"
-        done
+    @echo "Exporting notebooks..."
+    @{{EVAL}} 'query(<notebook>).map(x => x.value)' | python3 -c '{{SPLIT}}'   
 
 execute:
-    for file in export-*.ipynb; do {{EXEC}} "$file"; done
+    @echo "Executing notebooks..."
+    @python3 -c '{{EXEC}}'
 
 watch:
     watchexec -w . -f '**/*.typ' just export execute
 ```
 
-This assumes that notebook paths are of the form `export-xxx.ipynb` where `xxx` is the #setting[export-name].
+Notes:
+- This should work on Linux, macOS and Windows as long as Python is installed.
+- It assumes that notebook paths are of the form `export-xxx.ipynb` where `xxx` is the #setting[export-name].
 
 = Cell Specification <cell-specification>
 
@@ -868,16 +904,14 @@ The functions #func[render], #func[outputs], #func[sources], #func[cells] and al
 
 The functions #func[export], #func[execute] and #func[evaluate] only accept the "raw element" form.
 
-Notes:
+One form of specification is notably missing from the list: `none`. Indeed the `none` value is used internally to represent that no specification was provided by the user (meaning that all cells should be selected). To specify "no cell", use the empty array `()`.  
 
-- One form of specification is notably missing from the list: `none`. Indeed the `none` value is used internally to represent that no specification was provided by the user (meaning that all cells should be selected). To specify "no cell", use the empty array `()`.  
+// The #func[render], #func[outputs], #func[sources], #func[cells] functions and the "plural" variants of `outputs` don't raise an error if no matching cell is found. The "singular" variants however do raise an error in this case, and can be combined with `map` to work with multiple cells:
 
-- The #func[render], #func[outputs], #func[sources], #func[cells] functions and the "plural" variants of `outputs` don't raise an error if no matching cell is found. The "singular" variants however do raise an error in this case, and can be combined with `map` to work with multiple cells:
-
-  ```typ
-  // Render the first 10 cells, raising an error if fewer are found
-  #range(10).map(Cell).join()
-  ```
+// ```typ
+// // Render the first 10 cells, raising an error if fewer are found
+// #range(10).map(Cell).join()
+// ```
 
 == Allowed Values
 
@@ -896,7 +930,7 @@ Notes:
   2+2
   ```
 
-  Callisto will automatically convert the header line to a cell label in the metadata. See #link(<cell-preprocessing>)[Cell data and cell header] for details. 
+  Callisto will automatically convert the header line to a cell label in the metadata. See @cell-preprocessing for details. 
 
   The #setting[name-path] setting can be used to change where Callisto will look in the cell dict to check for matching cell names.
 
@@ -1411,7 +1445,7 @@ For example, text outputs can contain ANSI escape codes used in terminals to col
 
 #setting-doc[`theme`][#pills.str #pills.dictionary]
 
-The theme used for rendering content (default: `"notebook"`). This can be the name of a built-in theme as string, or a theme dictionary (see #link(<themes>)[Themes] for more information). By default the theme has no effect on the `outputs` function and its variants, but this can be changed using the #setting[apply-theme] setting.
+The theme used for rendering content (default: `"notebook"`). This can be the name of a built-in theme as string, or a theme dictionary (see @themes for more information). By default the theme has no effect on the `outputs` function and its variants, but this can be changed using the #setting[apply-theme] setting.
 
 Currently available built-in themes:
 
@@ -1434,7 +1468,9 @@ Example:
 
 #setting-doc[`export-name`][#pills.str]
 
-The name used to identify raw elements belonging to a particular export, and to get the exported notebook from the command line. The default is `"notebook"`.
+The name used to identify raw elements belonging to a particular notebook export. The default is `"notebook"`. If you want to export several notebooks from the same document, you must give each of them a unique export name.
+
+By default, the export name is also used to label the metadata holding the exported notebook. This can be changed with the #setting[export-label] setting.
 
 The export name is independent from the notebook file: the filename can be unwieldy, or undefined if the notebook is exported but not read back.
 
@@ -1456,6 +1492,23 @@ The notebook staged in this example can be retrieved from the command line and w
 typst eval --input callisto-export=true --in document.typ \
     'query(<python>).first().value' > notebooks/export-python.ipynb
 ```
+
+#setting-doc[`export-label`][#pills.str #pills.auto]
+
+The label for the metadata returned by #func[stage-notebook]. The default is `auto`, to derive a label from the #setting[export-name] value. Example:
+
+```typ
+#let (execute, stage-notebook) = callisto.config(
+  nb: path("notebooks/export-python.ipynb"),
+  kernel: "python3",
+  export-name: "python",
+  export-label: <notebook>, // instead of the default <python>
+)
+#stage-notebook()
+```
+
+This setting is often used to exported multiple notebooks under the same label, so they can be retrieved from the command line with a single `typst eval`. See @section:export-together for a complete example.
+
 
 #setting-doc[`cell-header`][#pills.dictionary #pills.none]
 
@@ -1542,7 +1595,7 @@ Example:
 
 This setting is useful for manipulating cell outputs in documents that use #link(<export-and-execution>)[export and execution]: During export (with `typst eval`) functions such as #func[output] and #func[evaluate] return a #setting[placeholder] instead of the real output value. Furthermore, #func[evaluate] doesn't return the bare value (or placeholder) but a content value that includes metadata. Working with such values that have different types during `typst compile` vs `typst eval` can be cumbersome. The `transform` function is applied directly on the real cell outputs, sparing us this complexity.
 
-For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here's a complete example:
+For example, we can transform a NumPy vector into a Typst math `vec`, to typeset as part of a formula. Here is a complete example:
 
 ``````typ
 #import "@preview/callisto:0.3.0"
@@ -1633,6 +1686,24 @@ A dictionary holding the built-in #link(<themes>)[themes]: `plain`, `notebook` a
 
 A dictionary holding the default #link(<handlers>)[handlers].
 
+#function-doc(`export-names`)
+
+This function returns all the #setting[export-name] values used in the current document.
+
+#doc-block(```typc
+export-names() yields array-pill
+```)
+
+This function must be called with context. It can be used to automatically stage all the exported notebooks. Example:
+
+```typ
+#context for name in callisto.export-names() {
+  callisto.stage-notebook(export-name: name, export-label: <notebook>)
+}
+```
+
+See @section:export-together for a complete example.
+
 #function-doc(`handle`)
 
 This function is used in #link(<handlers>)[handlers] to defer processing of a value to another handler.
@@ -1643,7 +1714,7 @@ handle(
   ctx: dictionary-pill,
   ..args,
   any-pill,
-)
+) yields any-pill
 ```)
 
 / `mime`: The "MIME type" of the handler to call to process the value passed as positional argument.

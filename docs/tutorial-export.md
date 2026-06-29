@@ -102,9 +102,25 @@ watch:
 
 Putting this in a file called `Makefile` next to our Typst document, we can then run the `typst eval` and `jupyter-nbconvert` commands by simply typing `make` in the terminal.
 
-Note that we also defined a `watch` target in the Makefile: if you have the [`watchexec`](https://watchexec.github.io/) tool installed, you can type `make watch` to monitor the project directory for changes to any Typst file and run `typst eval` and `jupyter-nbconvert` automatically.
+Here's an equivalent `justfile`, to use with the `just` command instead of `make`:
 
-See the [reference manual](callisto-manual.pdf#nameddest=makefile) for an example Justfile if you prefer to use `just` instead of `make`.
+```just
+default: export execute
+
+EVAL := "typst eval --input callisto-export=true --in document.typ"
+
+export:
+	{{EVAL}} 'query(<notebook>).first().value' > export.ipynb
+
+execute:
+	jupyter-nbconvert --to notebook --execute --inplace export.ipynb
+
+watch:
+	watchexec -w . -f '**/*.typ' just export execute
+```
+
+Note that we also defined a `watch` target in the Makefile/justfile: if you have the [`watchexec`](https://watchexec.github.io/) tool installed, you can type `make watch` (or `just watch`) to monitor the project directory for changes to any Typst file and run `typst eval` and `jupyter-nbconvert` automatically.
+
 
 ## More Features
 

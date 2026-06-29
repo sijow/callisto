@@ -134,6 +134,7 @@
   show selector.or(
     heading.where(level: 1),
     heading.where(level: 2),
+    heading.where(level: 3),
   ): set heading(numbering: "1.")
   show heading.where(level: 1): set text(16pt)
   show heading.where(level: 2): set text(14pt)
@@ -182,11 +183,13 @@
 }
 
 #let function-doc(it, content: none) = {
+  show heading.where(level: 3): set heading(numbering: none)
   if content == none { content = it }
   [#heading(depth: 3, content)#label("function:" + it.text)]
 }
 
 #let setting-doc(name, pills, content: none) = {
+  show heading.where(level: 3): set heading(numbering: none)
   if content == none { content = name }
   show heading: it => it.body
   block(
@@ -199,7 +202,7 @@
     },
   )
 }
-#let example(it) = heading(depth: 4, [Example: ] + it)
+#let example(it) = heading(depth: 3, [Example: ] + it)
 
 #let _ref-link(it, kind: none, content: none) = link(
   label(kind + ":" + it.text),

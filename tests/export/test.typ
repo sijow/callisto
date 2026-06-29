@@ -19,7 +19,6 @@
   Out,
   export,
   make-notebook,
-  stage-notebook,
   execute,
   evaluate,
 ) = callisto.config(
@@ -28,8 +27,10 @@
   export-name: "python",
 )
 
-// Expose the exported notebook as labelled metadata for `typst eval`
-#stage-notebook()
+// Export all notebooks under the same label
+#context for name in callisto.export-names() {
+  callisto.stage-notebook(export-name: name, export-label: <notebook>)
+}
 
 // Embed the notebook (unexecuted) in the PDF
 #context pdf.attach(
@@ -197,14 +198,11 @@ The square of 4 is `4*4`<x2>, and that of 5 is `5*5`<x2>.
 #let (
   result: result-sympy,
   export: export-sympy,
-  stage-notebook: stage-sympy,
 ) = callisto.config(
   nb: path("export-sympy.ipynb"),
   kernel: "python3",
   export-name: "sympy",
 )
-
-#stage-sympy()
 
 #export-sympy(
   ```
@@ -254,7 +252,6 @@ Code can be generated dynamically for execution:
   Out: Out-julia,
   output: output-julia,
   export: export-julia,
-  stage-notebook: stage-julia,
   execute: execute-julia,
   evaluate: evaluate-julia,
 ) = callisto.config(
@@ -264,8 +261,6 @@ Code can be generated dynamically for execution:
   theme: "neat",
   console-text: (bg: luma(30%)),
 )
-
-#stage-julia()
 
 // #let raw-elements = raw.where(lang: "julia").or(raw.where(lang: none))
 // #let raw-elements = raw

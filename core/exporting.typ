@@ -6,6 +6,11 @@
 // Label for exported raw elements
 #let _element-label = label("__callisto:exported-element")
 
+// Get all the export names found in the document. Requires context.
+#let export-names() = {
+  query(_element-label).map(x => x.value.export-name).dedup()
+}
+
 // Return the export metadata for the given raw element.
 #let export(..args) = {
 
@@ -128,9 +133,9 @@
       "includes elements with different kernels: " + repr(kernels))
   }
 
-  // Default kernel is taken from exported elements, so that a simple
-  // `typst eval '#import "@preview/callisto:0.3.0"; #callisto.make-notebook()"`
-  // can work.
+  // Give precedence to cfg.kernel to allow for override and to avoid error
+  // when there's no exported cell yet, but fall back on kernel of exported raw
+  // elements to allow config-less calls
   let kernel = cfg.kernel
   if kernel == none {
     if kernels.len() == 0 {
@@ -142,18 +147,18 @@
   return _notebook-from-raw-elements(elems, kernel, cfg.lang, cfg.export-name)
 }
 
-// Return the labeled metadata that should be inserted in the document so that
-// `typst eval` can find the exported notebook.
-#let stage-notebook(..args) = {
+// Return the labeled metadata element that should be inserted in the document
+// so that `typst eval` can find the exported notebook.
+#let stage-notebook(..args) = context {
   let (cfg,) = configuration.parse-main-args(..args)
+
   let export-label = cfg.export-label
   if export-label == auto {
     export-label = label(cfg.export-name)
   }
-  return context {
-    let md = metadata(make-notebook(..args))
-    return [#md#export-label]
-  }
+
+  let md = metadata(make-notebook(..args))
+  return [#md#export-label]
 }
 
 // Return export metadata and cell rendering/output (depending on value-func),

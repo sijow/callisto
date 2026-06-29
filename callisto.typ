@@ -19,6 +19,7 @@
 #import "core/header-pattern.typ"
 
 #import util: handle
+#import exporting: export-names
 
 #let cells = reading.cell.cells.with(
   default-handlers: default-handlers,

@@ -19,7 +19,7 @@
 }
 
 // Helper for rendering from a single cell
-#let _render-cell(..args, placeholder-mime: none) = {
+#let _render-cell(..args, func-name: none) = {
   // Make sure the handlers are called with a context with result: "value"
   let (cell-spec, cfg) = parse-main-args(
     ..args,
@@ -29,9 +29,12 @@
 
   let cs = cells(..args)
 
-  if cs.len() == 0 and placeholder-enabled(cfg: cfg) {
+  if placeholder-enabled(cfg: cfg) and (
+    cs.len() == 0 or
+    cs.len() == 1 and func-name == "Out" and cs.first().execution_count == none
+  ) {
     let ctx = get-ctx(none, cell-spec: cell-spec, cfg: cfg)
-    return get-placeholder(mime: placeholder-mime, ctx: ctx)
+    return get-placeholder(mime: "placeholder-" + func-name, ctx: ctx)
   }
   
   if cs.len() != 1 {
@@ -46,7 +49,7 @@
 // Render a single cell
 #let Cell(..args) = _render-cell(
   ..args,
-  placeholder-mime: "placeholder-Cell",
+  func-name: "Cell",
 )
 // Render a single code cell's input
 #let In(..args) = _render-cell(
@@ -54,7 +57,7 @@
   cell-type: "code",
   input: true,
   output: false,
-  placeholder-mime: "placeholder-In",
+  func-name: "In",
 )
 // Render a single code cell's output
 #let Out(..args) = _render-cell(
@@ -62,5 +65,5 @@
   cell-type: "code",
   input: false,
   output: true,
-  placeholder-mime: "placeholder-Out",
+  func-name: "Out",
 )

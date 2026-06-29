@@ -1,2 +1,2 @@
 export:
-    typst eval --root=../.. --input callisto-export=true --in test.typ 'query(<notebook>).first().value' > export.ipynb
+    typst eval --root=../.. --input callisto-export=true --pretty --in test.typ 'query(<notebook>).first().value' > export.ipynb

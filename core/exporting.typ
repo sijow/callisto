@@ -60,7 +60,7 @@
 // given cell index.
 #let _make-cell(i, elem) = {
   (
-    id: "id" + str(i),
+    id: "cell-id-" + str(i),
     cell_type: "code",
     metadata: _cell-metadata(elem),
     source: elem.text,
@@ -187,7 +187,9 @@
       } else {
         ()
       }
-      export-md + [#value-func(new-spec, ..cfg)]
+      // Make sure the cell is matched by id if the spec is a string
+      // (if not, the spec is raw and name-path doesn't matter)
+      export-md + [#value-func(new-spec, ..cfg, name-path: "id")]
     }
   }
 

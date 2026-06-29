@@ -13,15 +13,14 @@
   In,
   Out,
   display,
-  stage-notebook,
   execute,
   evaluate,
+  stage-notebook,
 ) = callisto.config(
   nb: path("export.ipynb"),
   kernel: "python3",
 )
 
-// Expose the exported notebook as labelled metadata for `typst eval`
 #stage-notebook()
 
 #show raw.where(lang: "py-x"): execute
@@ -34,6 +33,7 @@ a = 1
 
 #context display(query(<a>).first())
 
+// Render an executed cell that doesn't exist
 #Cell(
   ```py-x
   b = 2

@@ -30,7 +30,7 @@
 // return a dict of resolved user handlers, where each value is a handler
 // function or none. Each user handler can be given as none or auto or a
 // function or an array of values representing functions to compose, where
-// the auto value represent the default handler.
+// the auto value represents the default handler.
 #let _resolve-user-handlers(default, user, user-new) = {
   if type(user) != dictionary {
     panic("handlers must be auto or a dictionary")

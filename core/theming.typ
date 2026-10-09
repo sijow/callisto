@@ -12,7 +12,7 @@
 // Resolve field value to a function
 #let _resolve-field(key, value, named-themes) = {
   if value == none {
-    return none
+    return ((key): none)
   }
   if type(value) == function {
     return ((key): value)
